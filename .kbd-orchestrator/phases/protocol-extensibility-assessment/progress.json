@@ -1,0 +1,50 @@
+{
+  "phase": "protocol-extensibility-assessment",
+  "last_updated": "2026-05-02T00:00:00Z",
+  "last_updated_by": "claude-code",
+  "assessment_complete": true,
+  "plan_complete": true,
+  "execution_dispatched": true,
+  "reflection_complete": true,
+  "changes": {
+    "hooks-infrastructure": {
+      "status": "DONE",
+      "tasks_total": 9,
+      "tasks_done": 9,
+      "last_task_completed": "T9 — cargo build clean; cargo test --test integration: 83/83 passed",
+      "next_task_pending": null,
+      "started_by": "claude-code",
+      "started_at": "2026-05-02T00:00:00Z",
+      "completed_by": "claude-code",
+      "completed_at": "2026-05-02T00:00:00Z",
+      "blockers": [],
+      "notes": "All 9 tasks complete. ProxyHooks trait + NullHooks + WebhookHooks in src/hooks.rs. Arc<dyn ProxyHooks> in AppState. --hooks-config / PROXY_HOOKS_CONFIG in main.rs. 7 callsites in proxy.rs. hooks.example.toml at root. 83/83 integration tests pass."
+    },
+    "a2a-agent-card": {
+      "status": "DONE",
+      "tasks_total": 5,
+      "tasks_done": 5,
+      "last_task_completed": "T5 — cargo build clean; cargo test --test integration: 83/83 passed",
+      "next_task_pending": null,
+      "started_by": "claude-code",
+      "started_at": "2026-05-02T00:00:00Z",
+      "completed_by": "claude-code",
+      "completed_at": "2026-05-02T00:00:00Z",
+      "blockers": [],
+      "notes": "All tasks complete. Route GET /.well-known/agent.json mounted only when --a2a flag is set. 83/83 integration tests pass."
+    },
+    "docs-integration-guide": {
+      "status": "DONE",
+      "tasks_total": 3,
+      "tasks_done": 3,
+      "last_task_completed": "T3 — Verified both docs render correctly; all code fences have language tags, no unclosed blocks",
+      "next_task_pending": null,
+      "started_by": "claude-code",
+      "started_at": "2026-05-02T00:00:00Z",
+      "completed_by": "claude-code",
+      "completed_at": "2026-05-02T00:00:00Z",
+      "blockers": [],
+      "notes": "docs/hooks.md and docs/a2a-integration.md created. All content derived from src/hooks.rs, src/a2a.rs, hooks.example.toml, and proposal docs. T3 automated lint: all checks passed."
+    }
+  }
+}

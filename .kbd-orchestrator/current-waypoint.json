@@ -1,0 +1,10 @@
+{
+  "phase": "protocol-extensibility-assessment",
+  "status": "reflected",
+  "change_backend": "openspec",
+  "next_pending_change": null,
+  "exact_next_command": "/kbd-assess multi-backend-architecture",
+  "active_phase": "multi-backend-architecture",
+  "prior_phase": "protocol-extensibility-assessment",
+  "last_updated": "2026-05-02"
+}

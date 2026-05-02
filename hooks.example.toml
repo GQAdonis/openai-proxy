@@ -1,0 +1,90 @@
+# hooks.example.toml
+#
+# Webhook configuration for openai-proxy lifecycle events.
+#
+# Copy this file to hooks.toml (or any path you prefer) and point the proxy at
+# it with --hooks-config <path> or the PROXY_HOOKS_CONFIG environment variable.
+#
+#   openai-proxy --hooks-config hooks.toml
+#   PROXY_HOOKS_CONFIG=hooks.toml openai-proxy
+#
+# Each section configures a single event type.  Omitting a section silences
+# that event (no POST is made).  All events deliver an AG-UI-compatible JSON
+# payload:
+#
+#   {
+#     "type": "<event_type>",
+#     "timestamp": "2026-05-02T12:00:00Z",
+#     ... event-specific fields ...
+#   }
+#
+# The proxy fires hooks asynchronously (fire-and-forget).  Webhook errors are
+# logged at WARN level but never returned to the caller.
+
+# ---------------------------------------------------------------------------
+# Fired at the entry point of every chat completions request.
+#
+# Payload extra fields:
+#   model         — the model string from the incoming request
+#   message_count — number of messages in the conversation
+# ---------------------------------------------------------------------------
+[on_request_received]
+url = "http://localhost:3000/events"
+
+# ---------------------------------------------------------------------------
+# Fired for every text delta emitted during a streaming response.
+#
+# Payload extra fields:
+#   delta — the incremental text content chunk
+# ---------------------------------------------------------------------------
+[on_text_delta]
+url = "http://localhost:3000/events"
+
+# ---------------------------------------------------------------------------
+# Fired when a new tool call is initiated by the model.
+#
+# Payload extra fields:
+#   name    — the function name being called
+#   call_id — the unique tool call identifier
+# ---------------------------------------------------------------------------
+[on_tool_call_start]
+url = "http://localhost:3000/events"
+
+# ---------------------------------------------------------------------------
+# Fired for each incremental chunk of tool call arguments.
+#
+# Payload extra fields:
+#   call_id    — the tool call this delta belongs to
+#   args_delta — the incremental JSON arguments fragment
+# ---------------------------------------------------------------------------
+[on_tool_call_args]
+url = "http://localhost:3000/events"
+
+# ---------------------------------------------------------------------------
+# Fired when a tool result message is submitted back to the model in a
+# multi-turn conversation (i.e. a message with role="tool" in the request).
+#
+# Payload extra fields:
+#   call_id — the tool call that produced this result
+# ---------------------------------------------------------------------------
+[on_tool_result_submitted]
+url = "http://localhost:3000/events"
+
+# ---------------------------------------------------------------------------
+# Fired when the model signals that it has finished generating a response.
+#
+# Payload extra fields:
+#   finish_reason — "stop", "tool_calls", "length", or "content_filter"
+# ---------------------------------------------------------------------------
+[on_response_complete]
+url = "http://localhost:3000/events"
+
+# ---------------------------------------------------------------------------
+# Fired when the proxy encounters an upstream error or model-not-available.
+#
+# Payload extra fields:
+#   status  — HTTP status code (e.g. 400, 500)
+#   message — error detail string
+# ---------------------------------------------------------------------------
+[on_error]
+url = "http://localhost:3000/events"

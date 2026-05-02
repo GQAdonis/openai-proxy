@@ -1,0 +1,7 @@
+schema: spec-driven
+created: 2026-05-02
+status: pending
+phase: protocol-extensibility-assessment
+complexity: Low
+model_class: small
+depends_on: []
