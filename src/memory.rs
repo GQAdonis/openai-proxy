@@ -18,7 +18,7 @@ pub struct DocumentRecord {
     pub created_at: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SearchResult {
     pub id: String,
     pub scope: String,
@@ -143,32 +143,38 @@ mod memory_impl {
             metadata: serde_json::Value,
         ) -> anyhow::Result<String> {
             let id = uuid::Uuid::new_v4().to_string();
+            let id_for_query = id.clone();
+            let scope_owned = scope.to_string();
+            let text_owned = text.to_string();
+            let metadata_owned = metadata.clone();
             let now = chrono::Utc::now().to_rfc3339();
             let embedding = self.embed_text(text).await;
             self.db
                 .query("CREATE type::thing('document', $id) SET id = $id, scope = $scope, text = $text, embedding = $embedding, metadata = $metadata, created_at = <datetime>$now")
-                .bind(("id", &id))
-                .bind(("scope", scope))
-                .bind(("text", text))
+                .bind(("id", id_for_query))
+                .bind(("scope", scope_owned))
+                .bind(("text", text_owned))
                 .bind(("embedding", embedding))
-                .bind(("metadata", &metadata))
+                .bind(("metadata", metadata_owned))
                 .bind(("now", now))
                 .await?;
             Ok(id)
         }
 
         pub async fn delete_document(&self, id: &str) -> anyhow::Result<()> {
+            let id_owned = id.to_string();
             self.db
                 .query("DELETE type::thing('document', $id)")
-                .bind(("id", id))
+                .bind(("id", id_owned))
                 .await?;
             Ok(())
         }
 
         pub async fn list_documents(&self, scope: &str) -> anyhow::Result<Vec<DocumentRecord>> {
+            let scope_owned = scope.to_string();
             let mut resp = self.db
                 .query("SELECT id, scope, text, metadata, time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at FROM document WHERE scope = $scope")
-                .bind(("scope", scope))
+                .bind(("scope", scope_owned))
                 .await?;
             let docs: Vec<DocumentRecord> = resp.take(0)?;
             Ok(docs)
@@ -189,6 +195,7 @@ mod memory_impl {
                 }).collect());
             }
 
+            let scope_owned = scope.to_string();
             let mut resp = self.db
                 .query(format!(
                     "SELECT id, scope, text, metadata, \
@@ -198,7 +205,7 @@ mod memory_impl {
                      AND embedding <|{limit},40|> $query_vec \
                      ORDER BY distance LIMIT {limit}"
                 ))
-                .bind(("scope", scope))
+                .bind(("scope", scope_owned))
                 .bind(("query_vec", embedding))
                 .await?;
             let results: Vec<SearchResult> = resp.take(0)?;

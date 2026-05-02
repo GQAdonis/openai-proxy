@@ -25,6 +25,7 @@ use crate::{
         ChatCompletionRequest, ChatCompletionResponse, Choice, Message, MessageContent,
         ResponseMessage, ToolCall, ToolCallFunction, Usage,
     },
+    memory::MemoryBackend,
     skills::select_skills,
 };
 
