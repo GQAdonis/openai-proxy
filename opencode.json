@@ -1,0 +1,34 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "plugin": [
+    "file:./plugin"
+  ],
+
+  "model": "codex/gpt-5.3-codex",
+
+  "provider": {
+    "codex": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Codex (via proxy)",
+      "options": {
+        "baseURL": "http://localhost:8080/v1",
+        "apiKey": "codex-proxy"
+      },
+      "models": {
+        "gpt-5.3-codex": {
+          "name": "GPT-5.3 Codex",
+          "limit": { "context": 128000, "output": 16384 }
+        },
+        "codex-mini": {
+          "name": "Codex Mini",
+          "limit": { "context": 128000, "output": 16384 }
+        },
+        "gpt-4o": {
+          "name": "GPT-4o (via Codex proxy)",
+          "limit": { "context": 128000, "output": 16384 }
+        }
+      }
+    }
+  }
+}

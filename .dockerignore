@@ -1,0 +1,29 @@
+# Build artifacts — rebuilt inside Docker
+target/
+
+# Secrets and local config — injected via env / mounted volumes
+.env
+.env.*
+auth.json
+config.toml
+hooks.toml
+mcp.toml
+memory.db
+memory.db-*
+
+# Plugin runtime artifacts (not needed in server image)
+plugin/node_modules/
+plugin/dist/
+
+# Development / workflow tooling
+.kbd-orchestrator/
+openspec/
+.refiner/
+.idea/
+.vscode/
+.DS_Store
+
+# Docs and tests (not in production image)
+docs/
+tests/
+references/

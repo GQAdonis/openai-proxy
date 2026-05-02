@@ -1,0 +1,60 @@
+services:
+  proxy:
+    build: .
+    image: openai-proxy:latest
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      # Auth — choose one
+      # Option A: mount your local auth.json (ChatGPT subscription or API key)
+      CODEX_AUTH_PATH: /run/secrets/auth.json
+      # Option B: OpenAI API key inline (overrides auth.json if set)
+      # OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+      # Wire format: "responses" (default) or "chat"
+      CODEX_WIRE_API: ${CODEX_WIRE_API:-responses}
+
+      # Backend selection override (usually left unset — auto-detected from auth)
+      # CODEX_BACKEND_URL: https://api.openai.com/v1/responses
+
+      # Logging
+      RUST_LOG: ${RUST_LOG:-openai_proxy=info}
+
+    volumes:
+      # Mount your local auth.json read-only (preferred over env var for secrets)
+      - "${CODEX_AUTH_PATH:-~/.codex/auth.json}:/run/secrets/auth.json:ro"
+
+      # Config file (scaffold with: openai-proxy setup config)
+      - "${OPROXY_CONFIG_DIR:-~/.config/oproxy}:/home/oproxy/.config/oproxy:ro"
+
+      # SurrealDB data directory — only relevant when --features memory
+      - oproxy-data:/home/oproxy/.local/share/oproxy
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ── Optional: run as MCP Streamable HTTP server alongside the proxy ─────────
+  # Uncomment to expose the MCP endpoint on port 8081 in addition to HTTP.
+  # proxy-mcp:
+  #   build: .
+  #   image: openai-proxy:latest
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     CODEX_AUTH_PATH: /run/secrets/auth.json
+  #     MCP_HTTP_PORT: 8081
+  #     RUST_LOG: ${RUST_LOG:-openai_proxy=info}
+  #   volumes:
+  #     - "${CODEX_AUTH_PATH:-~/.codex/auth.json}:/run/secrets/auth.json:ro"
+  #   depends_on:
+  #     - proxy
+  #   restart: unless-stopped
+
+volumes:
+  oproxy-data:

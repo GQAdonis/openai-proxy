@@ -3,6 +3,9 @@ name = "openai-proxy"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+memory = ["dep:surrealdb", "dep:chrono"]
+
 [[bin]]
 name = "openai-proxy"
 path = "src/main.rs"
@@ -22,6 +25,10 @@ futures-util = "0.3"
 reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+serde_yml = "0.0"
+agent-client-protocol = "0.11"
+tokio-util = { version = "0.7", features = ["compat"] }
+futures = "0.3"
 thiserror = "2"
 toml = "0.8"
 tokio = { version = "1", features = ["full"] }
@@ -30,9 +37,12 @@ tower-http = { version = "0.6", features = ["cors", "trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1", features = ["v4"] }
+surrealdb = { version = "2.3", features = ["kv-surrealkv"], optional = true }
+chrono = { version = "0.4", optional = true }
 
 [dev-dependencies]
-axum-test = "17"
+axum-test = "20"
+tempfile = "3"
 tokio = { version = "1", features = ["full", "test-util"] }
 
 [profile.release]

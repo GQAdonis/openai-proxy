@@ -1,0 +1,40 @@
+# Rust build output
+/target/
+Cargo.lock
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+auth.json
+*.pem
+*.key
+
+# Config files with real credentials (scaffold with setup commands)
+config.toml
+hooks.toml
+mcp.toml
+
+# openai-proxy runtime data
+memory.db
+memory.db-*
+*.db-wal
+*.db-shm
+
+# Plugin build output
+/plugin/node_modules/
+/plugin/dist/
+/plugin/.bun/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# KBD / OpenSpec workflow files (not needed in distributed repo)
+.kbd-orchestrator/
+openspec/
+.refiner/

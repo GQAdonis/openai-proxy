@@ -1,10 +1,16 @@
 {
-  "phase": "protocol-extensibility-assessment",
+  "phase": "opencode-integration-hardening",
   "status": "reflected",
   "change_backend": "openspec",
   "next_pending_change": null,
-  "exact_next_command": "/kbd-assess multi-backend-architecture",
-  "active_phase": "multi-backend-architecture",
-  "prior_phase": "protocol-extensibility-assessment",
-  "last_updated": "2026-05-02"
+  "exact_next_command": "/kbd-new-phase",
+  "active_phase": "opencode-integration-hardening",
+  "prior_phase": "multi-backend-architecture",
+  "last_updated": "2026-05-02",
+  "parallel_groups": {
+    "group-a-independent": ["drop-serde-yaml", "models-context-limits", "acp-true-streaming", "ag-ui-endpoint"],
+    "group-b-after-config": ["cli-subcommands", "mcp-client-passthrough", "memory-surrealdb"],
+    "group-c-after-cli": ["setup-opencode", "setup-mcp", "skills-cli"],
+    "group-d-sequential": ["memory-embeddings", "memory-injection", "docs-integration"]
+  }
 }

@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rustc --version)",
+      "Bash(cargo --version)",
+      "Bash(cargo check *)",
+      "Bash(cargo clippy *)",
+      "WebSearch",
+      "WebFetch(domain:opencode.ai)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:numman-ali.github.io)",
+      "Bash(chmod +x *)",
+      "Bash(cargo test *)",
+      "Bash(cargo build *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k,'=',type\\(v\\).__name__, str\\(v\\)[:80] if not isinstance\\(v,dict\\) else list\\(v.keys\\(\\)\\)\\) for k,v in d.items\\(\\)]\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); t=d.get\\('tokens',{}\\); print\\('tokens.access_token:', repr\\(str\\(t.get\\('access_token',''\\)\\)[:20]\\)\\); print\\('tokens.account_id:', repr\\(t.get\\('account_id',''\\)\\)\\); print\\('OPENAI_API_KEY:', d.get\\('OPENAI_API_KEY'\\)\\)\")",
+      "Bash(cargo run *)",
+      "Bash(curl -s -X POST http://127.0.0.1:18081/v1/chat/completions -H 'Content-Type: application/json' -d '{\"model\":\"gpt-5.3-codex\",\"messages\":[{\"role\":\"user\",\"content\":\"Say hi\"}]}')",
+      "Bash(kill %1)",
+      "Bash(python3 -c ' *)",
+      "mcp__tavily-mcp__tavily_search",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:developers.openai.com)",
+      "WebFetch(domain:cookbook.openai.com)",
+      "Bash(openspec init *)",
+      "Bash(python3 *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(cargo search *)",
+      "Bash(cargo add *)",
+      "Bash(cargo info *)",
+      "Bash(cargo tree *)",
+      "Bash(cargo fetch *)",
+      "WebFetch(domain:docs.ag-ui.com)",
+      "WebFetch(domain:openai.com)",
+      "WebFetch(domain:docs.litellm.ai)",
+      "Bash(docker build *)",
+      "Bash(docker compose *)"
+    ]
+  }
+}

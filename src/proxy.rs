@@ -6,6 +6,7 @@ use std::{
 use axum::{
     Json,
     extract::State,
+    http::HeaderMap,
     response::{IntoResponse, Response, Sse, sse::Event},
 };
 use futures_util::StreamExt;
@@ -21,13 +22,15 @@ use crate::{
     error::ProxyError,
     hooks::HookEvent,
     openai::{
-        ChatCompletionRequest, ChatCompletionResponse, Choice, ResponseMessage, ToolCall,
-        ToolCallFunction, Usage,
+        ChatCompletionRequest, ChatCompletionResponse, Choice, Message, MessageContent,
+        ResponseMessage, ToolCall, ToolCallFunction, Usage,
     },
+    skills::select_skills,
 };
 
 pub async fn chat_completions(
     State(state): State<AppState>,
+    headers: HeaderMap,
     Json(req): Json<ChatCompletionRequest>,
 ) -> Result<Response, ProxyError> {
     // Hook: RequestReceived
@@ -38,6 +41,17 @@ pub async fn chat_completions(
             message_count: req.messages.len(),
         })
         .await;
+
+    // Inject relevant skills as a system message prefix when skills are loaded.
+    let req = inject_skills(req, &state);
+
+    // Inject memory context (RAG) when memory feature is enabled.
+    let memory_scope = headers
+        .get("x-memory-scope")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("session")
+        .to_string();
+    let req = inject_memory(req, &state, &memory_scope).await;
 
     let target = resolve_model(&req.model);
     let available = match state.backend_profile {
@@ -597,7 +611,7 @@ async fn stream_chat_completions(
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn build_responses_request(
+pub(crate) fn build_responses_request(
     state: &AppState,
     codex_req: &codex::ResponsesRequest,
 ) -> Result<reqwest::RequestBuilder, ProxyError> {
@@ -817,4 +831,128 @@ fn unix_now() -> u64 {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0)
+}
+
+/// If skills are loaded, select relevant ones and prepend their content as a
+/// system message. Returns the (possibly modified) request.
+fn inject_skills(mut req: ChatCompletionRequest, state: &AppState) -> ChatCompletionRequest {
+    // Inject skill context as a system message.
+    if !state.skills.is_empty() {
+        let max = std::env::var("PROXY_SKILLS_MAX")
+            .ok()
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(3);
+
+        let user_text: String = req
+            .messages
+            .iter()
+            .filter(|m| m.role == "user")
+            .map(|m| match &m.content {
+                crate::openai::MessageContent::Text(t) => t.as_str(),
+                _ => "",
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        let selected = select_skills(&user_text, &state.skills, max, state.backend_profile.name());
+        if !selected.is_empty() {
+            let skill_block = selected
+                .iter()
+                .map(|s| s.content.as_str())
+                .collect::<Vec<_>>()
+                .join("\n\n---\n\n");
+
+            let prefix_msg = Message {
+                role: "system".to_string(),
+                content: MessageContent::Text(format!("# Active Skills\n\n{skill_block}")),
+                tool_call_id: None,
+                tool_calls: None,
+                name: None,
+            };
+            req.messages.insert(0, prefix_msg);
+        }
+    }
+
+    // Inject MCP tool schemas when configured and request doesn't already include them.
+    if !state.mcp_tools.is_empty() {
+        // Extract existing tool names from raw JSON tools array.
+        let existing_names: std::collections::HashSet<String> = req
+            .tools
+            .as_ref()
+            .and_then(|v| v.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|t| t.get("function")?.get("name")?.as_str().map(str::to_owned))
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        let new_tools: Vec<serde_json::Value> = state
+            .mcp_tools
+            .iter()
+            .filter(|mcp| !existing_names.contains(&mcp.function.name))
+            .filter_map(|mcp| serde_json::to_value(mcp).ok())
+            .collect();
+
+        if !new_tools.is_empty() {
+            let tools_arr = req.tools.get_or_insert_with(|| serde_json::Value::Array(Vec::new()));
+            if let Some(arr) = tools_arr.as_array_mut() {
+                arr.extend(new_tools);
+            }
+        }
+    }
+
+    req
+}
+
+/// Inject relevant memory documents as a system context message (RAG injection).
+/// Only active when the `memory` feature is compiled in and a memory store is present.
+async fn inject_memory(
+    #[cfg_attr(not(feature = "memory"), allow(unused_mut))]
+    mut req: ChatCompletionRequest,
+    #[cfg_attr(not(feature = "memory"), allow(unused_variables))]
+    state: &AppState,
+    #[cfg_attr(not(feature = "memory"), allow(unused_variables))]
+    scope: &str,
+) -> ChatCompletionRequest {
+    #[cfg(feature = "memory")]
+    {
+        let Some(ref store) = state.memory_store else { return req };
+        if !store.is_enabled() { return req; }
+
+        let user_text: String = req.messages.iter()
+            .filter(|m| m.role == "user")
+            .map(|m| match &m.content {
+                MessageContent::Text(t) => t.as_str(),
+                _ => "",
+            })
+            .collect::<Vec<_>>()
+            .join(" ");
+
+        if user_text.is_empty() { return req; }
+
+        let results = match tokio::time::timeout(
+            std::time::Duration::from_millis(500),
+            store.search(&user_text, scope, 3),
+        ).await {
+            Ok(Ok(docs)) if !docs.is_empty() => docs,
+            _ => return req,
+        };
+
+        let context_block = results.iter()
+            .map(|d| format!("- {}", d.text))
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        let context_msg = Message {
+            role: "system".to_string(),
+            content: MessageContent::Text(format!("# Relevant Context\n\n{context_block}")),
+            tool_call_id: None,
+            tool_calls: None,
+            name: None,
+        };
+
+        req.messages.insert(0, context_msg);
+    }
+    req
 }

@@ -36,7 +36,7 @@ pub async fn agent_card_handler(State(state): State<AppState>) -> Json<AgentCard
     let card = AgentCard {
         name: "openai-proxy".to_string(),
         description: "OpenAI Chat Completions proxy backed by Codex/Responses API".to_string(),
-        url: state.backend_url.clone(),
+        url: format!("http://{}", state.bind_addr),
         version: env!("CARGO_PKG_VERSION").to_string(),
         capabilities: AgentCapabilities {
             streaming: true,

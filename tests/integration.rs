@@ -21,14 +21,14 @@ use serde_json::{Value, json};
 fn test_server() -> TestServer {
     let (state, _) = load_real_auth();
     let app = build_app(state, false);
-    TestServer::new(app).expect("failed to start test server")
+    TestServer::new(app)
 }
 
 fn test_server_with_default_model(model: &str) -> TestServer {
     let (mut state, _) = load_real_auth();
     state.default_model = Some(model.to_string());
     let app = build_app(state, false);
-    TestServer::new(app).expect("failed to start test server")
+    TestServer::new(app)
 }
 
 fn mcp_state() -> AppState {
@@ -75,6 +75,15 @@ fn chat_req(
         tool_choice: None,
         parallel_tool_calls: None,
     }
+}
+
+/// Helper to build a JSON request body for HTTP-level tests (avoids serde trait mismatch).
+fn chat_req_json(model: &str, messages: &[(&str, &str)]) -> serde_json::Value {
+    let msgs: Vec<serde_json::Value> = messages
+        .iter()
+        .map(|(role, content)| serde_json::json!({ "role": role, "content": content }))
+        .collect();
+    serde_json::json!({ "model": model, "messages": msgs, "stream": false })
 }
 
 // ── health endpoint ──────────────────────────────────────────────────────────
@@ -1638,4 +1647,57 @@ async fn missing_messages_field_returns_error() {
         "missing messages should return 4xx, got: {}",
         resp.status_code()
     );
+}
+
+// ── profile-mismatch + gpt-5.5 ───────────────────────────────────────────────
+
+#[tokio::test]
+async fn model_not_available_on_wrong_profile() {
+    // gpt-5.5-pro is only available on OpenAiResponses (API key). On ChatGptCodex it must
+    // return 400 with type "model_not_available".
+    let (state, _) = load_real_auth();
+    if !matches!(state.backend_profile, BackendProfile::ChatGptCodex) {
+        return; // Only relevant for ChatGPT subscription path
+    }
+
+    let server = test_server();
+    let resp = server
+        .post("/v1/chat/completions")
+        .json(&chat_req_json("gpt-5.5-pro", &[("user", "Hello")]))
+        .await;
+
+    assert_eq!(
+        resp.status_code().as_u16(),
+        400,
+        "expected 400 for gpt-5.5-pro on ChatGptCodex, got: {}",
+        resp.status_code()
+    );
+    let body: Value = resp.json();
+    assert_eq!(
+        body["error"]["type"], "model_not_available",
+        "expected model_not_available error type, got: {body}"
+    );
+}
+
+#[tokio::test]
+async fn non_streaming_gpt55_responds() {
+    // gpt-5.5 is available on all backend profiles.
+    let server = test_server();
+    let resp = server
+        .post("/v1/chat/completions")
+        .json(&chat_req_json("gpt-5.5", &[("user", "Say the word 'ready' and nothing else.")]))
+        .await;
+
+    assert_eq!(
+        resp.status_code().as_u16(),
+        200,
+        "expected 200 for gpt-5.5, got: {} body: {}",
+        resp.status_code(),
+        resp.text()
+    );
+    let body: Value = resp.json();
+    let content = body["choices"][0]["message"]["content"]
+        .as_str()
+        .unwrap_or("");
+    assert!(!content.is_empty(), "expected non-empty response from gpt-5.5, got: {body}");
 }

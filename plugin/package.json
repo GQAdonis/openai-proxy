@@ -1,0 +1,22 @@
+{
+  "name": "opencode-codex-proxy",
+  "version": "0.1.0",
+  "description": "OpenCode plugin: routes requests through openai-proxy → Codex Responses API using your ChatGPT subscription",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --noEmit && bun build src/index.ts --outdir dist --format esm --target bun",
+    "typecheck": "tsc --noEmit",
+    "dev": "bun run src/index.ts"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "latest",
+    "typescript": "^5.4.0"
+  },
+  "keywords": ["opencode", "opencode-plugin", "codex", "openai", "proxy"],
+  "license": "MIT"
+}
