@@ -5,7 +5,7 @@
     "file:./plugin"
   ],
 
-  "model": "codex/gpt-5.3-codex",
+  "model": "codex/gpt-5.5",
 
   "provider": {
     "codex": {
@@ -16,18 +16,14 @@
         "apiKey": "codex-proxy"
       },
       "models": {
-        "gpt-5.3-codex": {
-          "name": "GPT-5.3 Codex",
-          "limit": { "context": 128000, "output": 16384 }
-        },
-        "codex-mini": {
-          "name": "Codex Mini",
-          "limit": { "context": 128000, "output": 16384 }
-        },
-        "gpt-4o": {
-          "name": "GPT-4o (via Codex proxy)",
-          "limit": { "context": 128000, "output": 16384 }
-        }
+        "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 1000000, "output": 32768 } },
+        "gpt-5.5-pro":   { "name": "GPT-5.5 Pro",   "limit": { "context": 1000000, "output": 32768 } },
+        "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context":  400000, "output": 32768 } },
+        "gpt-5.4-mini":  { "name": "GPT-5.4 Mini",  "limit": { "context":  200000, "output": 16384 } },
+        "gpt-5.4-nano":  { "name": "GPT-5.4 Nano",  "limit": { "context":  128000, "output":  8192 } },
+        "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context":  400000, "output": 32768 } },
+        "gpt-5.3-chat":  { "name": "GPT-5.3 Chat",  "limit": { "context":  128000, "output": 16384 } },
+        "gpt-5.2-chat":  { "name": "GPT-5.2 Chat",  "limit": { "context":  128000, "output": 16384 } }
       }
     }
   }

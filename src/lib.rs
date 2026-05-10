@@ -85,7 +85,7 @@ pub fn build_app(state: AppState, enable_a2a: bool) -> Router {
         router = router
             .route("/v1/memory/documents", post(mem::create_document))
             .route("/v1/memory/documents", get(mem::list_documents))
-            .route("/v1/memory/documents/:id", delete(mem::delete_document))
+            .route("/v1/memory/documents/{id}", delete(mem::delete_document))
             .route("/v1/memory/search", get(mem::search_documents));
     }
 

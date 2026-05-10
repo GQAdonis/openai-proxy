@@ -37,7 +37,18 @@
       "WebFetch(domain:openai.com)",
       "WebFetch(domain:docs.litellm.ai)",
       "Bash(docker build *)",
-      "Bash(docker compose *)"
+      "Bash(docker compose *)",
+      "Bash(curl -s \"https://crates.io/api/v1/crates/surrealdb\")",
+      "Bash(curl -s \"https://crates.io/api/v1/crates/surrealdb/3.0.5\")",
+      "Bash(curl -s \"https://crates.io/api/v1/crates/surrealdb/2.3.0\")",
+      "WebFetch(domain:surrealdb.com)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:crates.io)",
+      "Bash(curl -s \"https://docs.rs/surrealdb/latest/surrealdb/engine/local/index.html\")",
+      "Bash(curl -s \"https://docs.rs/surrealdb/2.3.3/surrealdb/engine/local/index.html\")",
+      "Bash(curl -s \"https://docs.rs/surrealdb/2.3.3/surrealdb/method/query/struct.Response.html\")",
+      "Bash(curl -s \"https://docs.rs/surrealdb/latest/surrealdb/all.html\")",
+      "Bash(curl -s \"https://docs.rs/surrealdb/3.0.5/surrealdb/engine/local/struct.RocksDb.html\")"
     ]
   }
 }

@@ -103,6 +103,52 @@ Start the proxy: `OPENAI_API_KEY=sk-... openai-proxy serve --port 8080`
 
 ---
 
+## opencode Integration — Two Approaches
+
+opencode ships a **built-in Codex plugin** that handles ChatGPT OAuth directly without a proxy. This project provides a **separate proxy-based plugin** that routes all requests through the proxy binary. They solve the same problem with different architectures and **must not be used simultaneously**.
+
+### Approach 1: Built-in opencode Codex plugin (no proxy needed)
+
+opencode includes `CodexAuthPlugin` internally. It intercepts requests to Codex-model IDs and routes them directly to `chatgpt.com/backend-api/codex/responses` using opencode's own Effect-TS fetch interception layer.
+
+- **Credentials:** stored in `~/.local/share/opencode/auth.json` (opencode's own auth store)
+- **Setup:** run `opencode auth login` — no external binary required
+- **Scope:** opencode only — Claude Code, Zed, and other tools cannot share this credential path
+
+### Approach 2: openai-proxy plugin (this project)
+
+The TypeScript plugin in `plugin/` registers `openai-proxy` as a provider in opencode, routing all Codex requests through the proxy binary at `localhost:8080/v1`.
+
+- **Credentials:** read from `~/.codex/auth.json` (Codex CLI credential location)
+- **Setup:** start the proxy binary; run `openai-proxy setup opencode` or load `plugin/`
+- **Scope:** shared — Claude Code (MCP), Zed (ACP), and AG-UI frontends all route through the same proxy instance
+
+### Decision table
+
+| Scenario | Recommended approach |
+|----------|---------------------|
+| Only using opencode, want minimal setup (no Rust required) | Built-in opencode Codex plugin |
+| Using opencode + Claude Code + Zed in the same workflow | openai-proxy plugin |
+| Need skill injection (`PROXY_SKILLS_DIRS`) per request | openai-proxy plugin |
+| Need memory RAG (`--features memory`) | openai-proxy plugin |
+| Need MCP or ACP transport for non-opencode clients | openai-proxy plugin |
+
+> **Warning:** Do not activate both simultaneously. The built-in plugin and the proxy plugin use different credential paths (`~/.local/share/opencode/auth.json` vs `~/.codex/auth.json`) and will produce unpredictable behavior when both are configured. The model IDs also partially overlap (`codex-mini`), which can cause silent routing conflicts.
+
+### Disabling the built-in Codex plugin
+
+If you are using the proxy-based approach and want to prevent the built-in plugin from interfering, add to your `opencode.json`:
+
+```json
+{
+  "disabled": ["opencode:codex"]
+}
+```
+
+This prevents opencode from loading its built-in Codex interceptor, leaving the proxy plugin as the sole integration path.
+
+---
+
 ## Troubleshooting
 
 **"Provider not found"** — Make sure the proxy is running before opening opencode.
@@ -110,3 +156,5 @@ Start the proxy: `OPENAI_API_KEY=sk-... openai-proxy serve --port 8080`
 **"Connection refused"** — Check the port matches between `--port` and `baseURL`.
 
 **400 errors from ChatGPT backend** — Ensure you are using a supported model. `gpt-5.5-pro` and `codex-mini` are not available on the ChatGPT subscription path.
+
+**Auth not working after `opencode auth login`** — If you previously used the built-in Codex plugin, your token is in `~/.local/share/opencode/auth.json`. The proxy reads `~/.codex/auth.json`. Run `codex login` to write the proxy's expected credential file, or set `CODEX_AUTH_PATH` to point to the opencode auth file.

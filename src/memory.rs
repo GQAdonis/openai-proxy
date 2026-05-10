@@ -4,31 +4,6 @@
 /// SurrealDB dependency, keeping the binary small (~8MB vs ~40MB).
 use std::sync::Arc;
 
-use serde::{Deserialize, Serialize};
-
-// ── Shared record types (always compiled) ────────────────────────────────────
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DocumentRecord {
-    pub id: String,
-    pub scope: String,
-    pub text: String,
-    #[serde(default)]
-    pub metadata: serde_json::Value,
-    pub created_at: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SearchResult {
-    pub id: String,
-    pub scope: String,
-    pub text: String,
-    #[serde(default)]
-    pub metadata: serde_json::Value,
-    pub created_at: String,
-    pub distance: Option<f32>,
-}
-
 // ── Backend trait (always compiled) ─────────────────────────────────────────
 
 pub trait MemoryBackend: Send + Sync {
@@ -48,22 +23,45 @@ pub fn noop() -> DynMemory {
     Arc::new(NoopMemoryStore)
 }
 
-// ── Feature-gated concrete store ─────────────────────────────────────────────
+// ── Feature-gated concrete store + record types ─────────────────────────────
 
 #[cfg(feature = "memory")]
-pub use memory_impl::MemoryStore;
+pub use memory_impl::{DocumentRecord, MemoryStore, SearchResult};
 
 #[cfg(feature = "memory")]
 mod memory_impl {
     use std::{path::Path, sync::Arc, time::Duration};
 
+    use serde::{Deserialize, Serialize};
     use surrealdb::{
         Surreal,
-        engine::local::{Db, SurrealKv},
+        engine::local::{Db, RocksDb},
+        types::SurrealValue,
     };
     use tokio::time::timeout;
 
-    use super::{DocumentRecord, MemoryBackend, SearchResult};
+    use super::MemoryBackend;
+
+    #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+    pub struct DocumentRecord {
+        pub id: String,
+        pub scope: String,
+        pub text: String,
+        #[serde(default)]
+        pub metadata: serde_json::Value,
+        pub created_at: String,
+    }
+
+    #[derive(Debug, Clone, Serialize, Deserialize, SurrealValue)]
+    pub struct SearchResult {
+        pub id: String,
+        pub scope: String,
+        pub text: String,
+        #[serde(default)]
+        pub metadata: serde_json::Value,
+        pub created_at: String,
+        pub distance: Option<f32>,
+    }
 
     pub struct MemoryStore {
         pub db: Surreal<Db>,
@@ -86,7 +84,7 @@ mod memory_impl {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent)?;
             }
-            let db = Surreal::new::<SurrealKv>(path.to_string_lossy().as_ref()).await?;
+            let db = Surreal::new::<RocksDb>(path.to_string_lossy().as_ref()).await?;
             db.use_ns("oproxy").use_db("memory").await?;
             Self::migrate(&db).await?;
             Ok(Arc::new(Self { db, http_client, embedding_model, api_key }))
@@ -240,7 +238,7 @@ pub mod handlers {
     use serde::Deserialize;
 
     use crate::AppState;
-    use super::{DocumentRecord, SearchResult};
+    use super::memory_impl::{DocumentRecord, SearchResult};
 
     #[derive(Deserialize)]
     pub struct CreateDocumentBody {

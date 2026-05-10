@@ -63,12 +63,12 @@ impl CodexAuth {
 pub enum BackendProfile {
     /// `chatgpt.com/backend-api/codex/responses` — ChatGPT OAuth subscription.
     /// Requires stream=true, store=false. Rejects temperature, top_p, max_output_tokens.
-    /// Models: gpt-5.3-codex, gpt-5.4, gpt-5.5
+    /// Models: gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat
     ChatGptCodex,
 
     /// `api.openai.com/v1/responses` — OpenAI API key, Responses API wire format.
     /// Supports max_output_tokens, temperature (non-reasoning models), tools.
-    /// Models: gpt-5.5, gpt-5.5-pro, gpt-5.4, gpt-5.3-codex, codex-mini
+    /// Models: gpt-5.5, gpt-5.5-pro, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat
     OpenAiResponses,
 
     /// `api.openai.com/v1/chat/completions` — OpenAI API key, Chat Completions wire format.
@@ -127,7 +127,7 @@ pub fn resolve_model(input: &str) -> ModelTarget {
             model_id: "gpt-5.5-pro".into(),
             supports_codex_backend: false,
             supports_responses_api: true,
-            supports_chat_completions: false,
+            supports_chat_completions: true,
         },
         "gpt-5.4" => ModelTarget {
             model_id: "gpt-5.4".into(),
@@ -135,28 +135,52 @@ pub fn resolve_model(input: &str) -> ModelTarget {
             supports_responses_api: true,
             supports_chat_completions: true,
         },
+        "gpt-5.4-mini" => ModelTarget {
+            model_id: "gpt-5.4-mini".into(),
+            supports_codex_backend: true,
+            supports_responses_api: true,
+            supports_chat_completions: true,
+        },
+        "gpt-5.4-nano" => ModelTarget {
+            model_id: "gpt-5.4-nano".into(),
+            supports_codex_backend: true,
+            supports_responses_api: true,
+            supports_chat_completions: true,
+        },
         "gpt-5.3-codex" | "gpt-4o" | "gpt-4o-2024-11-20" | "gpt-4" | "gpt-4-turbo"
-        | "gpt-4-turbo-preview" | "gpt-4o-mini" | "gpt-3.5-turbo"
-        | "gpt-3.5-turbo-0125" => ModelTarget {
+        | "gpt-4-turbo-preview" | "gpt-3.5-turbo" | "gpt-3.5-turbo-0125" => ModelTarget {
             model_id: "gpt-5.3-codex".into(),
             supports_codex_backend: true,
             supports_responses_api: true,
             supports_chat_completions: true,
         },
-        "codex-mini" => ModelTarget {
-            model_id: "codex-mini".into(),
-            supports_codex_backend: false,
+        "gpt-5.3-chat" => ModelTarget {
+            model_id: "gpt-5.3-chat".into(),
+            supports_codex_backend: true,
             supports_responses_api: true,
             supports_chat_completions: true,
         },
-        m if m.starts_with("gpt-5.") || m.starts_with("codex") => ModelTarget {
+        "gpt-5.2-chat" => ModelTarget {
+            model_id: "gpt-5.2-chat".into(),
+            supports_codex_backend: true,
+            supports_responses_api: true,
+            supports_chat_completions: true,
+        },
+        // Legacy alias: codex-mini → gpt-5.4-mini (nearest equivalent)
+        "codex-mini" | "gpt-4o-mini" => ModelTarget {
+            model_id: "gpt-5.4-mini".into(),
+            supports_codex_backend: true,
+            supports_responses_api: true,
+            supports_chat_completions: true,
+        },
+        m if m.starts_with("gpt-5.") => ModelTarget {
             model_id: m.to_string(),
             supports_codex_backend: true,
             supports_responses_api: true,
             supports_chat_completions: true,
         },
         _ => ModelTarget {
-            model_id: "gpt-5.3-codex".into(),
+            model_id: "gpt-5.5".into(),
             supports_codex_backend: true,
             supports_responses_api: true,
             supports_chat_completions: true,

@@ -1,16 +1,16 @@
 {
-  "phase": "opencode-integration-hardening",
-  "status": "reflected",
+  "phase": "opencode-cross-integration-assessment",
+  "status": "planned",
   "change_backend": "openspec",
-  "next_pending_change": null,
-  "exact_next_command": "/kbd-new-phase",
-  "active_phase": "opencode-integration-hardening",
-  "prior_phase": "multi-backend-architecture",
-  "last_updated": "2026-05-02",
+  "next_pending_change": "proxy-bug-apikey-field",
+  "exact_next_command": "/kbd-execute opencode-cross-integration-assessment",
+  "active_phase": "opencode-cross-integration-assessment",
+  "prior_phase": "surrealdb-3x-migration",
+  "last_updated": "2026-05-10",
   "parallel_groups": {
-    "group-a-independent": ["drop-serde-yaml", "models-context-limits", "acp-true-streaming", "ag-ui-endpoint"],
-    "group-b-after-config": ["cli-subcommands", "mcp-client-passthrough", "memory-surrealdb"],
-    "group-c-after-cli": ["setup-opencode", "setup-mcp", "skills-cli"],
-    "group-d-sequential": ["memory-embeddings", "memory-injection", "docs-integration"]
+    "group-a-parallel": ["proxy-bug-apikey-field", "proxy-bug-codex-login-shape"],
+    "group-b-parallel": ["plugin-codex-conflict-docs", "model-catalog-unification"],
+    "group-c-single": ["skill-scoring-parity"],
+    "group-d-single": ["plugin-npm-publish"]
   }
 }

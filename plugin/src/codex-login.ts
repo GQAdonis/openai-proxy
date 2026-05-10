@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process"
 import { readCodexAuth } from "./auth.js"
+import type { AuthOAuthResult } from "@opencode-ai/plugin"
 
 /**
  * Spawns `codex login` in a subprocess, waits for it to complete, then reads
@@ -9,43 +10,35 @@ import { readCodexAuth } from "./auth.js"
  * This delegates the entire browser-based OAuth flow to the Codex CLI so we
  * never have to manage client_id / PKCE ourselves.
  */
-export async function spawnCodexLogin(): Promise<{
-  url?: string
-  method?: "code"
-  callback?: (code: string) => Promise<{
-    type: "success"
-    access: string
-    refresh?: string
-    expires?: number
-  }>
-}> {
-  // Run `codex login` interactively — the CLI opens the browser and handles
-  // the localhost OAuth callback automatically.
-  await runCodexLogin()
-
-  // After the CLI exits successfully, auth.json is written.
-  const auth = await readCodexAuth()
-
-  const token = auth.access_token ?? auth.api_key
-  if (!token) {
-    throw new Error(
-      "codex login completed but no token found in ~/.codex/auth.json"
-    )
-  }
-
-  // Return in the opencode OAuth success shape so it persists the token.
+export async function spawnCodexLogin(): Promise<AuthOAuthResult> {
   return {
-    // No URL redirect needed — we already ran the login via subprocess.
-    // Returning a no-op callback tells opencode the auth is complete.
-    method: "code",
-    callback: async () => ({
-      type: "success" as const,
-      access: token,
-      refresh: undefined,
-      // Codex tokens last ~1 hour; set a conservative expiry so opencode
-      // knows to re-check.
-      expires: Date.now() + 55 * 60 * 1000,
-    }),
+    // No browser redirect needed — the Codex CLI handles the OAuth browser
+    // round-trip itself when its subprocess runs.
+    url: "about:blank",
+    instructions: "The Codex CLI will open your browser automatically.",
+    method: "auto",
+    async callback() {
+      // Run `codex login` interactively — the CLI opens the browser and handles
+      // the localhost OAuth callback automatically.
+      await runCodexLogin()
+
+      // After the CLI exits successfully, auth.json is written.
+      const auth = await readCodexAuth()
+
+      const token = auth.access_token ?? auth.api_key
+      if (!token) {
+        return { type: "failed" as const }
+      }
+
+      return {
+        type: "success" as const,
+        access: token,
+        refresh: auth.access_token ? "" : token,
+        // Codex tokens last ~1 hour; set a conservative expiry so opencode
+        // knows to re-check before the token expires.
+        expires: Date.now() + 55 * 60 * 1000,
+      }
+    },
   }
 }
 

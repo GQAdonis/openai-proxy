@@ -1,38 +1,38 @@
 # KBD Current Waypoint
 
-**Phase:** protocol-extensibility-assessment  
+**Phase:** opencode-cross-integration-assessment  
 **Status:** PLANNED — ready to execute  
 **Change backend:** OpenSpec  
-**Last updated:** 2026-05-02  
+**Last updated:** 2026-05-10  
 
-## Status: REFLECTED — Advancing to next phase
+## Goal
 
-Phase `protocol-extensibility-assessment` complete. Reflection written.
+Fix integration bugs between openai-proxy and opencode, document the built-in CodexAuthPlugin conflict, unify model catalog, align skill scoring algorithms, and prepare the plugin for npm publishing.
 
 ## Next Action
 
 ```
-/kbd-assess multi-backend-architecture
+/kbd-execute opencode-cross-integration-assessment
 ```
 
 ## Execution Order
 
-| Round | Changes | Run |
-|-------|---------|-----|
-| 1 | `hooks-infrastructure`, `a2a-agent-card` | Parallel |
-| 2 | `docs-integration-guide` | After Round 1 |
+| Round | Group | Changes | Notes |
+|-------|-------|---------|-------|
+| 1 | A (parallel) | `proxy-bug-apikey-field`, `proxy-bug-codex-login-shape` | P0 bugs — run in parallel |
+| 2 | B (parallel) | `plugin-codex-conflict-docs`, `model-catalog-unification` | After bugs fixed |
+| 3 | C (single) | `skill-scoring-parity` | After `skills-selection-algorithm` (existing) applied |
+| 4 | D (single) | `plugin-npm-publish` | After P0 bugs fixed |
 
-## OpenSpec Change Specs
+## OpenSpec Changes (new)
 
-- `openspec/changes/hooks-infrastructure/` — ProxyHooks trait + WebhookHooks (9 tasks, Medium)
-- `openspec/changes/a2a-agent-card/` — A2A Agent Card endpoint (5 tasks, Low)
-- `openspec/changes/docs-integration-guide/` — hooks.md + a2a-integration.md (3 tasks, Low)
-
-## Scope Cuts (do not re-open)
-
-- A2A Task lifecycle — SKIP (proxy is stateless)
-- Native AG-UI SSE emitter — SKIP (wrong layer)
-- A2UI native support — SKIP (spec still draft v0.9)
+- `openspec/changes/proxy-bug-apikey-field/` — fix `auth?.apiKey` type mismatch
+- `openspec/changes/proxy-bug-codex-login-shape/` — validate `spawnCodexLogin()` return shape
+- `openspec/changes/plugin-codex-conflict-docs/` — document built-in plugin conflict
+- `openspec/changes/model-catalog-unification/` — fetch models from proxy at runtime
+- `openspec/changes/skill-scoring-parity/` — IDF-weighted scoring in `src/skills.rs`
+- `openspec/changes/plugin-npm-publish/` — npm packaging for `opencode-codex-proxy`
 
 ## Plan Location
-`.kbd-orchestrator/phases/protocol-extensibility-assessment/plan.md`
+
+`.kbd-orchestrator/phases/opencode-cross-integration-assessment/plan.md`
