@@ -38,3 +38,4 @@ memory.db-*
 .kbd-orchestrator/
 openspec/
 .refiner/
+.claude/
