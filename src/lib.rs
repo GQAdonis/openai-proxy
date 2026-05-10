@@ -27,7 +27,7 @@ use crate::mcp_client::McpToolSchema;
 use crate::memory::DynMemory;
 #[cfg(feature = "memory")]
 use crate::memory::MemoryStore;
-use crate::skills::SkillManifest;
+use crate::skills::SkillIndex;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -41,7 +41,7 @@ pub struct AppState {
     /// The proxy's own listen address (e.g. "127.0.0.1:8080") — used in the A2A Agent Card.
     pub bind_addr: String,
     /// Skills loaded from `PROXY_SKILLS_DIRS` at startup.
-    pub skills: Arc<Vec<SkillManifest>>,
+    pub skills: Arc<SkillIndex>,
     /// MCP tool schemas for passthrough injection.
     pub mcp_tools: Arc<Vec<McpToolSchema>>,
     /// Memory backend (noop unless `--features memory` and `memory.enabled = true`).
@@ -127,7 +127,7 @@ pub fn load_real_auth() -> (AppState, String) {
         default_model: None,
         hooks: Arc::new(NullHooks),
         bind_addr: "127.0.0.1:8080".to_string(),
-        skills: Arc::new(Vec::new()),
+        skills: Arc::new(SkillIndex::build(vec![])),
         mcp_tools: Arc::new(Vec::new()),
         memory: crate::memory::noop(),
         #[cfg(feature = "memory")]

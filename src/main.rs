@@ -160,7 +160,7 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
         tracing::info!(count = loaded.len(), "skills loaded");
         loaded
     } else {
-        Vec::new()
+        openai_proxy_lib::skills::SkillIndex::build(vec![])
     };
 
     // Load MCP tool schemas if configured.

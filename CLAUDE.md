@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `openai-proxy` is a Rust axum 0.8 proxy that bridges any OpenAI Chat Completions client to multiple backends: the ChatGPT Codex Responses API (ChatGPT Plus/Pro subscription), the OpenAI Responses API, and the OpenAI Chat Completions API. It is distributed as a CLI binary, an MCP server, an ACP server, an AG-UI streaming endpoint, an agentskills.io skill (`SKILL.md`), and a native opencode plugin (`plugin/`).
 
-Authentication source determines backend automatically: `~/.codex/auth.json` with `access_token` → `chatgpt.com/backend-api/codex/responses`; with `api_key` or `OPENAI_API_KEY` → `api.openai.com/v1/responses` (or `v1/chat/completions` when `CODEX_WIRE_API=chat`).
+Authentication source determines backend automatically: `~/.codex/auth.json` with `access_token` → `chatgpt.com/backend-api/codex/responses`; with `api_key` or `OPENAI_API_KEY` → `api.openai.com/v1/responses` (or `v1/chat/completions` when `CODEX_WIRE_API=chat`). The proxy understands both the flat `{ "access_token": ... }` format and the nested `{ "tokens": { "access_token": ... } }` format written by Codex CLI ≥ v1.x.
 
 ## Commands
 
@@ -75,9 +75,9 @@ Shared across all axum handlers via `State<AppState>`. Key fields:
 
 Three variants control both the upstream URL and request shape:
 
-- `ChatGptCodex` — strips `temperature`, `top_p`, `max_output_tokens`; forces `stream=true`, `store=false`
-- `OpenAiResponses` — Responses API format; passes `max_output_tokens`, tools
-- `OpenAiChatCompletions` — Chat Completions wire format; uses `messages[]`, `max_completion_tokens`
+- `ChatGptCodex` — strips `temperature`, `top_p`, `max_output_tokens`; forces `stream=true`, `store=false`; models: gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat
+- `OpenAiResponses` — Responses API format; passes `max_output_tokens`, tools; adds gpt-5.5-pro vs ChatGptCodex
+- `OpenAiChatCompletions` — Chat Completions wire format; uses `messages[]`, `max_completion_tokens`; same model set as OpenAiResponses
 
 Profile selected at startup based on auth credentials and `CODEX_WIRE_API`. Never changes at runtime.
 
@@ -125,8 +125,8 @@ Built-in defaults → `$XDG_CONFIG_HOME/oproxy/config.toml` → `--config <path>
 
 ### opencode integration levels
 
-1. **Native plugin** (`plugin/`) — TypeScript; hooks `config`, `auth`, `shell.env`, `event`; recommended
-2. **Static config** (`opencode.json` at repo root) — `@ai-sdk/openai-compatible` provider; drop-in for any project
+1. **Native plugin** (`plugin/`) — TypeScript; published as `@prometheus-ags/opencode-codex-proxy` on npm; hooks `config`, `auth`, `shell.env`, `event`; recommended. Provider ID: `codex`.
+2. **Static config** (`opencode.json` at repo root) — `@ai-sdk/openai-compatible` provider with provider ID `codex`; drop-in for any project
 3. **Generic OpenAI client** — `OPENAI_BASE_URL=http://localhost:8080/v1`, any non-empty API key
 
 `openai-proxy setup opencode` generates a correct `opencode.json` (detects ChatGPT OAuth vs API key; uses `{env:VAR}` syntax for opencode's interpolation format).
@@ -161,3 +161,5 @@ Responses API events use dot-notation: `response.output_text.delta`, `response.c
 - `cargo build` (no features) must always produce zero warnings; the memory feature may add cfg-attr suppression for non-feature builds
 - The AG-UI `AguiEvent` enum uses `#[serde(rename_all = "SCREAMING_SNAKE_CASE")]` — wire values are `RUN_STARTED`, `TEXT_MESSAGE_CONTENT`, etc.
 - opencode provider config uses `{env:VAR}` (not `${VAR}`) for runtime interpolation; the MCP key is `"mcp"` with `"type": "local"` (not `"mcpServers"` / `"type": "stdio"`)
+- `codex-mini` and `gpt-4o-mini` are legacy aliases that resolve to `gpt-5.4-mini` in `resolve_model()`; the alias mapping lives in `src/codex.rs`
+- opencode plugin provider ID is `codex` (not `openai-proxy`) — any config or test referencing the old name needs updating

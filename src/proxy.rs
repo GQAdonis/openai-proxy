@@ -26,7 +26,6 @@ use crate::{
         ResponseMessage, ToolCall, ToolCallFunction, Usage,
     },
     memory::MemoryBackend,
-    skills::select_skills,
 };
 
 pub async fn chat_completions(
@@ -855,7 +854,7 @@ fn inject_skills(mut req: ChatCompletionRequest, state: &AppState) -> ChatComple
             .collect::<Vec<_>>()
             .join(" ");
 
-        let selected = select_skills(&user_text, &state.skills, max, state.backend_profile.name());
+        let selected = state.skills.select(&user_text, max, state.backend_profile.name());
         if !selected.is_empty() {
             let skill_block = selected
                 .iter()

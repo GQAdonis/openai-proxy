@@ -48,7 +48,7 @@ pub fn skills_list(args: &SkillsListArgs, cfg_dirs: &[String]) {
     }
     println!("{:<30} {:<10} {:<12} {}", "NAME", "VERSION", "DOMAIN", "KEYWORDS");
     println!("{}", "-".repeat(65));
-    for s in &skills {
+    for s in &skills.manifests {
         let version = s.version.as_deref().unwrap_or("-");
         let domain = s.domain.as_deref().unwrap_or("-");
         let kw_count = s.triggers.as_ref()
@@ -101,7 +101,7 @@ pub fn skills_test(args: &SkillsTestArgs, cfg_dirs: &[String]) {
     println!("Profile: {}", args.profile);
     println!();
 
-    let selected = crate::skills::select_skills(&args.message, &skills, args.max, &args.profile);
+    let selected = skills.select(&args.message, args.max, &args.profile);
     if selected.is_empty() {
         println!("No skills matched.");
     } else {
@@ -120,7 +120,7 @@ pub fn skills_test(args: &SkillsTestArgs, cfg_dirs: &[String]) {
         }
     }
 
-    let not_selected: Vec<_> = skills.iter().filter(|s| !selected.iter().any(|sel| sel.name == s.name)).collect();
+    let not_selected: Vec<_> = skills.manifests.iter().filter(|s| !selected.iter().any(|sel| sel.name == s.name)).collect();
     if !not_selected.is_empty() {
         println!();
         println!("Not selected:");

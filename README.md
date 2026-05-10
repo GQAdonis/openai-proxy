@@ -15,6 +15,21 @@ The proxy surfaces as six delivery mechanisms depending on how you want to use i
 
 ---
 
+## What's new in v0.1.0
+
+- **Expanded model catalog** — eight canonical model IDs across all three backends: `gpt-5.5`, `gpt-5.5-pro`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, `gpt-5.3-codex`, `gpt-5.3-chat`, `gpt-5.2-chat`
+- **npm package** — `@prometheus-ags/opencode-codex-proxy` is now published on npm; install via `npm i @prometheus-ags/opencode-codex-proxy`
+- **opencode native plugin rewrite** — `plugin/` is now a proper opencode plugin with `config`, `auth`, `shell.env`, and `event` hooks; ships as an ESM package with TypeScript declarations
+- **Unified provider ID** — the plugin and opencode.json both use provider ID `codex` (was `openai-proxy`)
+- **Auth flexibility** — plugin auth hook supports both ChatGPT OAuth via `codex login` and OpenAI API key; falls back across `~/.local/share/opencode/auth.json` → `~/.codex/auth.json`
+- **Dynamic model refresh** — on `session.created`, the plugin fetches `/v1/models` and updates context limits at runtime rather than relying solely on static fallback values
+- **`shell.env` hook** — injects `CODEX_AUTH_PATH`, `CODEX_PROXY_URL`, and `CODEX_DEFAULT_MODEL` into every shell the opencode agent spawns
+- **Proxy health toast** — shows a TUI warning if the proxy is unreachable when a session starts
+- **`codex-mini` alias** — maps to `gpt-5.4-mini` (nearest equivalent) in the Rust catalog
+- **Codex CLI auth format** — proxy now understands nested `{ "tokens": { "access_token": ..., "account_id": ... } }` format written by Codex CLI ≥ v1.x
+
+---
+
 ## How it works
 
 ```
@@ -27,7 +42,7 @@ opencode / any OpenAI client
 │                                                     │
 │  1. Resolve model alias → canonical model ID        │
 │  2. Inject loaded SKILL.md context (optional)       │
-│  3. Inject memory RAG context (optional, --features memory) │
+│  3. Inject memory RAG context (--features memory)   │
 │  4. Inject MCP tool schemas (optional)              │
 │  5. Convert to backend wire format per profile      │
 │  6. Fire lifecycle hooks (optional)                 │
@@ -59,16 +74,20 @@ The three backends have different parameter allowlists. The proxy shapes each re
 | `stream` | force `true` | optional | optional |
 | `store` | force `false` | optional | n/a |
 
-### Model mapping
+### Model catalog
 
-| Input alias | Canonical model | ChatGPT sub | API key |
-|-------------|-----------------|:-----------:|:-------:|
-| `gpt-5.5` | `gpt-5.5` | ✓ 400K ctx | ✓ 1M ctx |
-| `gpt-5.5-pro` | `gpt-5.5-pro` | ✗ | ✓ 1M ctx |
-| `gpt-5.4` | `gpt-5.4` | ✓ | ✓ |
-| `gpt-5.3-codex`, `gpt-4o`, `gpt-4`, `gpt-3.5-turbo` | `gpt-5.3-codex` | ✓ | ✓ |
-| `codex-mini`, `gpt-4o-mini` | `codex-mini` | ✗ | ✓ |
-| anything else | `gpt-5.3-codex` | ✓ | ✓ |
+| Model ID | ChatGPT sub ctx | API key ctx | Notes |
+|----------|:-----------:|:-------:|-------|
+| `gpt-5.5` | 400K | 1M | Default for unknown aliases |
+| `gpt-5.5-pro` | — | 1M | API key only |
+| `gpt-5.4` | 400K | 400K | |
+| `gpt-5.4-mini` | 200K | 200K | `codex-mini` and `gpt-4o-mini` alias here |
+| `gpt-5.4-nano` | 128K | 128K | |
+| `gpt-5.3-codex` | 400K | 400K | `gpt-4o`, `gpt-4`, `gpt-3.5-turbo` alias here |
+| `gpt-5.3-chat` | 128K | 128K | |
+| `gpt-5.2-chat` | 128K | 128K | |
+
+All max output tokens: 32 768 for 5.5/5.4/5.3-codex; 16 384 for 5.4-mini/5.3-chat/5.2-chat; 8 192 for 5.4-nano.
 
 ---
 
@@ -121,7 +140,7 @@ docker compose up
 # Build the proxy, then generate a correct opencode.json for your credentials
 openai-proxy setup opencode --global --port 8080
 
-# Open opencode — the "openai-proxy" provider appears immediately
+# Open opencode — the "codex" provider appears immediately
 opencode
 ```
 
@@ -178,6 +197,7 @@ Full reference: [docs/config.md](docs/config.md)
 | `CODEX_BACKEND_URL` | auto | Override upstream URL |
 | `CODEX_WIRE_API` | `responses` | `responses` or `chat` |
 | `CODEX_DEFAULT_MODEL` | — | Default model for generic aliases |
+| `CODEX_PROXY_URL` | `http://localhost:8080/v1` | Base URL injected into plugin shell envs |
 | `OPENAI_API_KEY` | — | API key (fallback if no auth.json) |
 | `MCP_HTTP_PORT` | — | Start MCP Streamable HTTP server on this port |
 | `PROXY_SKILLS_DIRS` | — | Colon-separated skill directories |
@@ -221,32 +241,70 @@ Three levels are available. The `setup opencode` command generates the correct c
 
 ### Level 1 — Native plugin (recommended)
 
-The `plugin/` directory is a TypeScript opencode plugin that hooks into four opencode lifecycle points:
+The `plugin/` directory is a TypeScript opencode plugin published on npm as `@prometheus-ags/opencode-codex-proxy`. It hooks into four opencode lifecycle points:
 
 | Hook | Effect |
 |------|--------|
-| `config` | Injects the provider and all models into opencode's live config — no manual edits needed |
-| `auth` | Registers `"openai-proxy"` in `/connect` with OAuth (`codex login`) or API key options |
-| `shell.env` | Injects `CODEX_AUTH_PATH` into every shell the agent spawns |
-| `event` | On `session.created`, pings `/health` and emits a TUI warning if the proxy is not running |
+| `config` | Injects the `codex` provider and all models into opencode's live config |
+| `auth` | Registers `"codex"` in `/connect` with OAuth (`codex login`) or API key options; reads from opencode's auth store then falls back to `~/.codex/auth.json` |
+| `shell.env` | Injects `CODEX_AUTH_PATH`, `CODEX_PROXY_URL`, and `CODEX_DEFAULT_MODEL` into every shell the agent spawns |
+| `event` | On `session.created`, pings `/health`, emits a TUI warning if the proxy is not running, and refreshes model context limits from `/v1/models` |
+
+**Install from npm:**
 
 ```bash
-cd plugin && bun install   # or npm install
+npm i @prometheus-ags/opencode-codex-proxy
 ```
 
 Load globally in `~/.config/opencode/opencode.json`:
 ```json
-{ "plugin": ["file:/absolute/path/to/openai-proxy/plugin"] }
+{
+  "plugin": ["node_modules/@prometheus-ags/opencode-codex-proxy"]
+}
 ```
 
-Or project-locally — the `opencode.json` at the repo root already declares it:
+**Or build locally from source:**
+
+```bash
+cd plugin && bun install && bun run build
+```
+
+Load from the local path in `opencode.json`:
 ```json
 { "plugin": ["file:./plugin"] }
 ```
 
+The `opencode.json` at the repo root already declares the local plugin — it works out of the box when you clone the repo.
+
 ### Level 2 — Static config
 
-The `opencode.json` at the repo root declares the `codex` provider via `@ai-sdk/openai-compatible`. Drop it into any project directory and opencode picks it up. The `apiKey` field is required by the SDK but ignored by the proxy.
+The `opencode.json` at the repo root declares the `codex` provider via `@ai-sdk/openai-compatible`. Drop it into any project directory and opencode picks it up automatically. The `apiKey` field is required by the SDK but ignored by the proxy.
+
+```json
+{
+  "provider": {
+    "codex": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Codex (via proxy)",
+      "options": {
+        "baseURL": "http://localhost:8080/v1",
+        "apiKey": "codex-proxy"
+      },
+      "models": {
+        "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 1000000, "output": 32768 } },
+        "gpt-5.5-pro":   { "name": "GPT-5.5 Pro",   "limit": { "context": 1000000, "output": 32768 } },
+        "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context":  400000, "output": 32768 } },
+        "gpt-5.4-mini":  { "name": "GPT-5.4 Mini",  "limit": { "context":  200000, "output": 16384 } },
+        "gpt-5.4-nano":  { "name": "GPT-5.4 Nano",  "limit": { "context":  128000, "output":  8192 } },
+        "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context":  400000, "output": 32768 } },
+        "gpt-5.3-chat":  { "name": "GPT-5.3 Chat",  "limit": { "context":  128000, "output": 16384 } },
+        "gpt-5.2-chat":  { "name": "GPT-5.2 Chat",  "limit": { "context":  128000, "output": 16384 } }
+      }
+    }
+  },
+  "model": "codex/gpt-5.5"
+}
+```
 
 ### Level 3 — Any OpenAI-compatible client
 
@@ -501,6 +559,16 @@ curl http://localhost:8080/health
 curl http://localhost:8080/v1/models
 ```
 
+### Plugin development
+
+```bash
+cd plugin
+bun install
+bun run typecheck      # TypeScript type check (no emit)
+bun run build          # compile to dist/
+bun run dev            # run src/index.ts directly via bun
+```
+
 ---
 
 ## Endpoints
@@ -521,13 +589,23 @@ curl http://localhost:8080/v1/models
 
 ## Auth reference
 
-`~/.codex/auth.json` is written by `codex login`. The proxy reads it at startup.
+`~/.codex/auth.json` is written by `codex login`. The proxy understands both the flat format and the nested `tokens` block used by Codex CLI ≥ v1.x:
 
 ```json
+// Flat format (Codex CLI < v1.x)
 {
   "access_token": "eyJ...",
   "account_id":   "db1fc050-5df3-42c1-be65-9463d9d23f0b",
   "api_key":      "sk-proj-..."
+}
+
+// Nested format (Codex CLI ≥ v1.x)
+{
+  "tokens": {
+    "access_token": "eyJ...",
+    "account_id":   "db1fc050-5df3-42c1-be65-9463d9d23f0b"
+  },
+  "api_key": "sk-proj-..."
 }
 ```
 
@@ -539,15 +617,19 @@ curl http://localhost:8080/v1/models
 
 **`Cannot load ~/.codex/auth.json`** — Run `codex login`.
 
-**`401 Unauthorized`** — Token expired (~1 hour TTL). Run `codex login` again or re-auth via `opencode /connect → openai-proxy`.
+**`401 Unauthorized`** — Token expired (~1 hour TTL). Run `codex login` again or re-auth via `opencode /connect → codex`.
 
 **`403 Forbidden`** — ChatGPT backend rejected the request headers. Check [openai/codex releases](https://github.com/openai/codex/releases) for updated header requirements.
 
 **`400 model_not_available`** — The requested model is not available on your active backend profile. Check `openai-proxy config show` and [docs/opencode-setup.md](docs/opencode-setup.md#model-selection).
 
-**Plugin not loading in opencode** — Ensure `bun install` has run inside `plugin/` and the path in `opencode.json` is correct (absolute or relative to the opencode working directory).
+**Plugin not loading in opencode** — If using the npm package, ensure it is installed (`npm i @prometheus-ags/opencode-codex-proxy`). If using the local build, ensure `bun run build` has run inside `plugin/` and the path in `opencode.json` is correct.
+
+**Provider shows as `openai-proxy` instead of `codex`** — You have an older version of the plugin or a cached `opencode.json`. The provider ID changed to `codex` in v0.1.0. Update the plugin and regenerate with `openai-proxy setup opencode`.
 
 **`429 Too Many Requests`** — ChatGPT subscription Codex usage limit reached. Check usage at [chatgpt.com/codex](https://chatgpt.com/codex).
+
+**`gpt-5.5-pro` or `codex-mini` not working on ChatGPT subscription** — These models require an API key (`gpt-5.5-pro` is API-only; `codex-mini` aliases to `gpt-5.4-mini`, which is API-only on the subscription backend).
 
 ---
 
@@ -574,12 +656,12 @@ openai-proxy/
 │   ├── hooks.rs           # Webhook lifecycle hooks
 │   └── a2a.rs             # A2A Agent Card endpoint
 │
-├── plugin/                # opencode native TypeScript plugin
+├── plugin/                # opencode native TypeScript plugin (npm: @prometheus-ags/opencode-codex-proxy)
 │   └── src/
-│       ├── index.ts       # config, auth, shell.env, event hooks
+│       ├── index.ts       # CodexProxyPlugin — config, auth, shell.env, event hooks
 │       ├── auth.ts        # ~/.codex/auth.json reader
-│       ├── codex-login.ts # spawns `codex login`, returns tokens
-│       └── config.ts      # provider ID, base URL, model list
+│       ├── codex-login.ts # spawns `codex login`, returns OAuth tokens to opencode
+│       └── config.ts      # PROVIDER_ID, PROXY_BASE_URL, PROXY_MODELS, DEFAULT_MODEL
 │
 ├── docs/
 │   ├── config.md          # Full configuration reference

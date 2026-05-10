@@ -23,7 +23,7 @@ openai-proxy serve --port 8080
 # 2. In another terminal, write the opencode config for you
 openai-proxy setup opencode --global --port 8080
 
-# 3. Open opencode — select provider "openai-proxy"
+# 3. Open opencode — select provider "codex"
 opencode
 ```
 
@@ -31,31 +31,82 @@ The `setup opencode` command detects whether you have a ChatGPT subscription tok
 
 ---
 
+## Plugin Installation (v0.1.0+)
+
+The plugin is published on npm as `@prometheus-ags/opencode-codex-proxy`. This is the recommended installation method.
+
+### From npm
+
+```bash
+npm i @prometheus-ags/opencode-codex-proxy
+```
+
+Load globally in `~/.config/opencode/opencode.json`:
+
+```json
+{
+  "plugin": ["node_modules/@prometheus-ags/opencode-codex-proxy"]
+}
+```
+
+### From local source
+
+```bash
+cd plugin && bun install && bun run build
+```
+
+Load from the local path:
+
+```json
+{
+  "plugin": ["file:./plugin"]
+}
+```
+
+The `opencode.json` at the repo root already declares the local plugin — it works out of the box when you clone the repo.
+
+### What the plugin does
+
+| Hook | Effect |
+|------|--------|
+| `config` | Injects the `codex` provider and all models into opencode's live config — no manual edits needed |
+| `auth` | Registers `"codex"` in `/connect` with OAuth (`codex login`) or API key options; reads from opencode's own auth store, then falls back to `~/.codex/auth.json` |
+| `shell.env` | Injects `CODEX_AUTH_PATH`, `CODEX_PROXY_URL`, and `CODEX_DEFAULT_MODEL` into every shell the agent spawns |
+| `event` | On `session.created`, pings `/health`, shows a TUI warning if the proxy is not running, and refreshes model context limits from `/v1/models` |
+
+---
+
 ## Manual Configuration
 
 Create or edit `~/.config/opencode/opencode.json` (global) or `.opencode/opencode.json` (project):
 
-### ChatGPT Subscription (Plus/Pro) — OpenAI Max Plan
+> **Note:** The provider ID is `codex` (changed from `openai-proxy` in v0.1.0). Update any existing config that uses the old name.
+
+### ChatGPT Subscription (Plus/Pro)
 
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "openai-proxy": {
+    "codex": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "OpenAI Proxy (ChatGPT Subscription Plus/Pro)",
+      "name": "Codex (via proxy)",
       "options": {
         "baseURL": "http://127.0.0.1:8080/v1",
-        "apiKey": "not-required"
+        "apiKey": "codex-proxy"
       },
       "models": {
-        "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context": 400000, "output": 32768 } },
+        "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 400000, "output": 32768 } },
         "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context": 400000, "output": 32768 } },
-        "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 400000, "output": 32768 } }
+        "gpt-5.4-mini":  { "name": "GPT-5.4 Mini",  "limit": { "context": 200000, "output": 16384 } },
+        "gpt-5.4-nano":  { "name": "GPT-5.4 Nano",  "limit": { "context": 128000, "output":  8192 } },
+        "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context": 400000, "output": 32768 } },
+        "gpt-5.3-chat":  { "name": "GPT-5.3 Chat",  "limit": { "context": 128000, "output": 16384 } },
+        "gpt-5.2-chat":  { "name": "GPT-5.2 Chat",  "limit": { "context": 128000, "output": 16384 } }
       }
     }
   },
-  "model": "openai-proxy/gpt-5.5"
+  "model": "codex/gpt-5.5"
 }
 ```
 
@@ -67,23 +118,26 @@ Start the proxy: `openai-proxy serve --port 8080`
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "openai-proxy": {
+    "codex": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "OpenAI Proxy (API Key)",
+      "name": "Codex (via proxy)",
       "options": {
         "baseURL": "http://127.0.0.1:8080/v1",
-        "apiKey": "not-required"
+        "apiKey": "codex-proxy"
       },
       "models": {
         "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 1000000, "output": 32768 } },
         "gpt-5.5-pro":   { "name": "GPT-5.5 Pro",   "limit": { "context": 1000000, "output": 32768 } },
-        "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context": 200000,  "output": 16384 } },
-        "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context": 200000,  "output": 16384 } },
-        "codex-mini":    { "name": "Codex Mini",     "limit": { "context": 96000,   "output": 8192  } }
+        "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context":  400000, "output": 32768 } },
+        "gpt-5.4-mini":  { "name": "GPT-5.4 Mini",  "limit": { "context":  200000, "output": 16384 } },
+        "gpt-5.4-nano":  { "name": "GPT-5.4 Nano",  "limit": { "context":  128000, "output":  8192 } },
+        "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context":  400000, "output": 32768 } },
+        "gpt-5.3-chat":  { "name": "GPT-5.3 Chat",  "limit": { "context":  128000, "output": 16384 } },
+        "gpt-5.2-chat":  { "name": "GPT-5.2 Chat",  "limit": { "context":  128000, "output": 16384 } }
       }
     }
   },
-  "model": "openai-proxy/gpt-5.5"
+  "model": "codex/gpt-5.5"
 }
 ```
 
@@ -93,13 +147,18 @@ Start the proxy: `OPENAI_API_KEY=sk-... openai-proxy serve --port 8080`
 
 ## Model Selection
 
-| Model | Context | Auth |
-|-------|---------|------|
-| `gpt-5.5` | 400K (sub) / 1M (API key) | Both |
-| `gpt-5.5-pro` | 1M | API key only |
-| `gpt-5.4` | 400K / 200K | Both |
-| `gpt-5.3-codex` | 400K / 200K | Both |
-| `codex-mini` | 96K | API key only |
+| Model | ChatGPT sub ctx | API key ctx | Notes |
+|-------|:-----------:|:-------:|-------|
+| `gpt-5.5` | 400K | 1M | Default; use for most tasks |
+| `gpt-5.5-pro` | — | 1M | API key only |
+| `gpt-5.4` | 400K | 400K | Balanced speed/quality |
+| `gpt-5.4-mini` | 200K | 200K | `codex-mini` aliases here |
+| `gpt-5.4-nano` | 128K | 128K | Lightweight tasks |
+| `gpt-5.3-codex` | 400K | 400K | `gpt-4o`, `gpt-4` alias here |
+| `gpt-5.3-chat` | 128K | 128K | Conversational |
+| `gpt-5.2-chat` | 128K | 128K | |
+
+The `GET /v1/models` endpoint always returns the authoritative list for the active backend profile.
 
 ---
 
@@ -117,10 +176,10 @@ opencode includes `CodexAuthPlugin` internally. It intercepts requests to Codex-
 
 ### Approach 2: openai-proxy plugin (this project)
 
-The TypeScript plugin in `plugin/` registers `openai-proxy` as a provider in opencode, routing all Codex requests through the proxy binary at `localhost:8080/v1`.
+The TypeScript plugin in `plugin/` registers `codex` as a provider in opencode, routing all requests through the proxy binary at `localhost:8080/v1`.
 
-- **Credentials:** read from `~/.codex/auth.json` (Codex CLI credential location)
-- **Setup:** start the proxy binary; run `openai-proxy setup opencode` or load `plugin/`
+- **Credentials:** reads from opencode's auth store (`~/.local/share/opencode/auth.json`) first, then falls back to `~/.codex/auth.json`
+- **Setup:** start the proxy binary; install via `npm i @prometheus-ags/opencode-codex-proxy` or build locally
 - **Scope:** shared — Claude Code (MCP), Zed (ACP), and AG-UI frontends all route through the same proxy instance
 
 ### Decision table
@@ -133,7 +192,7 @@ The TypeScript plugin in `plugin/` registers `openai-proxy` as a provider in ope
 | Need memory RAG (`--features memory`) | openai-proxy plugin |
 | Need MCP or ACP transport for non-opencode clients | openai-proxy plugin |
 
-> **Warning:** Do not activate both simultaneously. The built-in plugin and the proxy plugin use different credential paths (`~/.local/share/opencode/auth.json` vs `~/.codex/auth.json`) and will produce unpredictable behavior when both are configured. The model IDs also partially overlap (`codex-mini`), which can cause silent routing conflicts.
+> **Warning:** Do not activate both simultaneously. The built-in plugin and the proxy plugin both register the `codex` provider ID. Having both active will produce duplicate provider entries and unpredictable routing behavior.
 
 ### Disabling the built-in Codex plugin
 
@@ -145,7 +204,19 @@ If you are using the proxy-based approach and want to prevent the built-in plugi
 }
 ```
 
-This prevents opencode from loading its built-in Codex interceptor, leaving the proxy plugin as the sole integration path.
+---
+
+## Auth credential path
+
+The proxy reads `~/.codex/auth.json` by default. The plugin's `shell.env` hook sets `CODEX_AUTH_PATH` for child shells, so scripts that call the proxy binary inherit the correct path automatically.
+
+If you ran `opencode auth login` previously and tokens are in `~/.local/share/opencode/auth.json`, the plugin's `auth.loader` reads them directly — no manual migration needed.
+
+To point the proxy at a different credential file:
+
+```bash
+CODEX_AUTH_PATH=~/.local/share/opencode/auth.json openai-proxy serve
+```
 
 ---
 
@@ -155,6 +226,10 @@ This prevents opencode from loading its built-in Codex interceptor, leaving the 
 
 **"Connection refused"** — Check the port matches between `--port` and `baseURL`.
 
-**400 errors from ChatGPT backend** — Ensure you are using a supported model. `gpt-5.5-pro` and `codex-mini` are not available on the ChatGPT subscription path.
+**Provider shows as `openai-proxy` instead of `codex`** — You have an older `opencode.json`. The provider ID changed to `codex` in v0.1.0. Regenerate with `openai-proxy setup opencode` or update the provider key manually.
 
-**Auth not working after `opencode auth login`** — If you previously used the built-in Codex plugin, your token is in `~/.local/share/opencode/auth.json`. The proxy reads `~/.codex/auth.json`. Run `codex login` to write the proxy's expected credential file, or set `CODEX_AUTH_PATH` to point to the opencode auth file.
+**400 errors from ChatGPT backend** — Ensure you are using a supported model. `gpt-5.5-pro` is not available on the ChatGPT subscription path; use `gpt-5.5` instead.
+
+**Auth not working after `opencode auth login`** — The plugin's `auth.loader` tries opencode's own auth store first. If it still fails, run `codex login` to write `~/.codex/auth.json` as a fallback, or set `CODEX_AUTH_PATH` to point to opencode's auth file.
+
+**Toast warning "Codex proxy not running"** — The proxy binary is not running or is on a different port. Start it with `openai-proxy serve` or set `CODEX_PROXY_URL` to match the actual URL.

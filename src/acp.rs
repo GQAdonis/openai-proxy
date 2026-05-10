@@ -14,7 +14,6 @@ use crate::{
     codex::{self, ResponseStreamEvent},
     openai::{ChatCompletionRequest, Message, MessageContent},
     proxy::build_responses_request,
-    skills::select_skills,
 };
 
 /// Run the ACP stdio server. Reads JSON-RPC 2.0 from stdin, dispatches prompt
@@ -137,7 +136,7 @@ async fn handle_prompt(
             .ok()
             .and_then(|v| v.parse::<usize>().ok())
             .unwrap_or(3);
-        let selected = select_skills(&user_text, &state.skills, max, state.backend_profile.name());
+        let selected = state.skills.select(&user_text, max, state.backend_profile.name());
         if !selected.is_empty() {
             let skill_block = selected
                 .iter()

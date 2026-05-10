@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     path::{Path, PathBuf},
 };
 
@@ -38,7 +38,6 @@ fn parse_skill_file(raw: &str) -> Option<SkillManifest> {
 }
 
 /// Walk `dir` recursively and collect all SKILL.md files as `SkillManifest`s.
-/// Files with missing `name` or `description` are skipped with a warning.
 fn load_skills_from_dir(dir: &Path) -> Vec<SkillManifest> {
     let mut skills = Vec::new();
     let Ok(entries) = std::fs::read_dir(dir) else {
@@ -70,93 +69,176 @@ fn load_skills_from_dir(dir: &Path) -> Vec<SkillManifest> {
     skills
 }
 
-/// Load skills from colon-separated directory paths.
-pub fn load_skills(dirs: &[PathBuf]) -> Vec<SkillManifest> {
-    dirs.iter().flat_map(|d| load_skills_from_dir(d)).collect()
-}
-
-/// Select up to `max` skills relevant to `message` using keyword scoring.
-/// Skills with zero keyword overlap are included as fallback (up to `max`) if
-/// no skill scored > 0. Deduplicated by name.
-pub fn select_skills<'a>(
-    message: &str,
-    skills: &'a [SkillManifest],
-    max: usize,
-    backend_profile_name: &str,
-) -> Vec<&'a SkillManifest> {
-    if skills.is_empty() || max == 0 {
-        return Vec::new();
-    }
-
-    let message_tokens: HashSet<String> = message
-        .to_lowercase()
+/// Tokenize a string into lowercase alphanumeric tokens.
+fn tokenize(s: &str) -> HashSet<String> {
+    s.to_lowercase()
         .split(|c: char| !c.is_alphanumeric())
         .filter(|t| !t.is_empty())
         .map(String::from)
-        .collect();
+        .collect()
+}
 
-    let is_codex_profile = backend_profile_name == "ChatGptCodex";
+/// Skill index with IDF weights precomputed at build time.
+///
+/// IDF (Inverse Document Frequency) gives higher weight to keywords that appear
+/// in fewer skills — rare, specific keywords are more diagnostic than common ones.
+/// This mirrors the TF-IDF hybrid scoring in opencode's `skill/index.ts`.
+#[derive(Debug, Clone)]
+pub struct SkillIndex {
+    pub manifests: Vec<SkillManifest>,
+    /// IDF weight per lowercased keyword token: ln(N / df).
+    idf: HashMap<String, f32>,
+}
 
-    let mut scored: Vec<(f32, &SkillManifest)> = skills
-        .iter()
-        .map(|skill| {
-            let keywords = skill
-                .triggers
-                .as_ref()
-                .and_then(|t| t.keywords.as_ref())
-                .map(|kws| kws.as_slice())
-                .unwrap_or(&[]);
+impl SkillIndex {
+    /// Build the index from loaded manifests, computing IDF weights once.
+    pub fn build(manifests: Vec<SkillManifest>) -> Self {
+        let n = manifests.len();
+        let mut df: HashMap<String, usize> = HashMap::new();
 
-            let score = if keywords.is_empty() {
-                0.0_f32
-            } else {
-                let matches = keywords
-                    .iter()
-                    .filter(|kw| message_tokens.contains(&kw.to_lowercase()))
-                    .count();
-                matches as f32 / keywords.len() as f32
-            };
-
-            // Domain boost: coding/rust domains get a bump on all profiles; extra on codex.
-            let domain_boost = if let Some(domain) = &skill.domain {
-                let d = domain.to_lowercase();
-                if d == "coding" || d == "rust" || d == "programming" {
-                    if is_codex_profile { 0.3 } else { 0.1 }
-                } else {
-                    0.0
-                }
-            } else {
-                0.0
-            };
-
-            (score + domain_boost, skill)
-        })
-        .collect();
-
-    // Sort by score descending, stable order for ties.
-    scored.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
-
-    // Deduplicate by name.
-    let mut seen = HashSet::new();
-    let unique: Vec<&SkillManifest> = scored
-        .iter()
-        .filter_map(|(_, skill)| {
-            if seen.insert(skill.name.clone()) {
-                Some(*skill)
-            } else {
-                None
+        for manifest in &manifests {
+            // Collect unique tokens across name, description, and trigger keywords.
+            let mut seen: HashSet<String> = HashSet::new();
+            for token in tokenize(&manifest.name) {
+                seen.insert(token);
             }
-        })
-        .collect();
+            for token in tokenize(&manifest.description) {
+                seen.insert(token);
+            }
+            if let Some(triggers) = &manifest.triggers {
+                if let Some(kws) = &triggers.keywords {
+                    for kw in kws {
+                        for token in tokenize(kw) {
+                            seen.insert(token);
+                        }
+                    }
+                }
+            }
+            for token in seen {
+                *df.entry(token).or_insert(0) += 1;
+            }
+        }
 
-    // If all scores are 0 (no keyword match, no domain), use insertion-order fallback.
-    let all_zero = scored.iter().all(|(s, _)| *s == 0.0);
-    if all_zero {
-        return unique.into_iter().take(max).collect();
+        // IDF = ln(N / df). When N == 0 or df == 0, weight is 0.
+        let idf = if n == 0 {
+            HashMap::new()
+        } else {
+            df.into_iter()
+                .map(|(token, count)| {
+                    let weight = (n as f32 / count as f32).ln();
+                    (token, weight)
+                })
+                .collect()
+        };
+
+        Self { manifests, idf }
     }
 
-    // Return top-k with score > 0 (or include low-score ones up to max if needed).
-    unique.into_iter().take(max).collect()
+    pub fn is_empty(&self) -> bool {
+        self.manifests.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.manifests.len()
+    }
+
+    /// Select up to `max` skills relevant to `message`.
+    ///
+    /// Scoring: 60% IDF-weighted keyword overlap + 40% raw keyword overlap + domain boost.
+    /// This matches opencode's 60/40 TF-IDF / keyword hybrid in `skill/index.ts`.
+    ///
+    /// Fallback: if all scores are 0 (no keyword overlap at all), return up to `max`
+    /// skills in insertion order so there is always some context injected.
+    pub fn select<'a>(
+        &'a self,
+        message: &str,
+        max: usize,
+        backend_profile_name: &str,
+    ) -> Vec<&'a SkillManifest> {
+        if self.manifests.is_empty() || max == 0 {
+            return Vec::new();
+        }
+
+        let message_tokens = tokenize(message);
+        let is_codex_profile = backend_profile_name.contains("ChatGPT") || backend_profile_name.contains("ChatGptCodex");
+
+        let mut scored: Vec<(f32, &SkillManifest)> = self.manifests
+            .iter()
+            .map(|skill| {
+                let keywords: Vec<String> = skill
+                    .triggers
+                    .as_ref()
+                    .and_then(|t| t.keywords.as_ref())
+                    .map(|kws| kws.iter().flat_map(|kw| tokenize(kw)).collect())
+                    .unwrap_or_default();
+
+                let (idf_score, raw_score) = if keywords.is_empty() {
+                    (0.0_f32, 0.0_f32)
+                } else {
+                    // IDF-weighted score: sum of IDF weights for matched keywords /
+                    // sum of IDF weights for all skill keywords.
+                    let total_idf: f32 = keywords.iter()
+                        .map(|kw| self.idf.get(kw).copied().unwrap_or(0.0))
+                        .sum();
+
+                    let matched_idf: f32 = keywords.iter()
+                        .filter(|kw| message_tokens.contains(*kw))
+                        .map(|kw| self.idf.get(kw).copied().unwrap_or(0.0))
+                        .sum();
+
+                    let idf = if total_idf > 0.0 { matched_idf / total_idf } else { 0.0 };
+
+                    // Raw keyword overlap: matched count / total keyword count.
+                    let matched_count = keywords.iter()
+                        .filter(|kw| message_tokens.contains(*kw))
+                        .count();
+                    let raw = matched_count as f32 / keywords.len() as f32;
+
+                    (idf, raw)
+                };
+
+                // Blend: 60% IDF-weighted + 40% raw overlap.
+                let keyword_score = 0.6 * idf_score + 0.4 * raw_score;
+
+                // Domain boost: coding/rust domains get a bump; extra on codex backend.
+                let domain_boost = match skill.domain.as_deref().map(|d| d.to_lowercase()).as_deref() {
+                    Some("coding") | Some("rust") | Some("programming") => {
+                        if is_codex_profile { 0.3 } else { 0.1 }
+                    }
+                    _ => 0.0,
+                };
+
+                (keyword_score + domain_boost, skill)
+            })
+            .collect();
+
+        // Sort by score descending, stable for ties.
+        scored.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+
+        // Deduplicate by name.
+        let mut seen = HashSet::new();
+        let unique: Vec<&SkillManifest> = scored
+            .iter()
+            .filter_map(|(_, skill)| {
+                if seen.insert(skill.name.clone()) { Some(*skill) } else { None }
+            })
+            .collect();
+
+        // If all scores are 0 (no keyword overlap, no domain boost), fall back to
+        // insertion order so context is always injected rather than nothing.
+        let all_zero = scored.iter().all(|(s, _)| *s == 0.0);
+        if all_zero {
+            return self.manifests.iter().take(max).collect();
+        }
+
+        unique.into_iter().take(max).collect()
+    }
+}
+
+/// Load skills from a list of directory paths and build a `SkillIndex`.
+pub fn load_skills(dirs: &[PathBuf]) -> SkillIndex {
+    let manifests = dirs.iter().flat_map(|d| load_skills_from_dir(d)).collect();
+    SkillIndex::build(manifests)
 }
 
 #[cfg(test)]
@@ -199,51 +281,82 @@ mod tests {
         let tmp = TempDir::new().unwrap();
         make_skill_file(tmp.path(), "rust-helper", "Helps with Rust", &["rust", "cargo"], Some("rust"));
         make_skill_file(tmp.path(), "python-helper", "Helps with Python", &["python", "pip"], None);
-        let skills = load_skills(&[tmp.path().to_path_buf()]);
-        assert_eq!(skills.len(), 2);
+        let idx = load_skills(&[tmp.path().to_path_buf()]);
+        assert_eq!(idx.len(), 2);
     }
 
     #[test]
-    fn select_skills_keyword_match() {
+    fn select_keyword_match() {
         let tmp = TempDir::new().unwrap();
         make_skill_file(tmp.path(), "rust-helper", "Helps with Rust", &["rust", "cargo"], None);
         make_skill_file(tmp.path(), "python-helper", "Helps with Python", &["python", "pip"], None);
-        let skills = load_skills(&[tmp.path().to_path_buf()]);
+        let idx = load_skills(&[tmp.path().to_path_buf()]);
 
-        let selected = select_skills("I need help with rust cargo build", &skills, 3, "OpenAiResponses");
-        assert_eq!(selected.len(), 2); // both returned since max=3
-        assert_eq!(selected[0].name, "rust-helper"); // rust-helper scores higher
+        let selected = idx.select("I need help with rust cargo build", 3, "OpenAiResponses");
+        assert_eq!(selected.len(), 2);
+        assert_eq!(selected[0].name, "rust-helper");
     }
 
     #[test]
-    fn select_skills_cap_respected() {
+    fn select_cap_respected() {
         let tmp = TempDir::new().unwrap();
         for i in 0..5 {
             make_skill_file(tmp.path(), &format!("skill-{i}"), &format!("Skill {i}"), &["foo"], None);
         }
-        let skills = load_skills(&[tmp.path().to_path_buf()]);
-        let selected = select_skills("foo bar baz", &skills, 2, "OpenAiResponses");
+        let idx = load_skills(&[tmp.path().to_path_buf()]);
+        let selected = idx.select("foo bar baz", 2, "OpenAiResponses");
         assert_eq!(selected.len(), 2);
     }
 
     #[test]
-    fn select_skills_fallback_when_no_match() {
+    fn select_fallback_when_no_match() {
         let tmp = TempDir::new().unwrap();
         make_skill_file(tmp.path(), "skill-a", "Skill A", &["alpha"], None);
         make_skill_file(tmp.path(), "skill-b", "Skill B", &["beta"], None);
-        let skills = load_skills(&[tmp.path().to_path_buf()]);
-        // Message has no keyword overlap — fallback to insertion order.
-        let selected = select_skills("completely unrelated message", &skills, 2, "OpenAiResponses");
+        let idx = load_skills(&[tmp.path().to_path_buf()]);
+        let selected = idx.select("completely unrelated message", 2, "OpenAiResponses");
         assert_eq!(selected.len(), 2);
     }
 
     #[test]
-    fn select_skills_deduplicates() {
+    fn select_deduplicates() {
         let raw = "---\nname: dup\ndescription: Duplicate skill\ntriggers:\n  keywords:\n    - foo\n---\n\nBody.\n";
         let m1 = parse_skill_file(raw).unwrap();
         let m2 = m1.clone();
-        let skills = vec![m1, m2];
-        let selected = select_skills("foo", &skills, 5, "OpenAiResponses");
+        let idx = SkillIndex::build(vec![m1, m2]);
+        let selected = idx.select("foo", 5, "OpenAiResponses");
         assert_eq!(selected.len(), 1);
+    }
+
+    #[test]
+    fn idf_weights_rare_keywords_higher() {
+        // "actix" appears in only 1 skill (df=1); "rust" appears in both (df=2).
+        // A message mentioning "actix" should rank the actix skill above a rust-only skill
+        // because actix has higher IDF weight.
+        let raw_actix = "---\nname: actix-helper\ndescription: Actix web framework\ntriggers:\n  keywords:\n    - actix\n    - rust\n---\n\nBody.\n";
+        let raw_rust = "---\nname: rust-helper\ndescription: General Rust\ntriggers:\n  keywords:\n    - rust\n---\n\nBody.\n";
+        let m_actix = parse_skill_file(raw_actix).unwrap();
+        let m_rust = parse_skill_file(raw_rust).unwrap();
+        let idx = SkillIndex::build(vec![m_actix, m_rust]);
+
+        let selected = idx.select("I need help with actix", 2, "OpenAiResponses");
+        assert_eq!(selected[0].name, "actix-helper");
+    }
+
+    #[test]
+    fn empty_index_returns_empty() {
+        let idx = SkillIndex::build(vec![]);
+        assert!(idx.select("any message", 3, "OpenAiResponses").is_empty());
+    }
+
+    #[test]
+    fn single_skill_select_works() {
+        let raw = "---\nname: solo\ndescription: Solo skill\ntriggers:\n  keywords:\n    - solo\n---\n\nBody.\n";
+        let m = parse_skill_file(raw).unwrap();
+        let idx = SkillIndex::build(vec![m]);
+        // When N=1, IDF for all tokens = ln(1/1) = 0; falls through to raw overlap only.
+        let selected = idx.select("solo task here", 1, "OpenAiResponses");
+        assert_eq!(selected.len(), 1);
+        assert_eq!(selected[0].name, "solo");
     }
 }
