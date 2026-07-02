@@ -12,12 +12,14 @@ use axum::{
 use futures_util::StreamExt;
 use uuid::Uuid;
 
+#[cfg(feature = "memory")]
+use crate::memory::MemoryBackend;
 use crate::{
     AppState,
     codex::{
         self, BackendProfile, ChatCompletionChunk, ChunkChoice, Delta, PendingFunctionCall,
-        ResponseStreamEvent, ToolCallDelta, ToolCallFunctionDelta,
-        build_chat_completions_request, resolve_model,
+        ResponseStreamEvent, ToolCallDelta, ToolCallFunctionDelta, build_chat_completions_request,
+        resolve_model,
     },
     error::ProxyError,
     hooks::HookEvent,
@@ -25,7 +27,6 @@ use crate::{
         ChatCompletionRequest, ChatCompletionResponse, Choice, Message, MessageContent,
         ResponseMessage, ToolCall, ToolCallFunction, Usage,
     },
-    memory::MemoryBackend,
 };
 
 pub async fn chat_completions(
@@ -123,7 +124,10 @@ async fn non_stream_responses(
                 message: body.clone(),
             })
             .await;
-        return Err(ProxyError::Upstream { status: status.as_u16(), body });
+        return Err(ProxyError::Upstream {
+            status: status.as_u16(),
+            body,
+        });
     }
 
     let raw = resp.text().await?;
@@ -139,7 +143,9 @@ async fn non_stream_responses(
     let mut call_order: Vec<u32> = Vec::new();
 
     for line in raw.lines() {
-        let Some(data) = line.strip_prefix("data: ") else { continue };
+        let Some(data) = line.strip_prefix("data: ") else {
+            continue;
+        };
         if data == "[DONE]" {
             break;
         }
@@ -218,7 +224,9 @@ async fn non_stream_responses(
                 // Hook: TextDelta
                 state
                     .hooks
-                    .fire(HookEvent::TextDelta { delta: delta.clone() })
+                    .fire(HookEvent::TextDelta {
+                        delta: delta.clone(),
+                    })
                     .await;
                 content_parts.push(delta);
             }
@@ -230,7 +238,9 @@ async fn non_stream_responses(
                 // Hook: ResponseComplete
                 state
                     .hooks
-                    .fire(HookEvent::ResponseComplete { finish_reason: finish_reason.clone() })
+                    .fire(HookEvent::ResponseComplete {
+                        finish_reason: finish_reason.clone(),
+                    })
                     .await;
                 if let Some(usage) = response.usage {
                     input_tokens = usage.input_tokens;
@@ -239,6 +249,18 @@ async fn non_stream_responses(
             }
             _ => {}
         }
+    }
+
+    // Forensic log: nothing recognizable was parsed out of a non-empty upstream
+    // body. This produces an outwardly well-formed but empty-content response
+    // to the caller, which is otherwise silent and hard to distinguish from a
+    // legitimate empty completion after the fact.
+    if response_id.is_empty() && content_parts.is_empty() && call_order.is_empty() && !raw.trim().is_empty() {
+        tracing::warn!(
+            raw_len = raw.len(),
+            raw_snippet = %raw.chars().take(1000).collect::<String>(),
+            "non_stream_responses: no recognized SSE events parsed from upstream body"
+        );
     }
 
     // Check if the request had tool results — fire ToolResultSubmitted for each tool message.
@@ -343,7 +365,10 @@ async fn stream_responses(
                 message: body.clone(),
             })
             .await;
-        return Err(ProxyError::Upstream { status: status.as_u16(), body });
+        return Err(ProxyError::Upstream {
+            status: status.as_u16(),
+            body,
+        });
     }
 
     let byte_stream = resp.bytes_stream();
@@ -376,75 +401,97 @@ async fn stream_responses(
         .flatten();
 
     let sse_stream = line_stream.filter_map({
+        let id = id.clone();
+        let model = model.clone();
+        // We need mutable state for call_index_map inside filter_map.
+        // Use a Mutex-wrapped map to share across the async closure.
+        let call_index_map = std::sync::Arc::new(std::sync::Mutex::new(HashMap::<u32, u32>::new()));
+        // Pending call_ids for streaming hook purposes (call_id by output_index).
+        let pending_call_ids =
+            std::sync::Arc::new(std::sync::Mutex::new(HashMap::<u32, String>::new()));
+        move |line| {
             let id = id.clone();
             let model = model.clone();
-            // We need mutable state for call_index_map inside filter_map.
-            // Use a Mutex-wrapped map to share across the async closure.
-            let call_index_map = std::sync::Arc::new(std::sync::Mutex::new(
-                HashMap::<u32, u32>::new(),
-            ));
-            // Pending call_ids for streaming hook purposes (call_id by output_index).
-            let pending_call_ids = std::sync::Arc::new(std::sync::Mutex::new(
-                HashMap::<u32, String>::new(),
-            ));
-            move |line| {
-                let id = id.clone();
-                let model = model.clone();
-                let call_index_map = call_index_map.clone();
-                let pending_call_ids = pending_call_ids.clone();
-                let hooks = hooks.clone();
-                async move {
-                    if let Some(data) = line.strip_prefix("data: ") {
-                        if data == "[DONE]" {
-                            return None;
-                        }
-                        match serde_json::from_str::<ResponseStreamEvent>(data) {
-                            Ok(event) => {
-                                // Fire hooks based on the event type before building SSE.
-                                match &event {
-                                    ResponseStreamEvent::ResponseOutputItemAdded { output_index, item } => {
-                                        if item.item_type.as_deref() == Some("function_call") {
-                                            let call_id = item.call_id.clone().unwrap_or_default();
-                                            let name = item.name.clone().unwrap_or_default();
-                                            pending_call_ids.lock().unwrap().insert(*output_index, call_id.clone());
-                                            hooks.fire(HookEvent::ToolCallStart { name, call_id }).await;
-                                        }
-                                    }
-                                    ResponseStreamEvent::ResponseFunctionCallArgumentsDelta { output_index, delta } => {
-                                        let call_id = pending_call_ids
+            let call_index_map = call_index_map.clone();
+            let pending_call_ids = pending_call_ids.clone();
+            let hooks = hooks.clone();
+            async move {
+                if let Some(data) = line.strip_prefix("data: ") {
+                    if data == "[DONE]" {
+                        return None;
+                    }
+                    match serde_json::from_str::<ResponseStreamEvent>(data) {
+                        Ok(event) => {
+                            // Fire hooks based on the event type before building SSE.
+                            match &event {
+                                ResponseStreamEvent::ResponseOutputItemAdded {
+                                    output_index,
+                                    item,
+                                } => {
+                                    if item.item_type.as_deref() == Some("function_call") {
+                                        let call_id = item.call_id.clone().unwrap_or_default();
+                                        let name = item.name.clone().unwrap_or_default();
+                                        pending_call_ids
                                             .lock()
                                             .unwrap()
-                                            .get(output_index)
-                                            .cloned()
-                                            .unwrap_or_default();
-                                        hooks.fire(HookEvent::ToolCallArgs { call_id, args_delta: delta.clone() }).await;
+                                            .insert(*output_index, call_id.clone());
+                                        hooks
+                                            .fire(HookEvent::ToolCallStart { name, call_id })
+                                            .await;
                                     }
-                                    ResponseStreamEvent::ResponseOutputTextDelta { delta, .. } => {
-                                        hooks.fire(HookEvent::TextDelta { delta: delta.clone() }).await;
-                                    }
-                                    ResponseStreamEvent::ResponseDone { response } => {
-                                        let finish = codex::map_finish_reason(response.status.as_deref());
-                                        hooks.fire(HookEvent::ResponseComplete { finish_reason: finish }).await;
-                                    }
-                                    _ => {}
                                 }
-                                build_sse_event(&id, created, &model, event, &call_index_map)
+                                ResponseStreamEvent::ResponseFunctionCallArgumentsDelta {
+                                    output_index,
+                                    delta,
+                                } => {
+                                    let call_id = pending_call_ids
+                                        .lock()
+                                        .unwrap()
+                                        .get(output_index)
+                                        .cloned()
+                                        .unwrap_or_default();
+                                    hooks
+                                        .fire(HookEvent::ToolCallArgs {
+                                            call_id,
+                                            args_delta: delta.clone(),
+                                        })
+                                        .await;
+                                }
+                                ResponseStreamEvent::ResponseOutputTextDelta { delta, .. } => {
+                                    hooks
+                                        .fire(HookEvent::TextDelta {
+                                            delta: delta.clone(),
+                                        })
+                                        .await;
+                                }
+                                ResponseStreamEvent::ResponseDone { response } => {
+                                    let finish =
+                                        codex::map_finish_reason(response.status.as_deref());
+                                    hooks
+                                        .fire(HookEvent::ResponseComplete {
+                                            finish_reason: finish,
+                                        })
+                                        .await;
+                                }
+                                _ => {}
                             }
-                            Err(e) => {
-                                tracing::trace!(
-                                    error = %e,
-                                    data = data,
-                                    "unrecognized Responses SSE event"
-                                );
-                                None
-                            }
+                            build_sse_event(&id, created, &model, event, &call_index_map)
                         }
-                    } else {
-                        None
+                        Err(e) => {
+                            tracing::trace!(
+                                error = %e,
+                                data = data,
+                                "unrecognized Responses SSE event"
+                            );
+                            None
+                        }
                     }
+                } else {
+                    None
                 }
             }
-        });
+        }
+    });
 
     Ok(Sse::new(sse_stream).into_response())
 }
@@ -499,10 +546,20 @@ async fn non_stream_chat_completions(
                 message: body.clone(),
             })
             .await;
-        return Err(ProxyError::Upstream { status: status.as_u16(), body });
+        return Err(ProxyError::Upstream {
+            status: status.as_u16(),
+            body,
+        });
     }
 
     let body: serde_json::Value = resp.json().await?;
+
+    if !body["choices"].is_array() {
+        tracing::warn!(
+            raw_body = %body.to_string().chars().take(1000).collect::<String>(),
+            "non_stream_chat_completions: upstream response missing choices array"
+        );
+    }
 
     let content = body["choices"][0]["message"]["content"]
         .as_str()
@@ -518,11 +575,14 @@ async fn non_stream_chat_completions(
     // Hook: ResponseComplete
     state
         .hooks
-        .fire(HookEvent::ResponseComplete { finish_reason: finish_reason.clone() })
+        .fire(HookEvent::ResponseComplete {
+            finish_reason: finish_reason.clone(),
+        })
         .await;
 
     // Extract tool_calls from the Chat Completions response if present.
-    let tool_calls = parse_chat_completions_tool_calls(&body["choices"][0]["message"]["tool_calls"]);
+    let tool_calls =
+        parse_chat_completions_tool_calls(&body["choices"][0]["message"]["tool_calls"]);
 
     let openai_resp = ChatCompletionResponse {
         id: response_id,
@@ -531,7 +591,11 @@ async fn non_stream_chat_completions(
         model: model_id,
         choices: vec![Choice {
             index: 0,
-            message: ResponseMessage { role: "assistant", content, tool_calls },
+            message: ResponseMessage {
+                role: "assistant",
+                content,
+                tool_calls,
+            },
             finish_reason,
         }],
         usage: Usage {
@@ -593,7 +657,10 @@ async fn stream_chat_completions(
                 message: body.clone(),
             })
             .await;
-        return Err(ProxyError::Upstream { status: status.as_u16(), body });
+        return Err(ProxyError::Upstream {
+            status: status.as_u16(),
+            body,
+        });
     }
 
     // Chat Completions streams standard SSE with OpenAI chunk format — pass through verbatim.
@@ -652,7 +719,10 @@ fn parse_chat_completions_tool_calls(value: &serde_json::Value) -> Option<Vec<To
             let id = tc["id"].as_str()?.to_string();
             let call_type = tc["type"].as_str().unwrap_or("function").to_string();
             let name = tc["function"]["name"].as_str()?.to_string();
-            let arguments = tc["function"]["arguments"].as_str().unwrap_or("{}").to_string();
+            let arguments = tc["function"]["arguments"]
+                .as_str()
+                .unwrap_or("{}")
+                .to_string();
             Some(ToolCall {
                 id,
                 call_type,
@@ -678,7 +748,11 @@ fn build_sse_event(
             model: model.to_string(),
             choices: vec![ChunkChoice {
                 index: 0,
-                delta: Delta { role: Some("assistant"), content: None, tool_calls: None },
+                delta: Delta {
+                    role: Some("assistant"),
+                    content: None,
+                    tool_calls: None,
+                },
                 finish_reason: None,
             }],
         }),
@@ -723,7 +797,10 @@ fn build_sse_event(
             }
         }
 
-        ResponseStreamEvent::ResponseFunctionCallArgumentsDelta { output_index, delta } => {
+        ResponseStreamEvent::ResponseFunctionCallArgumentsDelta {
+            output_index,
+            delta,
+        } => {
             let tc_index = {
                 let map = call_index_map.lock().unwrap();
                 *map.get(&output_index)?
@@ -770,7 +847,11 @@ fn build_sse_event(
                     model: model.to_string(),
                     choices: vec![ChunkChoice {
                         index: 0,
-                        delta: Delta { role: None, content: None, tool_calls: None },
+                        delta: Delta {
+                            role: None,
+                            content: None,
+                            tool_calls: None,
+                        },
                         finish_reason: Some("tool_calls".to_string()),
                     }],
                 };
@@ -787,7 +868,11 @@ fn build_sse_event(
             model: model.to_string(),
             choices: vec![ChunkChoice {
                 index: 0,
-                delta: Delta { role: None, content: Some(delta), tool_calls: None },
+                delta: Delta {
+                    role: None,
+                    content: Some(delta),
+                    tool_calls: None,
+                },
                 finish_reason: None,
             }],
         }),
@@ -810,7 +895,11 @@ fn build_sse_event(
                 model: model.to_string(),
                 choices: vec![ChunkChoice {
                     index: 0,
-                    delta: Delta { role: None, content: None, tool_calls: None },
+                    delta: Delta {
+                        role: None,
+                        content: None,
+                        tool_calls: None,
+                    },
                     finish_reason: Some(finish),
                 }],
             };
@@ -854,7 +943,9 @@ fn inject_skills(mut req: ChatCompletionRequest, state: &AppState) -> ChatComple
             .collect::<Vec<_>>()
             .join(" ");
 
-        let selected = state.skills.select(&user_text, max, state.backend_profile.name());
+        let selected = state
+            .skills
+            .select(&user_text, max, state.backend_profile.name());
         if !selected.is_empty() {
             let skill_block = selected
                 .iter()
@@ -895,7 +986,9 @@ fn inject_skills(mut req: ChatCompletionRequest, state: &AppState) -> ChatComple
             .collect();
 
         if !new_tools.is_empty() {
-            let tools_arr = req.tools.get_or_insert_with(|| serde_json::Value::Array(Vec::new()));
+            let tools_arr = req
+                .tools
+                .get_or_insert_with(|| serde_json::Value::Array(Vec::new()));
             if let Some(arr) = tools_arr.as_array_mut() {
                 arr.extend(new_tools);
             }
@@ -908,19 +1001,22 @@ fn inject_skills(mut req: ChatCompletionRequest, state: &AppState) -> ChatComple
 /// Inject relevant memory documents as a system context message (RAG injection).
 /// Only active when the `memory` feature is compiled in and a memory store is present.
 async fn inject_memory(
-    #[cfg_attr(not(feature = "memory"), allow(unused_mut))]
-    mut req: ChatCompletionRequest,
-    #[cfg_attr(not(feature = "memory"), allow(unused_variables))]
-    state: &AppState,
-    #[cfg_attr(not(feature = "memory"), allow(unused_variables))]
-    scope: &str,
+    #[cfg_attr(not(feature = "memory"), allow(unused_mut))] mut req: ChatCompletionRequest,
+    #[cfg_attr(not(feature = "memory"), allow(unused_variables))] state: &AppState,
+    #[cfg_attr(not(feature = "memory"), allow(unused_variables))] scope: &str,
 ) -> ChatCompletionRequest {
     #[cfg(feature = "memory")]
     {
-        let Some(ref store) = state.memory_store else { return req };
-        if !store.is_enabled() { return req; }
+        let Some(ref store) = state.memory_store else {
+            return req;
+        };
+        if !store.is_enabled() {
+            return req;
+        }
 
-        let user_text: String = req.messages.iter()
+        let user_text: String = req
+            .messages
+            .iter()
             .filter(|m| m.role == "user")
             .map(|m| match &m.content {
                 MessageContent::Text(t) => t.as_str(),
@@ -929,17 +1025,22 @@ async fn inject_memory(
             .collect::<Vec<_>>()
             .join(" ");
 
-        if user_text.is_empty() { return req; }
+        if user_text.is_empty() {
+            return req;
+        }
 
         let results = match tokio::time::timeout(
             std::time::Duration::from_millis(500),
             store.search(&user_text, scope, 3),
-        ).await {
+        )
+        .await
+        {
             Ok(Ok(docs)) if !docs.is_empty() => docs,
             _ => return req,
         };
 
-        let context_block = results.iter()
+        let context_block = results
+            .iter()
             .map(|d| format!("- {}", d.text))
             .collect::<Vec<_>>()
             .join("\n");

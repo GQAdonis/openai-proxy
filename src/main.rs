@@ -5,15 +5,14 @@ use tower_http::trace::TraceLayer;
 use tracing_subscriber::{EnvFilter, fmt};
 
 use openai_proxy_lib::{
-    AppState, build_app,
-    acp,
+    AppState, acp, build_app,
     cli::{
-        Command, SetupAction, SkillsAction, ConfigAction,
-        setup::{ServeArgs, setup_opencode, setup_mcp, setup_config},
-        skills::{skills_list, skills_validate, skills_test},
-        config::{config_show, config_path},
+        Command, ConfigAction, SetupAction, SkillsAction,
+        config::{config_path, config_show},
+        setup::{ServeArgs, setup_config, setup_mcp, setup_opencode},
+        skills::{skills_list, skills_test, skills_validate},
     },
-    codex::{BackendProfile, CodexAuth, CODEX_BACKEND_URL, OPENAI_CHAT_URL, OPENAI_RESPONSES_URL},
+    codex::{BackendProfile, CODEX_BACKEND_URL, CodexAuth, OPENAI_CHAT_URL, OPENAI_RESPONSES_URL},
     config::{ProxyConfig, expand_tilde},
     hooks::{NullHooks, WebhookHooks},
     mcp,
@@ -105,7 +104,11 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
                 path = %auth_path.display(),
                 "auth.json not found ({e}); falling back to OPENAI_API_KEY"
             );
-            CodexAuth { access_token: None, account_id: None, api_key: Some(key) }
+            CodexAuth {
+                access_token: None,
+                account_id: None,
+                api_key: Some(key),
+            }
         } else {
             panic!(
                 "Cannot load {}: {e}\nRun `codex login` first, or set OPENAI_API_KEY.",
@@ -126,9 +129,15 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
     } else if auth.access_token.is_some() {
         (CODEX_BACKEND_URL.to_string(), BackendProfile::ChatGptCodex)
     } else if wire_api.eq_ignore_ascii_case("chat") {
-        (OPENAI_CHAT_URL.to_string(), BackendProfile::OpenAiChatCompletions)
+        (
+            OPENAI_CHAT_URL.to_string(),
+            BackendProfile::OpenAiChatCompletions,
+        )
     } else {
-        (OPENAI_RESPONSES_URL.to_string(), BackendProfile::OpenAiResponses)
+        (
+            OPENAI_RESPONSES_URL.to_string(),
+            BackendProfile::OpenAiResponses,
+        )
     };
 
     tracing::info!(backend = %backend_url, profile = %backend_profile.name(), "backend selected");
@@ -139,18 +148,22 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
     }
 
     let hooks_config = serve.hooks_config.or(cfg.hooks.config_path.clone());
-    let hooks: Arc<dyn openai_proxy_lib::hooks::ProxyHooks + Send + Sync> =
-        if let Some(ref path) = hooks_config {
-            match WebhookHooks::from_config_file(path) {
-                Ok(wh) => { tracing::info!(path = %path, "webhook hooks loaded"); Arc::new(wh) }
-                Err(e) => {
-                    tracing::warn!(path = %path, error = %e, "failed to load hooks config; using NullHooks");
-                    Arc::new(NullHooks)
-                }
+    let hooks: Arc<dyn openai_proxy_lib::hooks::ProxyHooks + Send + Sync> = if let Some(ref path) =
+        hooks_config
+    {
+        match WebhookHooks::from_config_file(path) {
+            Ok(wh) => {
+                tracing::info!(path = %path, "webhook hooks loaded");
+                Arc::new(wh)
             }
-        } else {
-            Arc::new(NullHooks)
-        };
+            Err(e) => {
+                tracing::warn!(path = %path, error = %e, "failed to load hooks config; using NullHooks");
+                Arc::new(NullHooks)
+            }
+        }
+    } else {
+        Arc::new(NullHooks)
+    };
 
     let bind_addr = format!("{host}:{port}");
 
@@ -179,6 +192,11 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
 
     let http_client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(300))
+        // Keep pooled connections to the upstream provider short-lived so a
+        // connection half-closed by the peer (or an intermediate proxy) is
+        // less likely to be reused after it's gone stale.
+        .pool_idle_timeout(std::time::Duration::from_secs(50))
+        .tcp_keepalive(std::time::Duration::from_secs(30))
         .build()?;
 
     // Initialize memory store when feature is compiled in and enabled in config.
@@ -195,7 +213,9 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
             http_client.clone(),
             cfg.memory.embedding_model.clone(),
             api_key,
-        ).await {
+        )
+        .await
+        {
             Ok(store) => {
                 tracing::info!(path = %db_path.display(), "memory store opened");
                 let backend: openai_proxy_lib::memory::DynMemory = store.clone();
@@ -251,7 +271,9 @@ async fn run_server(serve: ServeArgs, cfg: ProxyConfig) -> anyhow::Result<()> {
 
     let listener = tokio::net::TcpListener::bind(&bind_addr).await?;
     tracing::info!("OpenAI proxy listening on http://{bind_addr}");
-    tracing::info!("endpoints: POST /v1/chat/completions  GET /v1/models  GET /health  POST /ag-ui/stream");
+    tracing::info!(
+        "endpoints: POST /v1/chat/completions  GET /v1/models  GET /health  POST /ag-ui/stream"
+    );
     tracing::info!("point opencode at: http://{bind_addr}/v1");
 
     axum::serve(listener, app).await?;
