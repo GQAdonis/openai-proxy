@@ -30,10 +30,17 @@ fn parse_skill_file(raw: &str) -> Option<SkillManifest> {
     let rest = raw.strip_prefix("---")?;
     let end = rest.find("\n---")?;
     let yaml = &rest[..end];
-    let body = rest[end..].strip_prefix("\n---").unwrap_or("").trim_start_matches('\n').to_string();
+    let body = rest[end..]
+        .strip_prefix("\n---")
+        .unwrap_or("")
+        .trim_start_matches('\n')
+        .to_string();
 
     let mut manifest: SkillManifest = serde_yml::from_str(yaml).ok()?;
-    manifest.content = format!("# {}\n\n{}\n\n{}", manifest.name, manifest.description, body);
+    manifest.content = format!(
+        "# {}\n\n{}\n\n{}",
+        manifest.name, manifest.description, body
+    );
     Some(manifest)
 }
 
@@ -160,9 +167,11 @@ impl SkillIndex {
         }
 
         let message_tokens = tokenize(message);
-        let is_codex_profile = backend_profile_name.contains("ChatGPT") || backend_profile_name.contains("ChatGptCodex");
+        let is_codex_profile = backend_profile_name.contains("ChatGPT")
+            || backend_profile_name.contains("ChatGptCodex");
 
-        let mut scored: Vec<(f32, &SkillManifest)> = self.manifests
+        let mut scored: Vec<(f32, &SkillManifest)> = self
+            .manifests
             .iter()
             .map(|skill| {
                 let keywords: Vec<String> = skill
@@ -177,19 +186,26 @@ impl SkillIndex {
                 } else {
                     // IDF-weighted score: sum of IDF weights for matched keywords /
                     // sum of IDF weights for all skill keywords.
-                    let total_idf: f32 = keywords.iter()
+                    let total_idf: f32 = keywords
+                        .iter()
                         .map(|kw| self.idf.get(kw).copied().unwrap_or(0.0))
                         .sum();
 
-                    let matched_idf: f32 = keywords.iter()
+                    let matched_idf: f32 = keywords
+                        .iter()
                         .filter(|kw| message_tokens.contains(*kw))
                         .map(|kw| self.idf.get(kw).copied().unwrap_or(0.0))
                         .sum();
 
-                    let idf = if total_idf > 0.0 { matched_idf / total_idf } else { 0.0 };
+                    let idf = if total_idf > 0.0 {
+                        matched_idf / total_idf
+                    } else {
+                        0.0
+                    };
 
                     // Raw keyword overlap: matched count / total keyword count.
-                    let matched_count = keywords.iter()
+                    let matched_count = keywords
+                        .iter()
                         .filter(|kw| message_tokens.contains(*kw))
                         .count();
                     let raw = matched_count as f32 / keywords.len() as f32;
@@ -201,12 +217,17 @@ impl SkillIndex {
                 let keyword_score = 0.6 * idf_score + 0.4 * raw_score;
 
                 // Domain boost: coding/rust domains get a bump; extra on codex backend.
-                let domain_boost = match skill.domain.as_deref().map(|d| d.to_lowercase()).as_deref() {
-                    Some("coding") | Some("rust") | Some("programming") => {
-                        if is_codex_profile { 0.3 } else { 0.1 }
-                    }
-                    _ => 0.0,
-                };
+                let domain_boost =
+                    match skill.domain.as_deref().map(|d| d.to_lowercase()).as_deref() {
+                        Some("coding") | Some("rust") | Some("programming") => {
+                            if is_codex_profile {
+                                0.3
+                            } else {
+                                0.1
+                            }
+                        }
+                        _ => 0.0,
+                    };
 
                 (keyword_score + domain_boost, skill)
             })
@@ -220,7 +241,11 @@ impl SkillIndex {
         let unique: Vec<&SkillManifest> = scored
             .iter()
             .filter_map(|(_, skill)| {
-                if seen.insert(skill.name.clone()) { Some(*skill) } else { None }
+                if seen.insert(skill.name.clone()) {
+                    Some(*skill)
+                } else {
+                    None
+                }
             })
             .collect();
 
@@ -247,10 +272,20 @@ mod tests {
     use std::io::Write;
     use tempfile::TempDir;
 
-    fn make_skill_file(dir: &Path, name: &str, description: &str, keywords: &[&str], domain: Option<&str>) {
+    fn make_skill_file(
+        dir: &Path,
+        name: &str,
+        description: &str,
+        keywords: &[&str],
+        domain: Option<&str>,
+    ) {
         let skill_dir = dir.join(name);
         std::fs::create_dir_all(&skill_dir).unwrap();
-        let kws = keywords.iter().map(|k| format!("    - {k}")).collect::<Vec<_>>().join("\n");
+        let kws = keywords
+            .iter()
+            .map(|k| format!("    - {k}"))
+            .collect::<Vec<_>>()
+            .join("\n");
         let domain_line = domain.map(|d| format!("domain: {d}\n")).unwrap_or_default();
         let content = format!(
             "---\nname: {name}\ndescription: {description}\n{domain_line}triggers:\n  keywords:\n{kws}\n---\n\nSkill body here.\n"
@@ -279,8 +314,20 @@ mod tests {
     #[test]
     fn loads_skills_from_directory() {
         let tmp = TempDir::new().unwrap();
-        make_skill_file(tmp.path(), "rust-helper", "Helps with Rust", &["rust", "cargo"], Some("rust"));
-        make_skill_file(tmp.path(), "python-helper", "Helps with Python", &["python", "pip"], None);
+        make_skill_file(
+            tmp.path(),
+            "rust-helper",
+            "Helps with Rust",
+            &["rust", "cargo"],
+            Some("rust"),
+        );
+        make_skill_file(
+            tmp.path(),
+            "python-helper",
+            "Helps with Python",
+            &["python", "pip"],
+            None,
+        );
         let idx = load_skills(&[tmp.path().to_path_buf()]);
         assert_eq!(idx.len(), 2);
     }
@@ -288,8 +335,20 @@ mod tests {
     #[test]
     fn select_keyword_match() {
         let tmp = TempDir::new().unwrap();
-        make_skill_file(tmp.path(), "rust-helper", "Helps with Rust", &["rust", "cargo"], None);
-        make_skill_file(tmp.path(), "python-helper", "Helps with Python", &["python", "pip"], None);
+        make_skill_file(
+            tmp.path(),
+            "rust-helper",
+            "Helps with Rust",
+            &["rust", "cargo"],
+            None,
+        );
+        make_skill_file(
+            tmp.path(),
+            "python-helper",
+            "Helps with Python",
+            &["python", "pip"],
+            None,
+        );
         let idx = load_skills(&[tmp.path().to_path_buf()]);
 
         let selected = idx.select("I need help with rust cargo build", 3, "OpenAiResponses");
@@ -301,7 +360,13 @@ mod tests {
     fn select_cap_respected() {
         let tmp = TempDir::new().unwrap();
         for i in 0..5 {
-            make_skill_file(tmp.path(), &format!("skill-{i}"), &format!("Skill {i}"), &["foo"], None);
+            make_skill_file(
+                tmp.path(),
+                &format!("skill-{i}"),
+                &format!("Skill {i}"),
+                &["foo"],
+                None,
+            );
         }
         let idx = load_skills(&[tmp.path().to_path_buf()]);
         let selected = idx.select("foo bar baz", 2, "OpenAiResponses");

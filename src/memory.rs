@@ -14,7 +14,9 @@ pub trait MemoryBackend: Send + Sync {
 pub struct NoopMemoryStore;
 
 impl MemoryBackend for NoopMemoryStore {
-    fn is_enabled(&self) -> bool { false }
+    fn is_enabled(&self) -> bool {
+        false
+    }
 }
 
 pub type DynMemory = Arc<dyn MemoryBackend + Send + Sync>;
@@ -71,7 +73,9 @@ mod memory_impl {
     }
 
     impl MemoryBackend for MemoryStore {
-        fn is_enabled(&self) -> bool { true }
+        fn is_enabled(&self) -> bool {
+            true
+        }
     }
 
     impl MemoryStore {
@@ -87,7 +91,12 @@ mod memory_impl {
             let db = Surreal::new::<RocksDb>(path.to_string_lossy().as_ref()).await?;
             db.use_ns("oproxy").use_db("memory").await?;
             Self::migrate(&db).await?;
-            Ok(Arc::new(Self { db, http_client, embedding_model, api_key }))
+            Ok(Arc::new(Self {
+                db,
+                http_client,
+                embedding_model,
+                api_key,
+            }))
         }
 
         async fn migrate(db: &Surreal<Db>) -> anyhow::Result<()> {
@@ -109,9 +118,12 @@ mod memory_impl {
         /// Embed text via OpenAI API with a 500ms timeout.
         /// Returns empty vec on failure — callers degrade gracefully.
         pub async fn embed_text(&self, text: &str) -> Vec<f32> {
-            let Some(ref api_key) = self.api_key else { return Vec::new() };
+            let Some(ref api_key) = self.api_key else {
+                return Vec::new();
+            };
             let body = serde_json::json!({ "model": self.embedding_model, "input": text });
-            let fut = self.http_client
+            let fut = self
+                .http_client
                 .post("https://api.openai.com/v1/embeddings")
                 .bearer_auth(api_key)
                 .json(&body)
@@ -119,18 +131,31 @@ mod memory_impl {
 
             let resp = match timeout(Duration::from_millis(500), fut).await {
                 Ok(Ok(r)) => r,
-                Ok(Err(e)) => { tracing::warn!(error = %e, "embedding request failed"); return Vec::new(); }
-                Err(_) => { tracing::warn!("embedding request timed out"); return Vec::new(); }
+                Ok(Err(e)) => {
+                    tracing::warn!(error = %e, "embedding request failed");
+                    return Vec::new();
+                }
+                Err(_) => {
+                    tracing::warn!("embedding request timed out");
+                    return Vec::new();
+                }
             };
 
             let json: serde_json::Value = match resp.json().await {
                 Ok(v) => v,
-                Err(e) => { tracing::warn!(error = %e, "embedding response parse failed"); return Vec::new(); }
+                Err(e) => {
+                    tracing::warn!(error = %e, "embedding response parse failed");
+                    return Vec::new();
+                }
             };
 
             json["data"][0]["embedding"]
                 .as_array()
-                .map(|arr| arr.iter().filter_map(|v| v.as_f64().map(|f| f as f32)).collect())
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|v| v.as_f64().map(|f| f as f32))
+                        .collect()
+                })
                 .unwrap_or_default()
         }
 
@@ -187,14 +212,23 @@ mod memory_impl {
             let embedding = self.embed_text(query).await;
             if embedding.is_empty() {
                 let docs = self.list_documents(scope).await?;
-                return Ok(docs.into_iter().take(limit).map(|d| SearchResult {
-                    id: d.id, scope: d.scope, text: d.text,
-                    metadata: d.metadata, created_at: d.created_at, distance: None,
-                }).collect());
+                return Ok(docs
+                    .into_iter()
+                    .take(limit)
+                    .map(|d| SearchResult {
+                        id: d.id,
+                        scope: d.scope,
+                        text: d.text,
+                        metadata: d.metadata,
+                        created_at: d.created_at,
+                        distance: None,
+                    })
+                    .collect());
             }
 
             let scope_owned = scope.to_string();
-            let mut resp = self.db
+            let mut resp = self
+                .db
                 .query(format!(
                     "SELECT id, scope, text, metadata, \
                      time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at, \
@@ -218,10 +252,16 @@ mod memory_impl {
             limit: usize,
         ) -> anyhow::Result<Vec<DocumentRecord>> {
             let results = self.search_documents(query, scope, limit).await?;
-            Ok(results.into_iter().map(|r| DocumentRecord {
-                id: r.id, scope: r.scope, text: r.text,
-                metadata: r.metadata, created_at: r.created_at,
-            }).collect())
+            Ok(results
+                .into_iter()
+                .map(|r| DocumentRecord {
+                    id: r.id,
+                    scope: r.scope,
+                    text: r.text,
+                    metadata: r.metadata,
+                    created_at: r.created_at,
+                })
+                .collect())
         }
     }
 }
@@ -237,8 +277,8 @@ pub mod handlers {
     };
     use serde::Deserialize;
 
-    use crate::AppState;
     use super::memory_impl::{DocumentRecord, SearchResult};
+    use crate::AppState;
 
     #[derive(Deserialize)]
     pub struct CreateDocumentBody {
@@ -261,15 +301,22 @@ pub mod handlers {
         pub limit: usize,
     }
 
-    fn default_limit() -> usize { 5 }
+    fn default_limit() -> usize {
+        5
+    }
 
     pub async fn create_document(
         State(state): State<AppState>,
         Json(body): Json<CreateDocumentBody>,
     ) -> Result<Json<serde_json::Value>, (StatusCode, String)> {
-        let store = state.memory_store
-            .ok_or_else(|| (StatusCode::SERVICE_UNAVAILABLE, "memory not enabled".to_string()))?;
-        let id = store.store_document(&body.scope, &body.text, body.metadata)
+        let store = state.memory_store.ok_or_else(|| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "memory not enabled".to_string(),
+            )
+        })?;
+        let id = store
+            .store_document(&body.scope, &body.text, body.metadata)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
         Ok(Json(serde_json::json!({ "id": id })))
@@ -279,9 +326,14 @@ pub mod handlers {
         State(state): State<AppState>,
         Path(id): Path<String>,
     ) -> Result<StatusCode, (StatusCode, String)> {
-        let store = state.memory_store
-            .ok_or_else(|| (StatusCode::SERVICE_UNAVAILABLE, "memory not enabled".to_string()))?;
-        store.delete_document(&id)
+        let store = state.memory_store.ok_or_else(|| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "memory not enabled".to_string(),
+            )
+        })?;
+        store
+            .delete_document(&id)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
         Ok(StatusCode::NO_CONTENT)
@@ -291,10 +343,15 @@ pub mod handlers {
         State(state): State<AppState>,
         Query(params): Query<ScopeQuery>,
     ) -> Result<Json<Vec<DocumentRecord>>, (StatusCode, String)> {
-        let store = state.memory_store
-            .ok_or_else(|| (StatusCode::SERVICE_UNAVAILABLE, "memory not enabled".to_string()))?;
+        let store = state.memory_store.ok_or_else(|| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "memory not enabled".to_string(),
+            )
+        })?;
         let scope = params.scope.as_deref().unwrap_or("session");
-        let docs = store.list_documents(scope)
+        let docs = store
+            .list_documents(scope)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
         Ok(Json(docs))
@@ -304,10 +361,15 @@ pub mod handlers {
         State(state): State<AppState>,
         Query(params): Query<SearchQuery>,
     ) -> Result<Json<Vec<SearchResult>>, (StatusCode, String)> {
-        let store = state.memory_store
-            .ok_or_else(|| (StatusCode::SERVICE_UNAVAILABLE, "memory not enabled".to_string()))?;
+        let store = state.memory_store.ok_or_else(|| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                "memory not enabled".to_string(),
+            )
+        })?;
         let scope = params.scope.as_deref().unwrap_or("session");
-        let results = store.search_documents(&params.q, scope, params.limit)
+        let results = store
+            .search_documents(&params.q, scope, params.limit)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
         Ok(Json(results))

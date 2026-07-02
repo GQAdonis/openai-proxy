@@ -21,7 +21,7 @@ MCP (Model Context Protocol) has become the dominant agentic integration standar
 - Native support in: Claude Code, Codex CLI, Gemini CLI, Cursor, VS Code Copilot, Zed
 - Streamable HTTP is the recommended transport for 2026 (SSE-based transport deprecated in the spec)
 
-Currently, `openai-proxy` is only accessible as an HTTP proxy — clients must be reconfigured to point at `localhost:8080`. An MCP server wrapping the same proxy logic would let any MCP-capable tool call Codex completions directly as a **tool call**, without any base URL reconfiguration.
+Currently, `openai-proxy` is only accessible as an HTTP proxy — clients must be reconfigured to point at `localhost:8181`. An MCP server wrapping the same proxy logic would let any MCP-capable tool call Codex completions directly as a **tool call**, without any base URL reconfiguration.
 
 ### What the MCP server would expose
 
@@ -78,7 +78,7 @@ compatibility:
 
 Start the proxy with: `cargo run --release` or `./openai-proxy`
 Configure via `~/.codex/auth.json` (written by `codex login`).
-Proxy listens on http://localhost:8080/v1 — point any OpenAI-compatible client here.
+Proxy listens on http://localhost:8181/v1 — point any OpenAI-compatible client here.
 ```
 
 #### Skill 2: `openai-proxy/use-via-mcp`

@@ -6,7 +6,7 @@ export const PROVIDER_ID = "codex"
  * expects — it appends `/chat/completions` automatically.
  */
 export const PROXY_BASE_URL =
-  process.env.CODEX_PROXY_URL ?? "http://localhost:8080/v1"
+  process.env.CODEX_PROXY_URL ?? "http://localhost:8181/v1"
 
 /** Shape of a single model entry used by the plugin and config hook. */
 export interface ProxyModel {

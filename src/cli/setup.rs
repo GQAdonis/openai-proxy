@@ -54,7 +54,7 @@ pub struct SetupOpencodeArgs {
     pub global: bool,
 
     /// Proxy port to register in opencode config
-    #[arg(long, default_value_t = 8080)]
+    #[arg(long, default_value_t = 8181)]
     pub port: u16,
 
     /// Print what would be written without writing
@@ -106,7 +106,11 @@ pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
         )
     };
 
-    let default_model = if is_chatgpt_sub { "openai-proxy/gpt-5.5" } else { "openai-proxy/gpt-5.5" };
+    let default_model = if is_chatgpt_sub {
+        "openai-proxy/gpt-5.5"
+    } else {
+        "openai-proxy/gpt-5.5"
+    };
 
     let config_dir = if args.global {
         dirs::config_dir()
@@ -153,7 +157,10 @@ pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
     if !args.force {
         if let Some(providers) = existing.get("provider") {
             if providers.get("openai-proxy").is_some() {
-                println!("openai-proxy provider already configured in {}. Use --force to overwrite.", config_path.display());
+                println!(
+                    "openai-proxy provider already configured in {}. Use --force to overwrite.",
+                    config_path.display()
+                );
                 return;
             }
         }
@@ -165,11 +172,17 @@ pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
         .unwrap()
         .entry("provider")
         .or_insert(serde_json::json!({}));
-    providers.as_object_mut().unwrap().insert("openai-proxy".to_string(), provider_entry);
+    providers
+        .as_object_mut()
+        .unwrap()
+        .insert("openai-proxy".to_string(), provider_entry);
 
     // Set default model if not already set.
     if existing.get("model").is_none() {
-        existing.as_object_mut().unwrap().insert("model".to_string(), serde_json::Value::String(default_model.to_string()));
+        existing.as_object_mut().unwrap().insert(
+            "model".to_string(),
+            serde_json::Value::String(default_model.to_string()),
+        );
     }
 
     match serde_json::to_string_pretty(&existing) {
@@ -178,9 +191,15 @@ pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
                 println!("opencode config written to {}", config_path.display());
                 println!("Point opencode at this proxy: model = {default_model}");
             }
-            Err(e) => { eprintln!("error writing {}: {e}", config_path.display()); std::process::exit(1); }
+            Err(e) => {
+                eprintln!("error writing {}: {e}", config_path.display());
+                std::process::exit(1);
+            }
         },
-        Err(e) => { eprintln!("error serializing config: {e}"); std::process::exit(1); }
+        Err(e) => {
+            eprintln!("error serializing config: {e}");
+            std::process::exit(1);
+        }
     }
 }
 
@@ -237,7 +256,10 @@ pub fn setup_mcp(args: &SetupMcpArgs) {
             .unwrap()
             .entry("mcp")
             .or_insert(serde_json::json!({}));
-        mcp_section.as_object_mut().unwrap().insert("openai-proxy".to_string(), mcp_entry);
+        mcp_section
+            .as_object_mut()
+            .unwrap()
+            .insert("openai-proxy".to_string(), mcp_entry);
 
         match serde_json::to_string_pretty(&existing) {
             Ok(json) => match std::fs::write(&config_path, json) {
@@ -270,11 +292,17 @@ pub fn setup_mcp(args: &SetupMcpArgs) {
             .unwrap()
             .entry("mcpServers")
             .or_insert(serde_json::json!({}));
-        mcp_servers.as_object_mut().unwrap().insert("openai-proxy".to_string(), mcp_entry);
+        mcp_servers
+            .as_object_mut()
+            .unwrap()
+            .insert("openai-proxy".to_string(), mcp_entry);
 
         match serde_json::to_string_pretty(&existing) {
             Ok(json) => match std::fs::write(&claude_config, json) {
-                Ok(_) => println!("Claude Code MCP config written to {}", claude_config.display()),
+                Ok(_) => println!(
+                    "Claude Code MCP config written to {}",
+                    claude_config.display()
+                ),
                 Err(e) => eprintln!("error writing claude config: {e}"),
             },
             Err(e) => eprintln!("error serializing claude config: {e}"),
@@ -300,7 +328,7 @@ pub fn setup_config() {
 
     let template = r#"[server]
 host = "0.0.0.0"
-port = 8080
+port = 8181
 
 [backend]
 wire_api = "responses"
@@ -326,6 +354,9 @@ a2a = false
 
     match std::fs::write(&path, template) {
         Ok(_) => println!("config scaffolded at {}", path.display()),
-        Err(e) => { eprintln!("error writing config: {e}"); std::process::exit(1); }
+        Err(e) => {
+            eprintln!("error writing config: {e}");
+            std::process::exit(1);
+        }
     }
 }

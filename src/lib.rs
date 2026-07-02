@@ -2,8 +2,8 @@ pub mod a2a;
 pub mod acp;
 pub mod agui;
 pub mod cli;
-pub mod config;
 pub mod codex;
+pub mod config;
 pub mod error;
 pub mod hooks;
 pub mod mcp;
@@ -21,7 +21,7 @@ use tower_http::cors::CorsLayer;
 
 use crate::a2a::agent_card_handler;
 use crate::agui::agui_stream;
-use crate::codex::{BackendProfile, CodexAuth, CODEX_BACKEND_URL, OPENAI_RESPONSES_URL};
+use crate::codex::{BackendProfile, CODEX_BACKEND_URL, CodexAuth, OPENAI_RESPONSES_URL};
 use crate::hooks::{NullHooks, ProxyHooks};
 use crate::mcp_client::McpToolSchema;
 use crate::memory::DynMemory;
@@ -38,7 +38,7 @@ pub struct AppState {
     pub default_model: Option<String>,
     /// Hook implementation — defaults to `NullHooks` (no-op).
     pub hooks: Arc<dyn ProxyHooks + Send + Sync>,
-    /// The proxy's own listen address (e.g. "127.0.0.1:8080") — used in the A2A Agent Card.
+    /// The proxy's own listen address (e.g. "127.0.0.1:8181") — used in the A2A Agent Card.
     pub bind_addr: String,
     /// Skills loaded from `PROXY_SKILLS_DIRS` at startup.
     pub skills: Arc<SkillIndex>,
@@ -104,16 +104,23 @@ pub fn load_real_auth() -> (AppState, String) {
         .join(".codex")
         .join("auth.json");
 
-    let auth = CodexAuth::load(&auth_path)
-        .unwrap_or_else(|e| panic!("~/.codex/auth.json missing or invalid: {e}\nRun `codex login` first."));
+    let auth = CodexAuth::load(&auth_path).unwrap_or_else(|e| {
+        panic!("~/.codex/auth.json missing or invalid: {e}\nRun `codex login` first.")
+    });
 
     let wire_api = std::env::var("CODEX_WIRE_API").unwrap_or_default();
     let (backend_url, backend_profile) = if auth.access_token.is_some() {
         (CODEX_BACKEND_URL.to_string(), BackendProfile::ChatGptCodex)
     } else if wire_api.eq_ignore_ascii_case("chat") {
-        (crate::codex::OPENAI_CHAT_URL.to_string(), BackendProfile::OpenAiChatCompletions)
+        (
+            crate::codex::OPENAI_CHAT_URL.to_string(),
+            BackendProfile::OpenAiChatCompletions,
+        )
     } else {
-        (OPENAI_RESPONSES_URL.to_string(), BackendProfile::OpenAiResponses)
+        (
+            OPENAI_RESPONSES_URL.to_string(),
+            BackendProfile::OpenAiResponses,
+        )
     };
 
     let state = AppState {
@@ -126,7 +133,7 @@ pub fn load_real_auth() -> (AppState, String) {
             .expect("http client"),
         default_model: None,
         hooks: Arc::new(NullHooks),
-        bind_addr: "127.0.0.1:8080".to_string(),
+        bind_addr: "127.0.0.1:8181".to_string(),
         skills: Arc::new(SkillIndex::build(vec![])),
         mcp_tools: Arc::new(Vec::new()),
         memory: crate::memory::noop(),

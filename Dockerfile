@@ -42,13 +42,13 @@ RUN mkdir -p /home/oproxy/.config/oproxy /home/oproxy/.local/share/oproxy \
 USER oproxy
 
 ENV HOST=0.0.0.0
-ENV PORT=8080
+ENV PORT=8181
 ENV RUST_LOG=openai_proxy=info
 
-EXPOSE 8080
+EXPOSE 8181
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:8181/health || exit 1
 
 ENTRYPOINT ["openai-proxy"]
 CMD ["serve"]

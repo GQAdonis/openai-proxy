@@ -5,7 +5,10 @@ use serde_json::Value;
 
 use crate::{
     AppState,
-    codex::{BackendProfile, ResponseStreamEvent, build_chat_completions_request, convert_request, map_model},
+    codex::{
+        BackendProfile, ResponseStreamEvent, build_chat_completions_request, convert_request,
+        map_model,
+    },
     openai::{ChatCompletionRequest, Message},
 };
 
@@ -200,7 +203,8 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
 
     let raw = match state.backend_profile {
         BackendProfile::OpenAiChatCompletions => {
-            let outbound = build_chat_completions_request(&chat_req, state.default_model.as_deref());
+            let outbound =
+                build_chat_completions_request(&chat_req, state.default_model.as_deref());
             let (auth_header, _) = state.auth.bearer();
             let resp = state
                 .http_client
@@ -216,7 +220,8 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
                 let body = resp.text().await.unwrap_or_default();
                 return Err(format!("upstream error {status}: {body}"));
             }
-            let body: serde_json::Value = resp.json().await.map_err(|e| format!("parse error: {e}"))?;
+            let body: serde_json::Value =
+                resp.json().await.map_err(|e| format!("parse error: {e}"))?;
             return Ok(body["choices"][0]["message"]["content"]
                 .as_str()
                 .unwrap_or("")
@@ -243,7 +248,10 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
             if let Some(id) = account_id {
                 req_builder = req_builder.header("chatgpt-account-id", id);
             }
-            let resp = req_builder.send().await.map_err(|e| format!("request failed: {e}"))?;
+            let resp = req_builder
+                .send()
+                .await
+                .map_err(|e| format!("request failed: {e}"))?;
             let status = resp.status();
             if !status.is_success() {
                 let body = resp.text().await.unwrap_or_default();
@@ -255,9 +263,15 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
 
     let mut parts: Vec<String> = Vec::new();
     for line in raw.lines() {
-        let Some(data) = line.strip_prefix("data: ") else { continue };
-        if data == "[DONE]" { break; }
-        let Ok(event) = serde_json::from_str::<ResponseStreamEvent>(data) else { continue };
+        let Some(data) = line.strip_prefix("data: ") else {
+            continue;
+        };
+        if data == "[DONE]" {
+            break;
+        }
+        let Ok(event) = serde_json::from_str::<ResponseStreamEvent>(data) else {
+            continue;
+        };
         if let ResponseStreamEvent::ResponseOutputTextDelta { delta, .. } = event {
             parts.push(delta);
         }
@@ -294,7 +308,8 @@ fn list_models_tool(state: &AppState) -> String {
              • gpt-4o-mini — GPT-4o Mini\n\
              • gpt-3.5-turbo — GPT-3.5 Turbo"
         }
-    }.to_string()
+    }
+    .to_string()
 }
 
 fn check_auth_tool(state: &AppState) -> String {
@@ -304,11 +319,7 @@ fn check_auth_tool(state: &AppState) -> String {
              Backend: {}\n\
              Account ID: {}",
             state.backend_url,
-            state
-                .auth
-                .account_id
-                .as_deref()
-                .unwrap_or("(not set)")
+            state.auth.account_id.as_deref().unwrap_or("(not set)")
         )
     } else if state.auth.api_key.is_some() {
         format!(
@@ -450,8 +461,10 @@ pub async fn run_stdio(state: AppState) -> anyhow::Result<()> {
             writeln!(stdout.lock(), "{json}")?;
 
             if is_init {
-                let notif =
-                    JsonRpcResponse::notification("notifications/initialized", serde_json::json!({}));
+                let notif = JsonRpcResponse::notification(
+                    "notifications/initialized",
+                    serde_json::json!({}),
+                );
                 writeln!(stdout.lock(), "{notif}")?;
             }
 
@@ -507,12 +520,7 @@ async fn mcp_http_handler(
         Some(resp) => {
             let json = serde_json::to_string(&resp)
                 .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-            Ok((
-                StatusCode::OK,
-                [("content-type", "application/json")],
-                json,
-            )
-                .into_response())
+            Ok((StatusCode::OK, [("content-type", "application/json")], json).into_response())
         }
         None => Ok(StatusCode::NO_CONTENT.into_response()),
     }

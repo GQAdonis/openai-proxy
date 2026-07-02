@@ -42,7 +42,10 @@ impl HookEvent {
     pub fn to_payload(&self) -> serde_json::Value {
         let timestamp = chrono_iso8601();
         match self {
-            HookEvent::RequestReceived { model, message_count } => serde_json::json!({
+            HookEvent::RequestReceived {
+                model,
+                message_count,
+            } => serde_json::json!({
                 "type": "on_request_received",
                 "timestamp": timestamp,
                 "model": model,
@@ -59,7 +62,10 @@ impl HookEvent {
                 "name": name,
                 "call_id": call_id,
             }),
-            HookEvent::ToolCallArgs { call_id, args_delta } => serde_json::json!({
+            HookEvent::ToolCallArgs {
+                call_id,
+                args_delta,
+            } => serde_json::json!({
                 "type": "on_tool_call_args",
                 "timestamp": timestamp,
                 "call_id": call_id,
@@ -96,7 +102,10 @@ impl HookEvent {
 /// `Pin<Box<dyn Future>>` return type to avoid the `async_trait` crate.
 pub trait ProxyHooks: Send + Sync {
     /// Fire a hook event.  Implementations MUST NOT propagate errors to the caller.
-    fn fire(&self, event: HookEvent) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>>;
+    fn fire(
+        &self,
+        event: HookEvent,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>>;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,7 +116,10 @@ pub trait ProxyHooks: Send + Sync {
 pub struct NullHooks;
 
 impl ProxyHooks for NullHooks {
-    fn fire(&self, _event: HookEvent) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>> {
+    fn fire(
+        &self,
+        _event: HookEvent,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>> {
         Box::pin(std::future::ready(()))
     }
 }
@@ -188,7 +200,10 @@ impl WebhookHooks {
 }
 
 impl ProxyHooks for WebhookHooks {
-    fn fire(&self, event: HookEvent) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>> {
+    fn fire(
+        &self,
+        event: HookEvent,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>> {
         let event_type = event.event_type().to_string();
         let url = self.urls.get(event_type.as_str()).cloned();
         let client = self.client.clone();

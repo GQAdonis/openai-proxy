@@ -30,7 +30,7 @@ Before evaluating what to add, be precise about what this is:
 **Core function:** A protocol translator. Converts OpenAI Chat Completions format → Codex/Responses API format, handles auth, and relays SSE streams.
 
 **Existing operation modes:**
-1. **HTTP proxy** — listens on `0.0.0.0:8080/v1`, speaks OpenAI Chat Completions in and out
+1. **HTTP proxy** — listens on `0.0.0.0:8181/v1`, speaks OpenAI Chat Completions in and out
 2. **MCP server (stdio)** — 4 JSON-RPC tools over stdin/stdout
 3. **MCP server (HTTP)** — same 4 tools over `POST /mcp`
 4. **CLI binary** — single statically linked Rust binary, ~5MB

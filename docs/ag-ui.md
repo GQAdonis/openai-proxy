@@ -77,7 +77,7 @@ data: {"type":"RUN_FINISHED","run_id":"f47ac10b-..."}
 import { useCoAgent } from "@copilotkit/react-core";
 
 const { run } = useCoAgent({
-  url: "http://localhost:8080/ag-ui/stream",
+  url: "http://localhost:8181/ag-ui/stream",
 });
 
 // Trigger a run

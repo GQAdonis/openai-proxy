@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@opencode-ai/plugin": "latest",
+    "@types/node": "^25.9.1",
     "typescript": "^5.4.0"
   },
   "keywords": ["opencode", "opencode-plugin", "codex", "openai", "proxy"],

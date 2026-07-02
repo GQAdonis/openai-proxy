@@ -32,13 +32,20 @@ impl IntoResponse for ProxyError {
         let (status, type_, message) = match &self {
             ProxyError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "bad_request", msg.clone()),
             ProxyError::Upstream { status, body } => {
-                let code = StatusCode::from_u16(*status)
-                    .unwrap_or(StatusCode::BAD_GATEWAY);
+                let code = StatusCode::from_u16(*status).unwrap_or(StatusCode::BAD_GATEWAY);
                 (code, "upstream_error", body.clone())
             }
-            ProxyError::Serde(e) => (StatusCode::BAD_REQUEST, "serialization_error", e.to_string()),
+            ProxyError::Serde(e) => (
+                StatusCode::BAD_REQUEST,
+                "serialization_error",
+                e.to_string(),
+            ),
             ProxyError::Http(e) => (StatusCode::BAD_GATEWAY, "http_error", e.to_string()),
-            ProxyError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, "internal_error", msg.clone()),
+            ProxyError::Internal(msg) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_error",
+                msg.clone(),
+            ),
             ProxyError::ModelNotAvailable { model, profile } => (
                 StatusCode::BAD_REQUEST,
                 "model_not_available",

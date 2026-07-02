@@ -23,11 +23,21 @@ pub fn data_dir() -> PathBuf {
         .join("oproxy")
 }
 
-fn default_host() -> String { "0.0.0.0".to_string() }
-fn default_port() -> u16 { 8080 }
-fn default_wire_api() -> String { "responses".to_string() }
-fn default_max_injected() -> usize { 3 }
-fn default_embedding_model() -> String { "text-embedding-3-small".to_string() }
+fn default_host() -> String {
+    "0.0.0.0".to_string()
+}
+fn default_port() -> u16 {
+    8181
+}
+fn default_wire_api() -> String {
+    "responses".to_string()
+}
+fn default_max_injected() -> usize {
+    3
+}
+fn default_embedding_model() -> String {
+    "text-embedding-3-small".to_string()
+}
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(default)]
@@ -40,7 +50,10 @@ pub struct ServerConfig {
 
 impl Default for ServerConfig {
     fn default() -> Self {
-        Self { host: default_host(), port: default_port() }
+        Self {
+            host: default_host(),
+            port: default_port(),
+        }
     }
 }
 
@@ -54,7 +67,9 @@ pub struct BackendConfig {
 
 impl Default for BackendConfig {
     fn default() -> Self {
-        Self { wire_api: default_wire_api() }
+        Self {
+            wire_api: default_wire_api(),
+        }
     }
 }
 
@@ -140,19 +155,38 @@ impl ProxyConfig {
     /// Apply env var overrides. Env vars win over the config file but lose to
     /// explicit CLI flags (which are applied by the caller after this).
     pub fn apply_env(&mut self) {
-        if let Ok(h) = std::env::var("HOST") { self.server.host = h; }
-        if let Ok(p) = std::env::var("PORT") {
-            if let Ok(n) = p.parse() { self.server.port = n; }
+        self.apply_env_from(|key| std::env::var(key).ok());
+    }
+
+    fn apply_env_from<F>(&mut self, mut var: F)
+    where
+        F: FnMut(&str) -> Option<String>,
+    {
+        if let Some(h) = var("HOST") {
+            self.server.host = h;
         }
-        if let Ok(w) = std::env::var("CODEX_WIRE_API") { self.backend.wire_api = w; }
-        if let Ok(dirs) = std::env::var("PROXY_SKILLS_DIRS") {
-            let extra: Vec<String> = dirs.split(':').filter(|s| !s.is_empty()).map(str::to_owned).collect();
+        if let Some(p) = var("PORT") {
+            if let Ok(n) = p.parse() {
+                self.server.port = n;
+            }
+        }
+        if let Some(w) = var("CODEX_WIRE_API") {
+            self.backend.wire_api = w;
+        }
+        if let Some(dirs) = var("PROXY_SKILLS_DIRS") {
+            let extra: Vec<String> = dirs
+                .split(':')
+                .filter(|s| !s.is_empty())
+                .map(str::to_owned)
+                .collect();
             self.skills.dirs.extend(extra);
         }
-        if let Ok(m) = std::env::var("PROXY_SKILLS_MAX") {
-            if let Ok(n) = m.parse() { self.skills.max_injected = n; }
+        if let Some(m) = var("PROXY_SKILLS_MAX") {
+            if let Ok(n) = m.parse() {
+                self.skills.max_injected = n;
+            }
         }
-        if let Ok(p) = std::env::var("PROXY_HOOKS_CONFIG") {
+        if let Some(p) = var("PROXY_HOOKS_CONFIG") {
             self.hooks.config_path = Some(p);
         }
     }
@@ -177,7 +211,7 @@ mod tests {
     #[test]
     fn load_missing_file_returns_defaults() {
         let cfg = ProxyConfig::load(Some(Path::new("/nonexistent/path/config.toml"))).unwrap();
-        assert_eq!(cfg.server.port, 8080);
+        assert_eq!(cfg.server.port, 8181);
         assert_eq!(cfg.backend.wire_api, "responses");
         assert!(!cfg.memory.enabled);
     }
@@ -196,9 +230,7 @@ mod tests {
         let mut f = NamedTempFile::new().unwrap();
         writeln!(f, "[server]\nport = 9090").unwrap();
         let mut cfg = ProxyConfig::load(Some(f.path())).unwrap();
-        std::env::set_var("PORT", "7777");
-        cfg.apply_env();
-        std::env::remove_var("PORT");
+        cfg.apply_env_from(|key| (key == "PORT").then(|| "7777".to_string()));
         assert_eq!(cfg.server.port, 7777);
     }
 

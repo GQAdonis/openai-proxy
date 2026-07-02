@@ -48,7 +48,20 @@
       "Bash(curl -s \"https://docs.rs/surrealdb/2.3.3/surrealdb/engine/local/index.html\")",
       "Bash(curl -s \"https://docs.rs/surrealdb/2.3.3/surrealdb/method/query/struct.Response.html\")",
       "Bash(curl -s \"https://docs.rs/surrealdb/latest/surrealdb/all.html\")",
-      "Bash(curl -s \"https://docs.rs/surrealdb/3.0.5/surrealdb/engine/local/struct.RocksDb.html\")"
+      "Bash(curl -s \"https://docs.rs/surrealdb/3.0.5/surrealdb/engine/local/struct.RocksDb.html\")",
+      "Bash(cargo metadata *)",
+      "Bash(cargo install *)",
+      "Bash(openai-proxy --version)",
+      "Bash(/Users/gqadonis/.cargo/bin/openai-proxy --help)",
+      "Read(//Users/gqadonis/.codex/**)",
+      "Read(//Users/gqadonis/Library/LaunchAgents/**)",
+      "Bash(mkdir -p /Users/gqadonis/.prometheus/logs)",
+      "Read(//Users/gqadonis/.prometheus/logs/**)",
+      "Bash(plutil *)",
+      "Bash(lsof -nP -iTCP:8181 -sTCP:LISTEN)",
+      "Bash(launchctl list *)",
+      "Bash(curl -sS -m 3 http://127.0.0.1:8181/health)",
+      "Bash(curl -sS -m 3 http://127.0.0.1:8181/v1/models)"
     ]
   }
 }

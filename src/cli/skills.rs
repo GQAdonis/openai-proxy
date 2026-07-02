@@ -38,20 +38,33 @@ pub struct SkillsTestArgs {
 pub fn skills_list(args: &SkillsListArgs, cfg_dirs: &[String]) {
     let dirs = resolve_dirs(args.dirs.as_deref(), cfg_dirs);
     if dirs.is_empty() {
-        println!("No skill directories configured. Set [skills] dirs in config.toml or use --dirs.");
+        println!(
+            "No skill directories configured. Set [skills] dirs in config.toml or use --dirs."
+        );
         return;
     }
     let skills = crate::skills::load_skills(&dirs);
     if skills.is_empty() {
-        println!("No skills found in: {}", dirs.iter().map(|d| d.display().to_string()).collect::<Vec<_>>().join(":"));
+        println!(
+            "No skills found in: {}",
+            dirs.iter()
+                .map(|d| d.display().to_string())
+                .collect::<Vec<_>>()
+                .join(":")
+        );
         return;
     }
-    println!("{:<30} {:<10} {:<12} {}", "NAME", "VERSION", "DOMAIN", "KEYWORDS");
+    println!(
+        "{:<30} {:<10} {:<12} {}",
+        "NAME", "VERSION", "DOMAIN", "KEYWORDS"
+    );
     println!("{}", "-".repeat(65));
     for s in &skills.manifests {
         let version = s.version.as_deref().unwrap_or("-");
         let domain = s.domain.as_deref().unwrap_or("-");
-        let kw_count = s.triggers.as_ref()
+        let kw_count = s
+            .triggers
+            .as_ref()
             .and_then(|t| t.keywords.as_ref())
             .map(|kws| kws.len())
             .unwrap_or(0);
@@ -77,7 +90,9 @@ pub fn skills_validate(args: &SkillsValidateArgs) {
 
 fn find_skill_mds(dir: &std::path::Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
-    let Ok(entries) = std::fs::read_dir(dir) else { return out };
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return out;
+    };
     for entry in entries.flatten() {
         let path = entry.path();
         if path.is_dir() {
@@ -107,7 +122,9 @@ pub fn skills_test(args: &SkillsTestArgs, cfg_dirs: &[String]) {
     } else {
         println!("Selected (top {}):", selected.len());
         for (i, s) in selected.iter().enumerate() {
-            let kws: Vec<&str> = s.triggers.as_ref()
+            let kws: Vec<&str> = s
+                .triggers
+                .as_ref()
                 .and_then(|t| t.keywords.as_ref())
                 .map(|kws| kws.as_slice())
                 .unwrap_or(&[])
@@ -115,12 +132,20 @@ pub fn skills_test(args: &SkillsTestArgs, cfg_dirs: &[String]) {
                 .filter(|kw| args.message.to_lowercase().contains(&kw.to_lowercase()))
                 .map(|kw| kw.as_str())
                 .collect();
-            let kw_str = if kws.is_empty() { String::new() } else { format!("  keywords matched: {}", kws.join(", ")) };
+            let kw_str = if kws.is_empty() {
+                String::new()
+            } else {
+                format!("  keywords matched: {}", kws.join(", "))
+            };
             println!("  {}. {}{}", i + 1, s.name, kw_str);
         }
     }
 
-    let not_selected: Vec<_> = skills.manifests.iter().filter(|s| !selected.iter().any(|sel| sel.name == s.name)).collect();
+    let not_selected: Vec<_> = skills
+        .manifests
+        .iter()
+        .filter(|s| !selected.iter().any(|sel| sel.name == s.name))
+        .collect();
     if !not_selected.is_empty() {
         println!();
         println!("Not selected:");
@@ -132,7 +157,10 @@ pub fn skills_test(args: &SkillsTestArgs, cfg_dirs: &[String]) {
 
 fn resolve_dirs(flag: Option<&str>, cfg_dirs: &[String]) -> Vec<PathBuf> {
     if let Some(raw) = flag {
-        raw.split(':').filter(|s| !s.is_empty()).map(|d| expand_tilde(d)).collect()
+        raw.split(':')
+            .filter(|s| !s.is_empty())
+            .map(|d| expand_tilde(d))
+            .collect()
     } else {
         cfg_dirs.iter().map(|d| expand_tilde(d)).collect()
     }

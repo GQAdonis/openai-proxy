@@ -43,6 +43,10 @@ pub fn config_show(cfg: &ProxyConfig) {
 pub fn config_path() {
     let dir = config_dir();
     let path = dir.join("config.toml");
-    let exists = if path.exists() { "exists" } else { "does not exist" };
+    let exists = if path.exists() {
+        "exists"
+    } else {
+        "does not exist"
+    };
     println!("{} ({})", path.display(), exists);
 }

@@ -41,7 +41,11 @@ impl CodexAuth {
             (raw.access_token, raw.account_id)
         };
         let api_key = raw.api_key.or(raw.openai_api_key);
-        Ok(Self { access_token, account_id, api_key })
+        Ok(Self {
+            access_token,
+            account_id,
+            api_key,
+        })
     }
 
     pub fn bearer(&self) -> (String, Option<String>) {
@@ -88,9 +92,13 @@ impl BackendProfile {
 
     pub fn name(&self) -> &'static str {
         match self {
-            BackendProfile::ChatGptCodex => "ChatGPT subscription (chatgpt.com/backend-api/codex/responses)",
+            BackendProfile::ChatGptCodex => {
+                "ChatGPT subscription (chatgpt.com/backend-api/codex/responses)"
+            }
             BackendProfile::OpenAiResponses => "OpenAI Responses API (api.openai.com/v1/responses)",
-            BackendProfile::OpenAiChatCompletions => "OpenAI Chat Completions (api.openai.com/v1/chat/completions)",
+            BackendProfile::OpenAiChatCompletions => {
+                "OpenAI Chat Completions (api.openai.com/v1/chat/completions)"
+            }
         }
     }
 }
@@ -147,8 +155,14 @@ pub fn resolve_model(input: &str) -> ModelTarget {
             supports_responses_api: true,
             supports_chat_completions: true,
         },
-        "gpt-5.3-codex" | "gpt-4o" | "gpt-4o-2024-11-20" | "gpt-4" | "gpt-4-turbo"
-        | "gpt-4-turbo-preview" | "gpt-3.5-turbo" | "gpt-3.5-turbo-0125" => ModelTarget {
+        "gpt-5.3-codex"
+        | "gpt-4o"
+        | "gpt-4o-2024-11-20"
+        | "gpt-4"
+        | "gpt-4-turbo"
+        | "gpt-4-turbo-preview"
+        | "gpt-3.5-turbo"
+        | "gpt-3.5-turbo-0125" => ModelTarget {
             model_id: "gpt-5.3-codex".into(),
             supports_codex_backend: true,
             supports_responses_api: true,
@@ -207,7 +221,9 @@ pub fn map_model(input: &str) -> String {
 /// Convert a Chat Completions tools array to Responses API format.
 /// Unwraps the nested "function" wrapper.
 pub fn convert_tools_to_responses_format(tools: &Value) -> Value {
-    let Some(arr) = tools.as_array() else { return tools.clone() };
+    let Some(arr) = tools.as_array() else {
+        return tools.clone();
+    };
     let converted: Vec<Value> = arr
         .iter()
         .map(|tool| {
@@ -361,7 +377,11 @@ fn resolve_model_id(req_model: &str, default_model: Option<&str>) -> String {
     let target = resolve_model(req_model);
     if let Some(dm) = default_model {
         let is_explicit = req_model.starts_with("gpt-5.") || req_model.starts_with("codex");
-        if is_explicit { target.model_id } else { dm.to_string() }
+        if is_explicit {
+            target.model_id
+        } else {
+            dm.to_string()
+        }
     } else {
         target.model_id
     }
@@ -448,7 +468,10 @@ pub fn convert_request(
 
     // Convert tools to Responses API format (unwrap nested "function" wrapper).
     let tools = req.tools.as_ref().map(convert_tools_to_responses_format);
-    let tool_choice = req.tool_choice.as_ref().map(convert_tool_choice_to_responses_format);
+    let tool_choice = req
+        .tool_choice
+        .as_ref()
+        .map(convert_tool_choice_to_responses_format);
 
     // ChatGptCodex rejects temperature, top_p, max_output_tokens — omit them.
     let (temperature, top_p, max_output_tokens, stop, store, stream) = match profile {
@@ -576,10 +599,7 @@ pub enum ResponseStreamEvent {
 
     /// Streaming delta for a function_call's arguments.
     #[serde(rename = "response.function_call_arguments.delta")]
-    ResponseFunctionCallArgumentsDelta {
-        output_index: u32,
-        delta: String,
-    },
+    ResponseFunctionCallArgumentsDelta { output_index: u32, delta: String },
 
     /// Final accumulated arguments for a function_call.
     #[serde(rename = "response.function_call_arguments.done")]

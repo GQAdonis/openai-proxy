@@ -54,7 +54,7 @@ codex login
 # Build and run the proxy
 cargo build --release
 ./target/release/openai-proxy serve
-# Proxy is now at http://localhost:8080
+# Proxy is now at http://localhost:8181
 ```
 
 **Step 2 — Install the plugin**
@@ -207,7 +207,7 @@ export OPENAI_API_KEY=sk-...
 # Build and run
 cargo build --release
 ./target/release/openai-proxy serve
-# Proxy is now at http://localhost:8080
+# Proxy is now at http://localhost:8181
 ```
 
 ### Docker
@@ -217,13 +217,13 @@ cargo build --release
 docker run --rm \
   -v ~/.codex/auth.json:/run/secrets/auth.json:ro \
   -e CODEX_AUTH_PATH=/run/secrets/auth.json \
-  -p 8080:8080 \
+  -p 8181:8181 \
   openai-proxy:latest
 
 # API key path
 docker run --rm \
   -e OPENAI_API_KEY=sk-... \
-  -p 8080:8080 \
+  -p 8181:8181 \
   openai-proxy:latest
 
 # With docker-compose (see docker-compose.yaml)
@@ -233,7 +233,7 @@ docker compose up
 ### Any OpenAI-compatible client
 
 ```bash
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:8181/v1/chat/completions \
   -H "Authorization: Bearer anything" \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-5.5","messages":[{"role":"user","content":"Hello"}],"stream":true}'
@@ -241,7 +241,7 @@ curl http://localhost:8080/v1/chat/completions \
 
 ```python
 from openai import OpenAI
-client = OpenAI(base_url="http://localhost:8080/v1", api_key="anything")
+client = OpenAI(base_url="http://localhost:8181/v1", api_key="anything")
 ```
 
 ---
@@ -261,7 +261,7 @@ Location: `~/.config/oproxy/config.toml`
 ```toml
 [server]
 host = "0.0.0.0"    # Env: HOST
-port = 8080         # Env: PORT
+port = 8181         # Env: PORT
 
 [backend]
 wire_api = "responses"   # "responses" (default) or "chat". Env: CODEX_WIRE_API
@@ -292,12 +292,12 @@ Full reference: [docs/config.md](docs/config.md)
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `HOST` | `0.0.0.0` | Bind address |
-| `PORT` | `8080` | Listen port |
+| `PORT` | `8181` | Listen port |
 | `CODEX_AUTH_PATH` | `~/.codex/auth.json` | Auth file path override |
 | `CODEX_BACKEND_URL` | auto | Override upstream URL |
 | `CODEX_WIRE_API` | `responses` | `responses` or `chat` |
 | `CODEX_DEFAULT_MODEL` | — | Default model for generic aliases |
-| `CODEX_PROXY_URL` | `http://localhost:8080/v1` | Base URL injected into plugin shell envs |
+| `CODEX_PROXY_URL` | `http://localhost:8181/v1` | Base URL injected into plugin shell envs |
 | `OPENAI_API_KEY` | — | API key (fallback if no auth.json) |
 | `MCP_HTTP_PORT` | — | Start MCP Streamable HTTP server on this port |
 | `PROXY_SKILLS_DIRS` | — | Colon-separated skill directories |
@@ -350,7 +350,7 @@ The `opencode.json` at the repo root declares the `codex` provider via `@ai-sdk/
       "npm": "@ai-sdk/openai-compatible",
       "name": "Codex (via proxy)",
       "options": {
-        "baseURL": "http://localhost:8080/v1",
+        "baseURL": "http://localhost:8181/v1",
         "apiKey": "codex-proxy"
       },
       "models": {
@@ -373,7 +373,7 @@ The `opencode.json` at the repo root declares the `codex` provider via `@ai-sdk/
 
 ```bash
 # Generate a correct opencode.json for your current credentials
-openai-proxy setup opencode --global --port 8080
+openai-proxy setup opencode --global --port 8181
 ```
 
 Full guide: [docs/opencode-setup.md](docs/opencode-setup.md)
@@ -494,15 +494,15 @@ Pass `X-Memory-Scope: project` (or `session`, `global`) to namespace documents p
 
 ```bash
 # Store
-curl -X POST http://localhost:8080/v1/memory/documents \
+curl -X POST http://localhost:8181/v1/memory/documents \
   -d '{"scope":"project","text":"The auth module uses JWT RS256.","metadata":{}}'
 
 # Search
-curl "http://localhost:8080/v1/memory/search?q=authentication&scope=project&limit=5"
+curl "http://localhost:8181/v1/memory/search?q=authentication&scope=project&limit=5"
 
 # List / Delete
-curl http://localhost:8080/v1/memory/documents?scope=project
-curl -X DELETE http://localhost:8080/v1/memory/documents/<id>
+curl http://localhost:8181/v1/memory/documents?scope=project
+curl -X DELETE http://localhost:8181/v1/memory/documents/<id>
 ```
 
 Full reference: [docs/memory.md](docs/memory.md)
@@ -565,13 +565,13 @@ docker build -t openai-proxy .
 docker run --rm \
   -v ~/.codex/auth.json:/run/secrets/auth.json:ro \
   -e CODEX_AUTH_PATH=/run/secrets/auth.json \
-  -p 8080:8080 \
+  -p 8181:8181 \
   openai-proxy
 
 # Run (API key)
 docker run --rm \
   -e OPENAI_API_KEY=sk-... \
-  -p 8080:8080 \
+  -p 8181:8181 \
   openai-proxy
 
 # With memory feature (requires --features memory build)
@@ -613,8 +613,8 @@ cargo test --test integration non_streaming_max_tokens_respected -- --nocapture
 cargo test --lib
 
 # Verify health
-curl http://localhost:8080/health
-curl http://localhost:8080/v1/models
+curl http://localhost:8181/health
+curl http://localhost:8181/v1/models
 ```
 
 ### Plugin development

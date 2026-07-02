@@ -7,7 +7,7 @@ The proxy implements the [A2A (Agent-to-Agent)](https://google.github.io/A2A/) s
 ## Enabling A2A
 
 ```bash
-openai-proxy serve --a2a --port 8080
+openai-proxy serve --a2a --port 8181
 ```
 
 Or in `~/.config/oproxy/config.toml`:
@@ -30,7 +30,7 @@ GET /.well-known/agent.json
 {
   "name": "openai-proxy",
   "description": "OpenAI-compatible proxy routing to ChatGPT Subscription or OpenAI Responses API",
-  "url": "http://127.0.0.1:8080",
+  "url": "http://127.0.0.1:8181",
   "version": "0.1.0",
   "capabilities": {
     "streaming": true,
@@ -89,7 +89,7 @@ opencode supports A2A for multi-agent coordination. When `--a2a` is enabled, ope
 {
   "agents": {
     "openai-proxy": {
-      "url": "http://127.0.0.1:8080"
+      "url": "http://127.0.0.1:8181"
     }
   }
 }

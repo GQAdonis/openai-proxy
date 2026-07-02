@@ -15,7 +15,9 @@ pub struct McpToolSchema {
     pub function: McpFunctionDef,
 }
 
-fn function_type() -> String { "function".to_string() }
+fn function_type() -> String {
+    "function".to_string()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct McpFunctionDef {
@@ -71,14 +73,18 @@ pub fn load_mcp_tools(config_path: &Path) -> Vec<McpToolSchema> {
         }
     };
 
-    let tools: Vec<McpToolSchema> = cfg.tool.into_iter().map(|t| McpToolSchema {
-        tool_type: "function".to_string(),
-        function: McpFunctionDef {
-            name: t.name,
-            description: t.description,
-            parameters: t.input_schema,
-        },
-    }).collect();
+    let tools: Vec<McpToolSchema> = cfg
+        .tool
+        .into_iter()
+        .map(|t| McpToolSchema {
+            tool_type: "function".to_string(),
+            function: McpFunctionDef {
+                name: t.name,
+                description: t.description,
+                parameters: t.input_schema,
+            },
+        })
+        .collect();
 
     // Import tool names from claude_code sources (schema must be declared inline).
     if let Some(sources) = cfg.sources {
@@ -111,13 +117,17 @@ mod tests {
     #[test]
     fn loads_inline_tool() {
         let mut f = NamedTempFile::new().unwrap();
-        writeln!(f, r#"
+        writeln!(
+            f,
+            r#"
 [[tool]]
 name = "read_file"
 description = "Read a file"
 [tool.input_schema]
 type = "object"
-"#).unwrap();
+"#
+        )
+        .unwrap();
         let tools = load_mcp_tools(f.path());
         assert_eq!(tools.len(), 1);
         assert_eq!(tools[0].function.name, "read_file");

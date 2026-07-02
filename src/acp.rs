@@ -33,9 +33,7 @@ pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
         .on_receive_request(
             {
                 let _state = state.clone();
-                async move |req: InitializeRequest,
-                            responder,
-                            _cx: ConnectionTo<Client>| {
+                async move |req: InitializeRequest, responder, _cx: ConnectionTo<Client>| {
                     responder.respond(
                         InitializeResponse::new(req.protocol_version)
                             .agent_capabilities(AgentCapabilities::new()),
@@ -45,9 +43,7 @@ pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
             agent_client_protocol::on_receive_request!(),
         )
         .on_receive_request(
-            async move |req: NewSessionRequest,
-                        responder,
-                        _cx: ConnectionTo<Client>| {
+            async move |req: NewSessionRequest, responder, _cx: ConnectionTo<Client>| {
                 let session_id = SessionId::new(uuid::Uuid::new_v4().to_string());
                 tracing::debug!(
                     session = %session_id,
@@ -61,9 +57,7 @@ pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
         .on_receive_request(
             {
                 let state = state.clone();
-                async move |req: PromptRequest,
-                            responder,
-                            cx: ConnectionTo<Client>| {
+                async move |req: PromptRequest, responder, cx: ConnectionTo<Client>| {
                     let session_id = req.session_id.clone();
                     match handle_prompt(req, &state, &cx).await {
                         Ok(stop_reason) => responder.respond(PromptResponse::new(stop_reason)),
@@ -136,7 +130,9 @@ async fn handle_prompt(
             .ok()
             .and_then(|v| v.parse::<usize>().ok())
             .unwrap_or(3);
-        let selected = state.skills.select(&user_text, max, state.backend_profile.name());
+        let selected = state
+            .skills
+            .select(&user_text, max, state.backend_profile.name());
         if !selected.is_empty() {
             let skill_block = selected
                 .iter()
@@ -175,8 +171,11 @@ async fn handle_prompt(
     };
 
     // Convert to Responses API wire format and send.
-    let codex_req =
-        codex::convert_request(&chat_req, state.default_model.as_deref(), state.backend_profile);
+    let codex_req = codex::convert_request(
+        &chat_req,
+        state.default_model.as_deref(),
+        state.backend_profile,
+    );
 
     let http_req = build_responses_request(state, &codex_req)
         .map_err(|e| anyhow::anyhow!("failed to build request: {e}"))?;
@@ -202,7 +201,9 @@ async fn handle_prompt(
 
         // Process all complete lines in the accumulated buffer.
         loop {
-            let Some(nl) = remainder.find('\n') else { break };
+            let Some(nl) = remainder.find('\n') else {
+                break;
+            };
             let line: String = remainder.drain(..=nl).collect();
             let line = line.trim_end_matches(['\n', '\r']);
 

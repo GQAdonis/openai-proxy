@@ -31,7 +31,7 @@ Default path: `~/.config/oproxy/config.toml`
 ```toml
 [server]
 host = "0.0.0.0"    # Bind address. Env: HOST. CLI: --host
-port = 8080         # Listen port.  Env: PORT. CLI: --port
+port = 8181         # Listen port.  Env: PORT. CLI: --port
 
 [backend]
 # Wire API format for OpenAI API key users.
@@ -115,7 +115,7 @@ OPENAI_API_KEY=sk-... openai-proxy serve
 
 ```toml
 [server]
-port = 8080
+port = 8181
 
 [skills]
 dirs = ["~/.config/oproxy/skills"]
@@ -129,7 +129,7 @@ a2a = true
 
 ```toml
 [server]
-port = 8080
+port = 8181
 
 [backend]
 wire_api = "responses"

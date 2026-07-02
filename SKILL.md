@@ -62,13 +62,13 @@ cargo build --release
 ./target/release/openai-proxy
 ```
 
-The proxy listens on `http://0.0.0.0:8080/v1` by default.
+The proxy listens on `http://0.0.0.0:8181/v1` by default.
 
 ### Step 3: Point your client at the proxy
 
 ```bash
 # Any OpenAI-compatible client
-export OPENAI_BASE_URL=http://localhost:8080/v1
+export OPENAI_BASE_URL=http://localhost:8181/v1
 export OPENAI_API_KEY=anything   # not forwarded upstream; auth.json is used
 
 # opencode: provider appears automatically via opencode.json / plugin
@@ -80,7 +80,7 @@ opencode
 | Variable | Default | Description |
 |---|---|---|
 | `HOST` | `0.0.0.0` | Interface to bind |
-| `PORT` | `8080` | HTTP proxy port |
+| `PORT` | `8181` | HTTP proxy port |
 | `CODEX_AUTH_PATH` | `~/.codex/auth.json` | Override auth file path |
 | `CODEX_BACKEND_URL` | auto | Override upstream endpoint |
 | `CODEX_DEFAULT_MODEL` | — | Default Codex model for generic aliases |
@@ -91,13 +91,13 @@ opencode
 ### Verify it's working
 
 ```bash
-curl http://localhost:8080/health
+curl http://localhost:8181/health
 # → {"status":"ok"}
 
-curl http://localhost:8080/v1/models
+curl http://localhost:8181/v1/models
 # → lists available models
 
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:8181/v1/chat/completions \
   -H "Authorization: Bearer anything" \
   -H "Content-Type: application/json" \
   -d '{"model":"codex-mini","messages":[{"role":"user","content":"Say hi"}]}'

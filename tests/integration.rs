@@ -12,8 +12,8 @@
 //!   cargo test --test integration -- --nocapture
 
 use axum_test::TestServer;
-use openai_proxy_lib::{AppState, build_app, load_real_auth, mcp};
 use openai_proxy_lib::codex::BackendProfile;
+use openai_proxy_lib::{AppState, build_app, load_real_auth, mcp};
 use serde_json::{Value, json};
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -118,7 +118,10 @@ async fn models_list_contains_gpt_5_3_codex() {
         .iter()
         .filter_map(|m| m["id"].as_str())
         .collect();
-    assert!(ids.contains(&"gpt-5.3-codex"), "expected gpt-5.3-codex in model list, got: {ids:?}");
+    assert!(
+        ids.contains(&"gpt-5.3-codex"),
+        "expected gpt-5.3-codex in model list, got: {ids:?}"
+    );
 }
 
 #[tokio::test]
@@ -137,7 +140,10 @@ async fn models_list_contains_codex_mini_for_api_key_profile() {
         .iter()
         .filter_map(|m| m["id"].as_str())
         .collect();
-    assert!(ids.contains(&"codex-mini"), "expected codex-mini in API key model list");
+    assert!(
+        ids.contains(&"codex-mini"),
+        "expected codex-mini in API key model list"
+    );
 }
 
 #[tokio::test]
@@ -267,7 +273,9 @@ async fn non_streaming_max_tokens_respected() {
 
     // ChatGptCodex profile strips max_tokens so the finish_reason may be "stop".
     // OpenAiResponses forwards max_output_tokens, so expect "length".
-    let finish = body["choices"][0]["finish_reason"].as_str().unwrap_or("stop");
+    let finish = body["choices"][0]["finish_reason"]
+        .as_str()
+        .unwrap_or("stop");
     match state.backend_profile {
         BackendProfile::ChatGptCodex => {
             // max_tokens is stripped; model may return stop with any output
@@ -282,7 +290,10 @@ async fn non_streaming_max_tokens_respected() {
                 "unexpected finish_reason: {finish}"
             );
             let output_tokens = body["usage"]["completion_tokens"].as_u64().unwrap_or(0);
-            assert!(output_tokens <= 20, "output tokens {output_tokens} should be near the 10-token limit");
+            assert!(
+                output_tokens <= 20,
+                "output tokens {output_tokens} should be near the 10-token limit"
+            );
         }
     }
 }
@@ -435,7 +446,10 @@ async fn streaming_returns_sse_content_type() {
 
     resp.assert_status_ok();
     let ct = resp.headers()["content-type"].to_str().unwrap();
-    assert!(ct.contains("text/event-stream"), "expected SSE content-type, got: {ct}");
+    assert!(
+        ct.contains("text/event-stream"),
+        "expected SSE content-type, got: {ct}"
+    );
 }
 
 #[tokio::test]
@@ -479,7 +493,10 @@ async fn streaming_produces_content_deltas() {
         .iter()
         .filter(|c| c["choices"][0]["delta"]["content"].is_string())
         .collect();
-    assert!(!content_chunks.is_empty(), "expected content delta chunks in stream");
+    assert!(
+        !content_chunks.is_empty(),
+        "expected content delta chunks in stream"
+    );
 }
 
 #[tokio::test]
@@ -500,11 +517,17 @@ async fn streaming_last_chunk_has_finish_reason() {
     let finish_chunk = chunks
         .iter()
         .find(|c| !c["choices"][0]["finish_reason"].is_null());
-    assert!(finish_chunk.is_some(), "no finish_reason chunk found in stream");
+    assert!(
+        finish_chunk.is_some(),
+        "no finish_reason chunk found in stream"
+    );
     let finish = finish_chunk.unwrap()["choices"][0]["finish_reason"]
         .as_str()
         .unwrap();
-    assert!(finish == "stop" || finish == "length", "unexpected finish_reason: {finish}");
+    assert!(
+        finish == "stop" || finish == "length",
+        "unexpected finish_reason: {finish}"
+    );
 }
 
 #[tokio::test]
@@ -552,7 +575,10 @@ async fn streaming_assembled_content_is_non_empty() {
         .iter()
         .filter_map(|c| c["choices"][0]["delta"]["content"].as_str())
         .collect();
-    assert!(!assembled.is_empty(), "assembled streaming content should not be empty");
+    assert!(
+        !assembled.is_empty(),
+        "assembled streaming content should not be empty"
+    );
 }
 
 #[tokio::test]
@@ -594,7 +620,10 @@ async fn streaming_with_gpt53_codex_model() {
     resp.assert_status_ok();
     let body = resp.text();
     let chunks = parse_sse_chunks(&body);
-    assert!(!chunks.is_empty(), "streaming with gpt-5.3-codex should return chunks");
+    assert!(
+        !chunks.is_empty(),
+        "streaming with gpt-5.3-codex should return chunks"
+    );
 }
 
 // ── tool calling — non-streaming ─────────────────────────────────────────────
@@ -637,15 +666,23 @@ async fn non_streaming_tool_call_response() {
     );
     if finish == "tool_calls" {
         let tool_calls = choice["message"]["tool_calls"].as_array().unwrap();
-        assert!(!tool_calls.is_empty(), "tool_calls array should not be empty");
+        assert!(
+            !tool_calls.is_empty(),
+            "tool_calls array should not be empty"
+        );
         let call = &tool_calls[0];
         assert_eq!(call["type"], "function");
-        assert!(!call["id"].as_str().unwrap_or("").is_empty(), "tool call id should be non-empty");
+        assert!(
+            !call["id"].as_str().unwrap_or("").is_empty(),
+            "tool call id should be non-empty"
+        );
         assert_eq!(call["function"]["name"], "get_weather");
-        let args: Value = serde_json::from_str(
-            call["function"]["arguments"].as_str().unwrap_or("{}")
-        ).unwrap();
-        assert!(args["location"].is_string(), "arguments should contain 'location'");
+        let args: Value =
+            serde_json::from_str(call["function"]["arguments"].as_str().unwrap_or("{}")).unwrap();
+        assert!(
+            args["location"].is_string(),
+            "arguments should contain 'location'"
+        );
     }
 }
 
@@ -677,14 +714,18 @@ async fn non_streaming_tool_call_roundtrip() {
         .json();
 
     assert_eq!(resp1["object"], "chat.completion");
-    let finish1 = resp1["choices"][0]["finish_reason"].as_str().unwrap_or("stop");
+    let finish1 = resp1["choices"][0]["finish_reason"]
+        .as_str()
+        .unwrap_or("stop");
 
     if finish1 != "tool_calls" {
         // Model answered directly — valid behavior, test passes
         return;
     }
 
-    let tool_calls = resp1["choices"][0]["message"]["tool_calls"].as_array().unwrap();
+    let tool_calls = resp1["choices"][0]["message"]["tool_calls"]
+        .as_array()
+        .unwrap();
     let call_id = tool_calls[0]["id"].as_str().unwrap().to_string();
 
     // Step 2: submit tool result
@@ -725,7 +766,10 @@ async fn non_streaming_tool_call_roundtrip() {
     let final_content = resp2["choices"][0]["message"]["content"]
         .as_str()
         .unwrap_or("");
-    assert!(!final_content.is_empty(), "final answer after tool result should be non-empty");
+    assert!(
+        !final_content.is_empty(),
+        "final answer after tool result should be non-empty"
+    );
 }
 
 #[tokio::test]
@@ -755,8 +799,13 @@ async fn non_streaming_tool_choice_none_ignores_tools() {
 
     assert_eq!(body["object"], "chat.completion");
     // With tool_choice=none, the model should answer directly.
-    let finish = body["choices"][0]["finish_reason"].as_str().unwrap_or("stop");
-    assert_eq!(finish, "stop", "tool_choice=none should produce finish_reason=stop");
+    let finish = body["choices"][0]["finish_reason"]
+        .as_str()
+        .unwrap_or("stop");
+    assert_eq!(
+        finish, "stop",
+        "tool_choice=none should produce finish_reason=stop"
+    );
     assert!(body["choices"][0]["message"]["content"].as_str().is_some());
 }
 
@@ -789,10 +838,15 @@ async fn streaming_tool_call_produces_tool_calls_chunks() {
     resp.assert_status_ok();
     let body = resp.text();
     let chunks = parse_sse_chunks(&body);
-    assert!(!chunks.is_empty(), "streaming with tools should produce chunks");
+    assert!(
+        !chunks.is_empty(),
+        "streaming with tools should produce chunks"
+    );
 
     // Find the finish_reason chunk — should be "tool_calls" or "stop".
-    let finish_chunk = chunks.iter().find(|c| !c["choices"][0]["finish_reason"].is_null());
+    let finish_chunk = chunks
+        .iter()
+        .find(|c| !c["choices"][0]["finish_reason"].is_null());
     if let Some(fc) = finish_chunk {
         let finish = fc["choices"][0]["finish_reason"].as_str().unwrap();
         assert!(
@@ -805,7 +859,10 @@ async fn streaming_tool_call_produces_tool_calls_chunks() {
             let has_tool_delta = chunks
                 .iter()
                 .any(|c| !c["choices"][0]["delta"]["tool_calls"].is_null());
-            assert!(has_tool_delta, "streaming tool_calls should have at least one tool_calls delta chunk");
+            assert!(
+                has_tool_delta,
+                "streaming tool_calls should have at least one tool_calls delta chunk"
+            );
         }
     }
 }
@@ -836,7 +893,10 @@ fn tool_format_conversion_unwraps_nested_function() {
     assert_eq!(tool["description"], "Get weather");
     assert!(tool["parameters"].is_object());
     // Nested "function" wrapper should be gone.
-    assert!(tool.get("function").is_none(), "function wrapper should be removed");
+    assert!(
+        tool.get("function").is_none(),
+        "function wrapper should be removed"
+    );
 }
 
 #[test]
@@ -847,7 +907,10 @@ fn tool_choice_conversion_function_object() {
     let converted = convert_tool_choice_to_responses_format(&choice);
     assert_eq!(converted["type"], "function");
     assert_eq!(converted["name"], "my_tool");
-    assert!(converted.get("function").is_none(), "nested function should be removed");
+    assert!(
+        converted.get("function").is_none(),
+        "nested function should be removed"
+    );
 }
 
 #[test]
@@ -857,7 +920,10 @@ fn tool_choice_conversion_string_passthrough() {
     for s in &["auto", "none", "required"] {
         let choice = json!(s);
         let converted = convert_tool_choice_to_responses_format(&choice);
-        assert_eq!(converted, choice, "string tool_choice should pass through unchanged");
+        assert_eq!(
+            converted, choice,
+            "string tool_choice should pass through unchanged"
+        );
     }
 }
 
@@ -890,11 +956,14 @@ fn convert_request_tool_messages_become_function_call_output() {
         name: None,
     };
 
-    let req = chat_req("gpt-5.3-codex", vec![
-        msg("user", "What's the weather?"),
-        assistant_msg,
-        tool_result_msg,
-    ]);
+    let req = chat_req(
+        "gpt-5.3-codex",
+        vec![
+            msg("user", "What's the weather?"),
+            assistant_msg,
+            tool_result_msg,
+        ],
+    );
 
     let codex_req = convert_request(&req, None, BackendProfile::OpenAiResponses);
 
@@ -902,8 +971,14 @@ fn convert_request_tool_messages_become_function_call_output() {
     assert_eq!(codex_req.input.len(), 3);
 
     assert!(matches!(codex_req.input[0], ResponsesInputItem::Message(_)));
-    assert!(matches!(codex_req.input[1], ResponsesInputItem::FunctionCall(_)));
-    assert!(matches!(codex_req.input[2], ResponsesInputItem::FunctionCallOutput(_)));
+    assert!(matches!(
+        codex_req.input[1],
+        ResponsesInputItem::FunctionCall(_)
+    ));
+    assert!(matches!(
+        codex_req.input[2],
+        ResponsesInputItem::FunctionCallOutput(_)
+    ));
 
     if let ResponsesInputItem::FunctionCall(ref fc) = codex_req.input[1] {
         assert_eq!(fc.call_id, "call_abc");
@@ -1008,10 +1083,10 @@ fn finish_reason_mapping_tool_calls() {
 fn convert_request_system_message_becomes_instructions() {
     use openai_proxy_lib::codex::{BackendProfile, ResponsesInputItem, convert_request};
 
-    let req = chat_req("gpt-5.3-codex", vec![
-        msg("system", "Be helpful."),
-        msg("user", "Hello"),
-    ]);
+    let req = chat_req(
+        "gpt-5.3-codex",
+        vec![msg("system", "Be helpful."), msg("user", "Hello")],
+    );
 
     let codex_req = convert_request(&req, None, BackendProfile::ChatGptCodex);
     assert_eq!(codex_req.instructions.as_deref(), Some("Be helpful."));
@@ -1031,21 +1106,30 @@ fn convert_request_no_system_message_injects_default_instructions() {
 
     let req = chat_req("gpt-5.3-codex", vec![msg("user", "Hello")]);
     let codex_req = convert_request(&req, None, BackendProfile::ChatGptCodex);
-    assert!(codex_req.instructions.is_some(), "default instructions should be injected");
+    assert!(
+        codex_req.instructions.is_some(),
+        "default instructions should be injected"
+    );
 }
 
 #[test]
 fn convert_request_multiple_system_messages_joined() {
     use openai_proxy_lib::codex::{BackendProfile, convert_request};
 
-    let req = chat_req("gpt-5.3-codex", vec![
-        msg("system", "Rule 1."),
-        msg("system", "Rule 2."),
-        msg("user", "Hi"),
-    ]);
+    let req = chat_req(
+        "gpt-5.3-codex",
+        vec![
+            msg("system", "Rule 1."),
+            msg("system", "Rule 2."),
+            msg("user", "Hi"),
+        ],
+    );
 
     let codex_req = convert_request(&req, None, BackendProfile::ChatGptCodex);
-    assert_eq!(codex_req.instructions.as_deref(), Some("Rule 1.\n\nRule 2."));
+    assert_eq!(
+        codex_req.instructions.as_deref(),
+        Some("Rule 1.\n\nRule 2.")
+    );
 }
 
 #[test]
@@ -1082,9 +1166,15 @@ fn convert_request_chatgpt_profile_strips_temperature() {
     req.top_p = Some(0.9);
 
     let codex_req = convert_request(&req, None, BackendProfile::ChatGptCodex);
-    assert!(codex_req.temperature.is_none(), "ChatGptCodex must strip temperature");
+    assert!(
+        codex_req.temperature.is_none(),
+        "ChatGptCodex must strip temperature"
+    );
     assert!(codex_req.top_p.is_none(), "ChatGptCodex must strip top_p");
-    assert!(codex_req.max_output_tokens.is_none(), "ChatGptCodex must strip max_output_tokens");
+    assert!(
+        codex_req.max_output_tokens.is_none(),
+        "ChatGptCodex must strip max_output_tokens"
+    );
 }
 
 #[test]
@@ -1097,9 +1187,21 @@ fn convert_request_responses_api_profile_preserves_temperature() {
     req.top_p = Some(0.8);
 
     let codex_req = convert_request(&req, None, BackendProfile::OpenAiResponses);
-    assert_eq!(codex_req.temperature, Some(0.5), "OpenAiResponses should preserve temperature");
-    assert_eq!(codex_req.top_p, Some(0.8), "OpenAiResponses should preserve top_p");
-    assert_eq!(codex_req.max_output_tokens, Some(50), "OpenAiResponses should preserve max_output_tokens");
+    assert_eq!(
+        codex_req.temperature,
+        Some(0.5),
+        "OpenAiResponses should preserve temperature"
+    );
+    assert_eq!(
+        codex_req.top_p,
+        Some(0.8),
+        "OpenAiResponses should preserve top_p"
+    );
+    assert_eq!(
+        codex_req.max_output_tokens,
+        Some(50),
+        "OpenAiResponses should preserve max_output_tokens"
+    );
 }
 
 #[test]
@@ -1136,16 +1238,25 @@ fn resolve_model_gpt55_supports_all_profiles() {
 fn resolve_model_gpt55_pro_responses_api_only() {
     use openai_proxy_lib::codex::resolve_model;
     let t = resolve_model("gpt-5.5-pro");
-    assert!(!t.supports_codex_backend, "gpt-5.5-pro should not be available on ChatGptCodex");
+    assert!(
+        !t.supports_codex_backend,
+        "gpt-5.5-pro should not be available on ChatGptCodex"
+    );
     assert!(t.supports_responses_api);
-    assert!(!t.supports_chat_completions, "gpt-5.5-pro should not be available on Chat Completions");
+    assert!(
+        !t.supports_chat_completions,
+        "gpt-5.5-pro should not be available on Chat Completions"
+    );
 }
 
 #[test]
 fn resolve_model_codex_mini_api_key_only() {
     use openai_proxy_lib::codex::resolve_model;
     let t = resolve_model("codex-mini");
-    assert!(!t.supports_codex_backend, "codex-mini must not be available on ChatGptCodex profile");
+    assert!(
+        !t.supports_codex_backend,
+        "codex-mini must not be available on ChatGptCodex profile"
+    );
     assert!(t.supports_responses_api);
     assert!(t.supports_chat_completions);
 }
@@ -1172,8 +1283,14 @@ fn auth_json_loads_from_standard_location() {
 fn auth_bearer_returns_non_empty_header() {
     let (state, _) = load_real_auth();
     let (header, _) = state.auth.bearer();
-    assert!(header.starts_with("Bearer "), "bearer header should start with 'Bearer '");
-    assert!(header.len() > 10, "bearer header should contain an actual token");
+    assert!(
+        header.starts_with("Bearer "),
+        "bearer header should start with 'Bearer '"
+    );
+    assert!(
+        header.len() > 10,
+        "bearer header should contain an actual token"
+    );
 }
 
 #[test]
@@ -1216,8 +1333,13 @@ async fn mcp_initialize_returns_protocol_version() {
         }),
     };
 
-    let resp = dispatch(&state, req).await.expect("initialize should return a response");
-    assert!(resp.error.is_none(), "initialize should not return an error");
+    let resp = dispatch(&state, req)
+        .await
+        .expect("initialize should return a response");
+    assert!(
+        resp.error.is_none(),
+        "initialize should not return an error"
+    );
     let result = resp.result.unwrap();
     assert_eq!(result["protocolVersion"], "2024-11-05");
     assert_eq!(result["serverInfo"]["name"], "openai-proxy");
@@ -1252,7 +1374,9 @@ async fn mcp_tools_list_returns_four_tools() {
         params: json!({}),
     };
 
-    let resp = dispatch(&state, req).await.expect("tools/list should respond");
+    let resp = dispatch(&state, req)
+        .await
+        .expect("tools/list should respond");
     assert!(resp.error.is_none());
     let tools = resp.result.unwrap()["tools"].as_array().unwrap().clone();
     assert_eq!(tools.len(), 4, "expected 4 MCP tools, got {}", tools.len());
@@ -1304,13 +1428,22 @@ async fn mcp_list_models_tool_returns_models_for_profile() {
     let result = resp.result.unwrap();
     assert_eq!(result["isError"], false);
     let text = result["content"][0]["text"].as_str().unwrap();
-    assert!(text.contains("gpt-5.3-codex"), "list_models should mention gpt-5.3-codex");
+    assert!(
+        text.contains("gpt-5.3-codex"),
+        "list_models should mention gpt-5.3-codex"
+    );
     match profile {
         BackendProfile::ChatGptCodex => {
-            assert!(!text.contains("codex-mini"), "ChatGptCodex should not list codex-mini");
+            assert!(
+                !text.contains("codex-mini"),
+                "ChatGptCodex should not list codex-mini"
+            );
         }
         _ => {
-            assert!(text.contains("codex-mini"), "API key profiles should list codex-mini");
+            assert!(
+                text.contains("codex-mini"),
+                "API key profiles should list codex-mini"
+            );
         }
     }
 }
@@ -1332,7 +1465,10 @@ async fn mcp_check_auth_tool_reports_authenticated() {
     let result = resp.result.unwrap();
     assert_eq!(result["isError"], false);
     let text = result["content"][0]["text"].as_str().unwrap();
-    assert!(text.contains('✓'), "check_auth should indicate authenticated status");
+    assert!(
+        text.contains('✓'),
+        "check_auth should indicate authenticated status"
+    );
 }
 
 #[tokio::test]
@@ -1352,7 +1488,10 @@ async fn mcp_set_model_recommends_mini_for_simple_task() {
         .as_str()
         .unwrap()
         .to_string();
-    assert!(text.contains("codex-mini"), "simple task should recommend codex-mini");
+    assert!(
+        text.contains("codex-mini"),
+        "simple task should recommend codex-mini"
+    );
 }
 
 #[tokio::test]
@@ -1372,7 +1511,10 @@ async fn mcp_set_model_recommends_full_for_complex_task() {
         .as_str()
         .unwrap()
         .to_string();
-    assert!(text.contains("gpt-5.3-codex"), "complex task should recommend gpt-5.3-codex");
+    assert!(
+        text.contains("gpt-5.3-codex"),
+        "complex task should recommend gpt-5.3-codex"
+    );
 }
 
 #[tokio::test]
@@ -1389,9 +1531,15 @@ async fn mcp_unknown_tool_returns_is_error_true() {
 
     let resp = dispatch(&state, req).await.unwrap();
     let result = resp.result.unwrap();
-    assert_eq!(result["isError"], true, "unknown tool should set isError=true");
+    assert_eq!(
+        result["isError"], true,
+        "unknown tool should set isError=true"
+    );
     let text = result["content"][0]["text"].as_str().unwrap();
-    assert!(text.contains("Unknown tool"), "should report unknown tool name");
+    assert!(
+        text.contains("Unknown tool"),
+        "should report unknown tool name"
+    );
 }
 
 #[tokio::test]
@@ -1407,7 +1555,10 @@ async fn mcp_unknown_method_returns_method_not_found_error() {
     };
 
     let resp = dispatch(&state, req).await.unwrap();
-    assert!(resp.error.is_some(), "unknown method should return JSON-RPC error");
+    assert!(
+        resp.error.is_some(),
+        "unknown method should return JSON-RPC error"
+    );
     assert_eq!(resp.error.unwrap().code, -32601);
 }
 
@@ -1424,7 +1575,10 @@ async fn mcp_notifications_initialized_returns_none() {
     };
 
     let resp = dispatch(&state, req).await;
-    assert!(resp.is_none(), "notifications/initialized should return None (no response)");
+    assert!(
+        resp.is_none(),
+        "notifications/initialized should return None (no response)"
+    );
 }
 
 // ── MCP live: chat_completion tool hits real Codex ───────────────────────────
@@ -1449,9 +1603,16 @@ async fn mcp_chat_completion_tool_returns_text() {
 
     let resp = dispatch(&state, req).await.unwrap();
     let result = resp.result.unwrap();
-    assert_eq!(result["isError"], false, "chat_completion should not error: {:?}", result);
+    assert_eq!(
+        result["isError"], false,
+        "chat_completion should not error: {:?}",
+        result
+    );
     let text = result["content"][0]["text"].as_str().unwrap();
-    assert!(!text.is_empty(), "MCP chat_completion should return non-empty text");
+    assert!(
+        !text.is_empty(),
+        "MCP chat_completion should return non-empty text"
+    );
 }
 
 #[tokio::test]
@@ -1478,7 +1639,11 @@ async fn mcp_chat_completion_tool_with_max_tokens() {
     // ChatGptCodex strips max_tokens — backend accepts the request anyway.
     // OpenAiResponses forwards it — backend truncates.
     // Either way: isError=false and some text.
-    assert_eq!(result["isError"], false, "chat_completion with max_tokens should not error: {:?}", result);
+    assert_eq!(
+        result["isError"], false,
+        "chat_completion with max_tokens should not error: {:?}",
+        result
+    );
     let text = result["content"][0]["text"].as_str().unwrap();
     assert!(!text.is_empty());
 }
@@ -1503,9 +1668,15 @@ async fn mcp_chat_completion_tool_missing_messages_is_error() {
 
     let resp = dispatch(&state, req).await.unwrap();
     let result = resp.result.unwrap();
-    assert_eq!(result["isError"], true, "missing messages should set isError=true");
+    assert_eq!(
+        result["isError"], true,
+        "missing messages should set isError=true"
+    );
     let text = result["content"][0]["text"].as_str().unwrap();
-    assert!(text.contains("messages"), "error should mention the missing field");
+    assert!(
+        text.contains("messages"),
+        "error should mention the missing field"
+    );
 }
 
 // ── MCP HTTP transport ────────────────────────────────────────────────────────
@@ -1622,10 +1793,7 @@ async fn mcp_http_bad_json_returns_400() {
 #[tokio::test]
 async fn invalid_json_body_returns_422() {
     let server = test_server();
-    let resp = server
-        .post("/v1/chat/completions")
-        .text("not json")
-        .await;
+    let resp = server.post("/v1/chat/completions").text("not json").await;
 
     assert!(
         resp.status_code().as_u16() >= 400,
@@ -1685,7 +1853,10 @@ async fn non_streaming_gpt55_responds() {
     let server = test_server();
     let resp = server
         .post("/v1/chat/completions")
-        .json(&chat_req_json("gpt-5.5", &[("user", "Say the word 'ready' and nothing else.")]))
+        .json(&chat_req_json(
+            "gpt-5.5",
+            &[("user", "Say the word 'ready' and nothing else.")],
+        ))
         .await;
 
     assert_eq!(
@@ -1699,5 +1870,8 @@ async fn non_streaming_gpt55_responds() {
     let content = body["choices"][0]["message"]["content"]
         .as_str()
         .unwrap_or("");
-    assert!(!content.is_empty(), "expected non-empty response from gpt-5.5, got: {body}");
+    assert!(
+        !content.is_empty(),
+        "expected non-empty response from gpt-5.5, got: {body}"
+    );
 }

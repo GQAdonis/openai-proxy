@@ -141,7 +141,7 @@ config.provider.codex = {
   npm: "@ai-sdk/openai-compatible",
   name: "Codex (via proxy)",
   options: {
-    baseURL: PROXY_BASE_URL,   // default: "http://localhost:8080/v1"
+    baseURL: PROXY_BASE_URL,   // default: "http://localhost:8181/v1"
     apiKey: <access_token or api_key or "codex-proxy">
   },
   models: { ... }
@@ -182,7 +182,7 @@ Fires once per opencode session on the `session.created` event:
 
 1. Pings `{proxy_host}/health` with a 1.5-second timeout.
 2. **If not healthy:** displays a TUI warning toast:
-   > "Codex proxy not running on http://localhost:8080/v1. Start it with: cargo run..."
+   > "Codex proxy not running on http://localhost:8181/v1. Start it with: cargo run..."
 3. **If healthy:** fetches `{PROXY_BASE_URL}/models` with a 2-second timeout. Parses `{ data: [{ id, context_length?, max_output_tokens? }] }` and refreshes the model list used by the config hook.
 
 ---
@@ -191,7 +191,7 @@ Fires once per opencode session on the `session.created` event:
 
 | Variable | Default | Effect |
 |----------|---------|--------|
-| `CODEX_PROXY_URL` | `http://localhost:8080/v1` | Override the proxy base URL. Set before Node loads the plugin for the config hook to pick it up; the shell.env hook also injects it into agent shells. |
+| `CODEX_PROXY_URL` | `http://localhost:8181/v1` | Override the proxy base URL. Set before Node loads the plugin for the config hook to pick it up; the shell.env hook also injects it into agent shells. |
 | `CODEX_AUTH_PATH` | `~/.codex/auth.json` | Override the credential file path. Also injected into agent shells. |
 | `CODEX_DEFAULT_MODEL` | _(not set)_ | If set, injected into agent shells as `CODEX_DEFAULT_MODEL`. |
 
@@ -274,13 +274,13 @@ The plugin's event hook refreshes these limits from `/v1/models` on each session
 
 ```bash
 # Check proxy is healthy
-curl http://localhost:8080/health
+curl http://localhost:8181/health
 
 # List available models
-curl http://localhost:8080/v1/models | jq .
+curl http://localhost:8181/v1/models | jq .
 
 # Test a completion (non-streaming)
-curl http://localhost:8080/v1/chat/completions \
+curl http://localhost:8181/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-5.5","messages":[{"role":"user","content":"hello"}],"stream":false}'
 ```
@@ -290,7 +290,7 @@ curl http://localhost:8080/v1/chat/completions \
 ## Troubleshooting
 
 **"Provider not found" / "Connection refused"**
-The proxy is not running or is on the wrong port. Run `openai-proxy serve` and confirm it binds to port 8080. If you changed the port, set `CODEX_PROXY_URL` to match.
+The proxy is not running or is on the wrong port. Run `openai-proxy serve` and confirm it binds to port 8181. If you changed the port, set `CODEX_PROXY_URL` to match.
 
 **Provider shows as `openai-proxy` instead of `codex`**
 You have an older `opencode.json` that uses the old provider key. The provider ID changed to `codex` in v0.1.0. Delete the old provider block and let the plugin inject it, or regenerate with `openai-proxy setup opencode`.
@@ -302,7 +302,7 @@ Add `"disabled": ["opencode:codex"]` to the `opencode.json` that loads the proxy
 The plugin's auth loader reads opencode's own auth store first. If the proxy binary also needs those credentials, start it with `CODEX_AUTH_PATH=~/.local/share/opencode/auth.json openai-proxy serve`.
 
 **Toast warning: "Codex proxy not running"**
-The proxy binary is not running or is on a different port than `PROXY_BASE_URL` (default `http://localhost:8080/v1`). Start the proxy or set `CODEX_PROXY_URL` to the actual URL before starting opencode.
+The proxy binary is not running or is on a different port than `PROXY_BASE_URL` (default `http://localhost:8181/v1`). Start the proxy or set `CODEX_PROXY_URL` to the actual URL before starting opencode.
 
 **400 errors with `gpt-5.5-pro` on a ChatGPT subscription**
 `gpt-5.5-pro` is not available on ChatGPT Plus/Pro subscriptions. Use `gpt-5.5` instead. The model is only accessible with an OpenAI API key.

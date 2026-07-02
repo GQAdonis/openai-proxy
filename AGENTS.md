@@ -37,7 +37,7 @@ openai-proxy setup mcp [--opencode|--claude] [--port N]
 `opencode.json` at repo root declares:
 - `"plugin": ["file:./plugin"]` — loads the TypeScript plugin
 - `"model": "codex/gpt-5.3-codex"` — default model
-- `"provider.codex"` — `@ai-sdk/openai-compatible` pointing at `http://localhost:8080/v1` with models: gpt-5.3-codex, codex-mini, gpt-4o
+- `"provider.codex"` — `@ai-sdk/openai-compatible` pointing at `http://localhost:8181/v1` with models: gpt-5.3-codex, codex-mini, gpt-4o
 
 `.opencode/` directory contains:
 - **10 opsx-* commands** — `/opsx-new`, `/opsx-apply`, `/opsx-archive`, `/opsx-continue`, `/opsx-explore`, `/opsx-ff`, `/opsx-sync`, `/opsx-verify`, `/opsx-onboard`, `/opsx-bulk-archive` — experimental OpenSpec artifact workflow

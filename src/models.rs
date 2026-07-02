@@ -26,39 +26,43 @@ struct ModelSpec {
 }
 
 const fn spec(id: &'static str, context_length: u32, max_output_tokens: u32) -> ModelSpec {
-    ModelSpec { id, context_length, max_output_tokens }
+    ModelSpec {
+        id,
+        context_length,
+        max_output_tokens,
+    }
 }
 
 pub async fn list_models(State(state): State<AppState>) -> Json<ModelList> {
     let models: &[ModelSpec] = match state.backend_profile {
         BackendProfile::ChatGptCodex => &[
-            spec("gpt-5.5",       400_000, 32_768),
-            spec("gpt-5.4",       400_000, 32_768),
-            spec("gpt-5.4-mini",  200_000, 16_384),
-            spec("gpt-5.4-nano",  128_000,  8_192),
+            spec("gpt-5.5", 400_000, 32_768),
+            spec("gpt-5.4", 400_000, 32_768),
+            spec("gpt-5.4-mini", 200_000, 16_384),
+            spec("gpt-5.4-nano", 128_000, 8_192),
             spec("gpt-5.3-codex", 400_000, 32_768),
-            spec("gpt-5.3-chat",  128_000, 16_384),
-            spec("gpt-5.2-chat",  128_000, 16_384),
+            spec("gpt-5.3-chat", 128_000, 16_384),
+            spec("gpt-5.2-chat", 128_000, 16_384),
         ],
         BackendProfile::OpenAiResponses => &[
-            spec("gpt-5.5",       1_000_000, 32_768),
-            spec("gpt-5.5-pro",   1_000_000, 32_768),
-            spec("gpt-5.4",         400_000, 32_768),
-            spec("gpt-5.4-mini",    200_000, 16_384),
-            spec("gpt-5.4-nano",    128_000,  8_192),
-            spec("gpt-5.3-codex",   400_000, 32_768),
-            spec("gpt-5.3-chat",    128_000, 16_384),
-            spec("gpt-5.2-chat",    128_000, 16_384),
+            spec("gpt-5.5", 1_000_000, 32_768),
+            spec("gpt-5.5-pro", 1_000_000, 32_768),
+            spec("gpt-5.4", 400_000, 32_768),
+            spec("gpt-5.4-mini", 200_000, 16_384),
+            spec("gpt-5.4-nano", 128_000, 8_192),
+            spec("gpt-5.3-codex", 400_000, 32_768),
+            spec("gpt-5.3-chat", 128_000, 16_384),
+            spec("gpt-5.2-chat", 128_000, 16_384),
         ],
         BackendProfile::OpenAiChatCompletions => &[
-            spec("gpt-5.5",       1_000_000, 32_768),
-            spec("gpt-5.5-pro",   1_000_000, 32_768),
-            spec("gpt-5.4",         400_000, 32_768),
-            spec("gpt-5.4-mini",    200_000, 16_384),
-            spec("gpt-5.4-nano",    128_000,  8_192),
-            spec("gpt-5.3-codex",   400_000, 32_768),
-            spec("gpt-5.3-chat",    128_000, 16_384),
-            spec("gpt-5.2-chat",    128_000, 16_384),
+            spec("gpt-5.5", 1_000_000, 32_768),
+            spec("gpt-5.5-pro", 1_000_000, 32_768),
+            spec("gpt-5.4", 400_000, 32_768),
+            spec("gpt-5.4-mini", 200_000, 16_384),
+            spec("gpt-5.4-nano", 128_000, 8_192),
+            spec("gpt-5.3-codex", 400_000, 32_768),
+            spec("gpt-5.3-chat", 128_000, 16_384),
+            spec("gpt-5.2-chat", 128_000, 16_384),
         ],
     };
 

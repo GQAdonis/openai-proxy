@@ -21,7 +21,7 @@ not mounted by default.
 openai-proxy --a2a
 
 # Fetch the Agent Card
-curl http://localhost:8080/.well-known/agent.json
+curl http://localhost:8181/.well-known/agent.json
 ```
 
 The proxy returns the Agent Card JSON immediately. No authentication is required
@@ -38,7 +38,7 @@ The `url` field reflects the `--bind` address of the running proxy instance.
 {
   "name": "openai-proxy",
   "description": "OpenAI Chat Completions proxy backed by Codex/Responses API",
-  "url": "http://localhost:8080",
+  "url": "http://localhost:8181",
   "version": "0.1.0",
   "capabilities": {
     "streaming": true,
@@ -94,7 +94,7 @@ The orchestrator reads the Agent Card from the well-known URL:
 
 ```bash
 GET /.well-known/agent.json HTTP/1.1
-Host: localhost:8080
+Host: localhost:8181
 ```
 
 ### 2. Identify available skills
@@ -110,7 +110,7 @@ The orchestrator sends an OpenAI-compatible chat completions request to the
 
 ```bash
 POST /v1/chat/completions HTTP/1.1
-Host: localhost:8080
+Host: localhost:8181
 Content-Type: application/json
 Authorization: Bearer <your-key>
 
@@ -133,7 +133,7 @@ To discover which models are available on the configured backend:
 
 ```bash
 GET /v1/models HTTP/1.1
-Host: localhost:8080
+Host: localhost:8181
 Authorization: Bearer <your-key>
 ```
 

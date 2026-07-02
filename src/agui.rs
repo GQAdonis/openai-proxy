@@ -10,8 +10,8 @@
 use axum::{
     Json,
     extract::State,
-    response::{IntoResponse, Response, Sse},
     response::sse::Event,
+    response::{IntoResponse, Response, Sse},
 };
 use futures_util::stream::{self, Stream, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -65,10 +65,7 @@ pub struct AguiRequest {
 ///
 /// Accepts an AG-UI request body and returns an SSE stream of AG-UI events.
 /// The stream is compatible with the CopilotKit `useCoAgent` hook.
-pub async fn agui_stream(
-    State(state): State<AppState>,
-    Json(body): Json<AguiRequest>,
-) -> Response {
+pub async fn agui_stream(State(state): State<AppState>, Json(body): Json<AguiRequest>) -> Response {
     let run_id = uuid::Uuid::new_v4().to_string();
     let message_id = uuid::Uuid::new_v4().to_string();
 
@@ -105,8 +102,11 @@ async fn build_agui_stream(
     let run_id_end = run_id.clone();
     let message_id_end = message_id.clone();
 
-    let codex_req =
-        codex::convert_request(&chat_req, state.default_model.as_deref(), state.backend_profile);
+    let codex_req = codex::convert_request(
+        &chat_req,
+        state.default_model.as_deref(),
+        state.backend_profile,
+    );
 
     // Build the upstream request; on failure emit a single error run.
     let http_req = match build_responses_request(&state, &codex_req) {
@@ -114,8 +114,11 @@ async fn build_agui_stream(
         Err(e) => {
             tracing::error!(error = %e, "ag-ui: failed to build upstream request");
             return stream::iter(vec![
-                Ok(Event::default().data(format!(r#"{{"type":"RUN_STARTED","run_id":"{run_id}"}}"#))),
-                Ok(Event::default().data(format!(r#"{{"type":"RUN_FINISHED","run_id":"{run_id_end}"}}"#))),
+                Ok(Event::default()
+                    .data(format!(r#"{{"type":"RUN_STARTED","run_id":"{run_id}"}}"#))),
+                Ok(Event::default().data(format!(
+                    r#"{{"type":"RUN_FINISHED","run_id":"{run_id_end}"}}"#
+                ))),
             ])
             .left_stream();
         }
@@ -127,16 +130,22 @@ async fn build_agui_stream(
             let status = r.status();
             tracing::error!(status = %status, "ag-ui: upstream error");
             return stream::iter(vec![
-                Ok(Event::default().data(format!(r#"{{"type":"RUN_STARTED","run_id":"{run_id}"}}"#))),
-                Ok(Event::default().data(format!(r#"{{"type":"RUN_FINISHED","run_id":"{run_id_end}"}}"#))),
+                Ok(Event::default()
+                    .data(format!(r#"{{"type":"RUN_STARTED","run_id":"{run_id}"}}"#))),
+                Ok(Event::default().data(format!(
+                    r#"{{"type":"RUN_FINISHED","run_id":"{run_id_end}"}}"#
+                ))),
             ])
             .left_stream();
         }
         Err(e) => {
             tracing::error!(error = %e, "ag-ui: upstream HTTP error");
             return stream::iter(vec![
-                Ok(Event::default().data(format!(r#"{{"type":"RUN_STARTED","run_id":"{run_id}"}}"#))),
-                Ok(Event::default().data(format!(r#"{{"type":"RUN_FINISHED","run_id":"{run_id_end}"}}"#))),
+                Ok(Event::default()
+                    .data(format!(r#"{{"type":"RUN_STARTED","run_id":"{run_id}"}}"#))),
+                Ok(Event::default().data(format!(
+                    r#"{{"type":"RUN_FINISHED","run_id":"{run_id_end}"}}"#
+                ))),
             ])
             .left_stream();
         }
@@ -144,12 +153,16 @@ async fn build_agui_stream(
 
     // Stream preamble + body chunks + epilogue.
     let preamble: Vec<Result<Event, Infallible>> = vec![
-        Ok(AguiEvent::RunStarted { run_id: run_id.clone() }
-            .to_sse_event()
-            .unwrap_or_else(|_| Event::default())),
-        Ok(AguiEvent::TextMessageStart { message_id: message_id.clone() }
-            .to_sse_event()
-            .unwrap_or_else(|_| Event::default())),
+        Ok(AguiEvent::RunStarted {
+            run_id: run_id.clone(),
+        }
+        .to_sse_event()
+        .unwrap_or_else(|_| Event::default())),
+        Ok(AguiEvent::TextMessageStart {
+            message_id: message_id.clone(),
+        }
+        .to_sse_event()
+        .unwrap_or_else(|_| Event::default())),
     ];
 
     let body_stream = resp
@@ -166,10 +179,14 @@ async fn build_agui_stream(
             remainder.push_str(&String::from_utf8_lossy(&chunk));
             let mut events = Vec::new();
             loop {
-                let Some(nl) = remainder.find('\n') else { break };
+                let Some(nl) = remainder.find('\n') else {
+                    break;
+                };
                 let line: String = remainder.drain(..=nl).collect();
                 let line = line.trim_end_matches(['\n', '\r']);
-                let Some(data) = line.strip_prefix("data: ") else { continue };
+                let Some(data) = line.strip_prefix("data: ") else {
+                    continue;
+                };
                 if data == "[DONE]" {
                     break;
                 }
@@ -193,9 +210,11 @@ async fn build_agui_stream(
         .flat_map(stream::iter);
 
     let epilogue: Vec<Result<Event, Infallible>> = vec![
-        Ok(AguiEvent::TextMessageEnd { message_id: message_id_end.clone() }
-            .to_sse_event()
-            .unwrap_or_else(|_| Event::default())),
+        Ok(AguiEvent::TextMessageEnd {
+            message_id: message_id_end.clone(),
+        }
+        .to_sse_event()
+        .unwrap_or_else(|_| Event::default())),
         Ok(AguiEvent::RunFinished { run_id: run_id_end }
             .to_sse_event()
             .unwrap_or_else(|_| Event::default())),
@@ -213,7 +232,9 @@ mod tests {
 
     #[test]
     fn agui_event_serializes_correctly() {
-        let ev = AguiEvent::RunStarted { run_id: "abc".to_string() };
+        let ev = AguiEvent::RunStarted {
+            run_id: "abc".to_string(),
+        };
         let json = serde_json::to_string(&ev).unwrap();
         assert!(json.contains("\"type\":\"RUN_STARTED\""));
         assert!(json.contains("\"run_id\":\"abc\""));
@@ -232,7 +253,9 @@ mod tests {
 
     #[test]
     fn agui_run_finished_serializes_correctly() {
-        let ev = AguiEvent::RunFinished { run_id: "r1".to_string() };
+        let ev = AguiEvent::RunFinished {
+            run_id: "r1".to_string(),
+        };
         let json = serde_json::to_string(&ev).unwrap();
         assert!(json.contains("\"type\":\"RUN_FINISHED\""));
     }

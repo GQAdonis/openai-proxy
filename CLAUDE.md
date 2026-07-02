@@ -127,7 +127,7 @@ Built-in defaults → `$XDG_CONFIG_HOME/oproxy/config.toml` → `--config <path>
 
 1. **Native plugin** (`plugin/`) — TypeScript; published as `@prometheus-ags/opencode-codex-proxy` on npm; hooks `config`, `auth`, `shell.env`, `event`; recommended. Provider ID: `codex`.
 2. **Static config** (`opencode.json` at repo root) — `@ai-sdk/openai-compatible` provider with provider ID `codex`; drop-in for any project
-3. **Generic OpenAI client** — `OPENAI_BASE_URL=http://localhost:8080/v1`, any non-empty API key
+3. **Generic OpenAI client** — `OPENAI_BASE_URL=http://localhost:8181/v1`, any non-empty API key
 
 `openai-proxy setup opencode` generates a correct `opencode.json` (detects ChatGPT OAuth vs API key; uses `{env:VAR}` syntax for opencode's interpolation format).
 
