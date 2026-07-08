@@ -1,38 +1,37 @@
 # KBD Current Waypoint
 
-**Phase:** opencode-cross-integration-assessment  
-**Status:** PLANNED — ready to execute  
-**Change backend:** OpenSpec  
-**Last updated:** 2026-05-10  
+**Phase:** opencode-cross-integration-assessment
+**Status:** REFLECTED — phase complete (6/6 changes done, closed)
+**Change backend:** OpenSpec
+**Last updated:** 2026-07-08
 
-## Goal
+## Goal (achieved)
 
 Fix integration bugs between openai-proxy and opencode, document the built-in CodexAuthPlugin conflict, unify model catalog, align skill scoring algorithms, and prepare the plugin for npm publishing.
+
+**Outcome:** 6/6 goals MET (100%). See `phases/opencode-cross-integration-assessment/reflection.md`.
 
 ## Next Action
 
 ```
-/kbd-execute opencode-cross-integration-assessment
+/kbd-new-phase
 ```
 
-## Execution Order
+This phase is executed and reflected; there is no remaining work in it. Start the next phase.
 
-| Round | Group | Changes | Notes |
-|-------|-------|---------|-------|
-| 1 | A (parallel) | `proxy-bug-apikey-field`, `proxy-bug-codex-login-shape` | P0 bugs — run in parallel |
-| 2 | B (parallel) | `plugin-codex-conflict-docs`, `model-catalog-unification` | After bugs fixed |
-| 3 | C (single) | `skill-scoring-parity` | After `skills-selection-algorithm` (existing) applied |
-| 4 | D (single) | `plugin-npm-publish` | After P0 bugs fixed |
+## Delivered Changes (all done)
 
-## OpenSpec Changes (new)
+| # | Change ID | Priority | Status |
+|---|-----------|----------|--------|
+| 1 | `proxy-bug-apikey-field` | P0 | ✅ done |
+| 2 | `proxy-bug-codex-login-shape` | P0 | ✅ done |
+| 3 | `plugin-codex-conflict-docs` | P0 | ✅ done |
+| 4 | `model-catalog-unification` | P1 | ✅ done |
+| 5 | `skill-scoring-parity` | P1 | ✅ done |
+| 6 | `plugin-npm-publish` | P2 | ✅ done |
 
-- `openspec/changes/proxy-bug-apikey-field/` — fix `auth?.apiKey` type mismatch
-- `openspec/changes/proxy-bug-codex-login-shape/` — validate `spawnCodexLogin()` return shape
-- `openspec/changes/plugin-codex-conflict-docs/` — document built-in plugin conflict
-- `openspec/changes/model-catalog-unification/` — fetch models from proxy at runtime
-- `openspec/changes/skill-scoring-parity/` — IDF-weighted scoring in `src/skills.rs`
-- `openspec/changes/plugin-npm-publish/` — npm packaging for `opencode-codex-proxy`
+## Records
 
-## Plan Location
-
-`.kbd-orchestrator/phases/opencode-cross-integration-assessment/plan.md`
+- Plan: `.kbd-orchestrator/phases/opencode-cross-integration-assessment/plan.md`
+- Progress: `.kbd-orchestrator/phases/opencode-cross-integration-assessment/progress.json`
+- Reflection: `.kbd-orchestrator/phases/opencode-cross-integration-assessment/reflection.md`

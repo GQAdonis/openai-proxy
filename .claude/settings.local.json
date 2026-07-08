@@ -61,7 +61,21 @@
       "Bash(lsof -nP -iTCP:8181 -sTCP:LISTEN)",
       "Bash(launchctl list *)",
       "Bash(curl -sS -m 3 http://127.0.0.1:8181/health)",
-      "Bash(curl -sS -m 3 http://127.0.0.1:8181/v1/models)"
+      "Bash(curl -sS -m 3 http://127.0.0.1:8181/v1/models)",
+      "Bash(git -C /Users/gqadonis/Projects/references/baseline/openai-proxy log --oneline -3)",
+      "Bash(git -C /Users/gqadonis/Projects/references/baseline/openai-proxy status --short)",
+      "Bash(/Users/gqadonis/Projects/references/baseline/openai-proxy/target/release/openai-proxy --version)",
+      "Bash(curl -sS -m 5 http://localhost:8181/health)",
+      "Read(//Users/gqadonis/.local/bin/**)",
+      "Bash(ps -o pid,lstart,command -p 2180)",
+      "Bash(find /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/shared/scripts -name kbd-reflect*.sh)",
+      "Bash(git -C /Users/gqadonis/Projects/prometheus/prometheus-skill-pack rev-parse --show-toplevel)",
+      "Bash(git -C /Users/gqadonis/Projects/prometheus/prometheus-skill-pack status --short)",
+      "Bash(git -C /Users/gqadonis/Projects/prometheus/prometheus-skill-pack status --porcelain)",
+      "Bash(bash /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/shared/scripts/tests/test-position-render.sh)",
+      "Bash(bash /Users/gqadonis/Projects/prometheus/prometheus-skill-pack/shared/scripts/tests/test-position-stop-gate.sh)",
+      "Bash(env -u CLAUDE_PLUGIN_ROOT -u REPO_ROOT bash shared/scripts/tests/test-position-render.sh)",
+      "Bash(env -u CLAUDE_PLUGIN_ROOT -u REPO_ROOT bash shared/scripts/tests/test-position-stop-gate.sh)"
     ]
   }
 }
