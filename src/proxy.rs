@@ -526,7 +526,7 @@ async fn non_stream_chat_completions(
         }
     }
 
-    let (auth_header, _) = state.auth.bearer();
+    let (auth_header, _) = state.auth.bearer()?;
     let resp = state
         .http_client
         .post(&state.backend_url)
@@ -637,7 +637,7 @@ async fn stream_chat_completions(
         }
     }
 
-    let (auth_header, _) = state.auth.bearer();
+    let (auth_header, _) = state.auth.bearer()?;
     let resp = state
         .http_client
         .post(&state.backend_url)
@@ -682,7 +682,7 @@ pub(crate) fn build_responses_request(
     state: &AppState,
     codex_req: &codex::ResponsesRequest,
 ) -> Result<reqwest::RequestBuilder, ProxyError> {
-    let (auth_header, account_id) = state.auth.bearer();
+    let (auth_header, account_id) = state.auth.bearer()?;
 
     let mut req_builder = state
         .http_client

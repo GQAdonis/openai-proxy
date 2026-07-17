@@ -205,7 +205,7 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
         BackendProfile::OpenAiChatCompletions => {
             let outbound =
                 build_chat_completions_request(&chat_req, state.default_model.as_deref());
-            let (auth_header, _) = state.auth.bearer();
+            let (auth_header, _) = state.auth.bearer().map_err(|e| e.to_string())?;
             let resp = state
                 .http_client
                 .post(&state.backend_url)
@@ -229,7 +229,7 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
         }
         profile => {
             let codex_req = convert_request(&chat_req, state.default_model.as_deref(), profile);
-            let (auth_header, account_id) = state.auth.bearer();
+            let (auth_header, account_id) = state.auth.bearer().map_err(|e| e.to_string())?;
             let mut req_builder = state
                 .http_client
                 .post(&state.backend_url)

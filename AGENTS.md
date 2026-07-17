@@ -18,7 +18,18 @@
 
 **Plugin path** in `opencode.json`: `"file:./plugin"`. Load globally via `~/.config/opencode/opencode.json` or project-locally via repo-root `opencode.json`.
 
-**Plugin provider ID**: `"codex"`. Models surfaced: `gpt-5.3-codex`, `codex-mini`, `gpt-4o` (128K context, 16K output).
+**Plugin provider ID**: `"codex"`. Models surfaced come from `plugin/src/config.ts::PROXY_MODELS`, refreshed at runtime from the proxy's own `GET /v1/models` (which derives from `src/model_catalog.rs`, the single source of truth). Current catalogue: `gpt-5.6-sol`/`gpt-5.6-terra`/`gpt-5.6-luna` (1.05M context, 128K output), `gpt-5.5`, `gpt-5.5-pro`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, `gpt-5.3-codex`, `gpt-5.3-chat`, `gpt-5.2-chat`, plus legacy aliases (`gpt-5.6`, `codex-mini`, `gpt-4o`, etc.).
+
+## Codex-native plugin
+
+Distinct from the opencode plugin above — this targets the Codex CLI's own native plugin system, not opencode.
+
+- **Manifest**: `.codex-plugin/plugin.json` — `name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`, `interface` (displayName/category/capabilities), `skills` (points at repo-root `SKILL.md`), `mcpServers` (points at repo-root `.mcp.json`).
+- **MCP config**: `.mcp.json` — launches the same MCP stdio server as the opencode integration (`openai-proxy serve --mcp-stdio`).
+- **Marketplace manifest**: `.agents/plugins/marketplace.json` — this repo IS the marketplace root; its single `plugins[]` entry uses `"source": {"source": "local", "path": "."}` (self-referencing — the plugin lives in the same repo as the marketplace manifest, not a separate git-subdir).
+- **Install (local clone)**: `codex plugin marketplace add <path-to-this-repo>` to register it as a marketplace, then `codex plugin add openai-proxy@openai-proxy` to install.
+- **Install (remote)**: `codex plugin marketplace add <this-repo's-git-url>` works the same way once the repo is pushed — Codex CLI fetches the repo and reads `.agents/plugins/marketplace.json` from its root.
+- No self-serve central Codex plugin directory exists yet (as of 2026-07) — distribution is via an explicit marketplace source add, not a public listing.
 
 ## CLI setup commands (generate opencode/MCP config)
 
@@ -36,8 +47,8 @@ openai-proxy setup mcp [--opencode|--claude] [--port N]
 
 `opencode.json` at repo root declares:
 - `"plugin": ["file:./plugin"]` — loads the TypeScript plugin
-- `"model": "codex/gpt-5.3-codex"` — default model
-- `"provider.codex"` — `@ai-sdk/openai-compatible` pointing at `http://localhost:8181/v1` with models: gpt-5.3-codex, codex-mini, gpt-4o
+- `"model": "codex/gpt-5.5"` — default model
+- `"provider.codex"` — `@ai-sdk/openai-compatible` pointing at `http://localhost:8181/v1`; models block mirrors `src/model_catalog.rs` (see the "opencode plugin (native)" section above for the current list)
 
 `.opencode/` directory contains:
 - **10 opsx-* commands** — `/opsx-new`, `/opsx-apply`, `/opsx-archive`, `/opsx-continue`, `/opsx-explore`, `/opsx-ff`, `/opsx-sync`, `/opsx-verify`, `/opsx-onboard`, `/opsx-bulk-archive` — experimental OpenSpec artifact workflow

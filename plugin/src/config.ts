@@ -23,6 +23,9 @@ export interface ProxyModel {
  * codex-mini is intentionally excluded from this list.
  */
 export const PROXY_MODELS: ProxyModel[] = [
+  { id: "gpt-5.6-sol",   name: "GPT-5.6 Sol",   context: 1_050_000, output: 128_000 },
+  { id: "gpt-5.6-terra", name: "GPT-5.6 Terra", context: 1_050_000, output: 128_000 },
+  { id: "gpt-5.6-luna",  name: "GPT-5.6 Luna",  context: 1_050_000, output: 128_000 },
   { id: "gpt-5.5",       name: "GPT-5.5",       context: 1_000_000, output: 32_768 },
   { id: "gpt-5.5-pro",   name: "GPT-5.5 Pro",   context: 1_000_000, output: 32_768 },
   { id: "gpt-5.4",       name: "GPT-5.4",       context:   400_000, output: 32_768 },

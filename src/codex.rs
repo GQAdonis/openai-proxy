@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 
 use crate::openai::{ChatCompletionRequest, MessageContent, ToolCall, ToolCallFunction};
 
@@ -31,10 +32,52 @@ struct TokensBlock {
     account_id: Option<String>,
 }
 
+/// Keyring service name Codex CLI uses for its own CLI auth storage
+/// (`cli_auth_credentials_store = "keyring"`). Matches `codex-rs/login/src/auth/storage.rs`
+/// upstream so this proxy can read credentials Codex CLI wrote, not just the plaintext file.
+const CODEX_KEYRING_SERVICE: &str = "Codex Auth";
+
+/// Reproduces Codex CLI's `compute_store_key()`: the keyring account for a given
+/// `$CODEX_HOME` is `cli|<first 16 hex chars of SHA256(canonicalized codex_home path)>`.
+fn codex_keyring_account(codex_home: &std::path::Path) -> String {
+    let canonical = codex_home
+        .canonicalize()
+        .unwrap_or_else(|_| codex_home.to_path_buf());
+    let path_str = canonical.to_string_lossy();
+    let mut hasher = Sha256::new();
+    hasher.update(path_str.as_bytes());
+    let digest = hasher.finalize();
+    let hex = format!("{digest:x}");
+    let truncated = hex.get(..16).unwrap_or(&hex);
+    format!("cli|{truncated}")
+}
+
+/// Attempt to load Codex CLI's `AuthDotJson`-shaped credentials from the OS keyring,
+/// for users who have opted into `cli_auth_credentials_store = "keyring"` (direct backend).
+/// Returns `None` on any failure — this is a best-effort fallback, not a hard requirement.
+fn load_from_keyring(codex_home: &std::path::Path) -> Option<CodexAuthFile> {
+    let account = codex_keyring_account(codex_home);
+    let entry = keyring::Entry::new(CODEX_KEYRING_SERVICE, &account).ok()?;
+    let serialized = entry.get_password().ok()?;
+    serde_json::from_str(&serialized).ok()
+}
+
 impl CodexAuth {
     pub fn load(path: &std::path::Path) -> anyhow::Result<Self> {
-        let content = std::fs::read_to_string(path)?;
-        let raw: CodexAuthFile = serde_json::from_str(&content)?;
+        let raw = match Self::load_from_file(path) {
+            Ok(raw) => raw,
+            Err(file_err) => {
+                let codex_home = path.parent().unwrap_or_else(|| std::path::Path::new("."));
+                load_from_keyring(codex_home).ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "no Codex credentials found: {} is missing or unreadable ({file_err}), \
+                         and no matching entry exists in the OS keyring under service \
+                         \"{CODEX_KEYRING_SERVICE}\"",
+                        path.display()
+                    )
+                })?
+            }
+        };
         let (access_token, account_id) = if let Some(t) = raw.tokens {
             (t.access_token, t.account_id)
         } else {
@@ -48,13 +91,21 @@ impl CodexAuth {
         })
     }
 
-    pub fn bearer(&self) -> (String, Option<String>) {
+    fn load_from_file(path: &std::path::Path) -> anyhow::Result<CodexAuthFile> {
+        let content = std::fs::read_to_string(path)?;
+        let raw: CodexAuthFile = serde_json::from_str(&content)?;
+        Ok(raw)
+    }
+
+    pub fn bearer(&self) -> Result<(String, Option<String>), crate::error::ProxyError> {
         if let (Some(token), Some(account_id)) = (&self.access_token, &self.account_id) {
-            (format!("Bearer {token}"), Some(account_id.clone()))
+            Ok((format!("Bearer {token}"), Some(account_id.clone())))
         } else if let Some(key) = &self.api_key {
-            (format!("Bearer {key}"), None)
+            Ok((format!("Bearer {key}"), None))
         } else {
-            panic!("auth.json contains neither access_token nor api_key");
+            Err(crate::error::ProxyError::AuthUnavailable(
+                "loaded credentials contain neither access_token nor api_key".to_string(),
+            ))
         }
     }
 }
@@ -67,17 +118,18 @@ impl CodexAuth {
 pub enum BackendProfile {
     /// `chatgpt.com/backend-api/codex/responses` — ChatGPT OAuth subscription.
     /// Requires stream=true, store=false. Rejects temperature, top_p, max_output_tokens.
-    /// Models: gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat
+    /// Supported models: see `model_catalog::CATALOG` entries with `supports_codex_backend: true`.
     ChatGptCodex,
 
     /// `api.openai.com/v1/responses` — OpenAI API key, Responses API wire format.
     /// Supports max_output_tokens, temperature (non-reasoning models), tools.
-    /// Models: gpt-5.5, gpt-5.5-pro, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat
+    /// Supported models: see `model_catalog::CATALOG` entries with `supports_responses_api: true`.
     OpenAiResponses,
 
     /// `api.openai.com/v1/chat/completions` — OpenAI API key, Chat Completions wire format.
     /// Uses messages[] array, max_completion_tokens.
     /// Opt-in via CODEX_WIRE_API=chat.
+    /// Supported models: see `model_catalog::CATALOG` entries with `supports_chat_completions: true`.
     OpenAiChatCompletions,
 }
 
@@ -124,81 +176,27 @@ pub struct ModelTarget {
 }
 
 pub fn resolve_model(input: &str) -> ModelTarget {
-    match input {
-        "gpt-5.5" => ModelTarget {
-            model_id: "gpt-5.5".into(),
+    if let Some(entry) = crate::model_catalog::lookup(input) {
+        return ModelTarget {
+            model_id: entry.model_id.to_string(),
+            supports_codex_backend: entry.supports_codex_backend,
+            supports_responses_api: entry.supports_responses_api,
+            supports_chat_completions: entry.supports_chat_completions,
+        };
+    }
+    if input.starts_with("gpt-5.") {
+        return ModelTarget {
+            model_id: input.to_string(),
             supports_codex_backend: true,
             supports_responses_api: true,
             supports_chat_completions: true,
-        },
-        "gpt-5.5-pro" => ModelTarget {
-            model_id: "gpt-5.5-pro".into(),
-            supports_codex_backend: false,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        "gpt-5.4" => ModelTarget {
-            model_id: "gpt-5.4".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        "gpt-5.4-mini" => ModelTarget {
-            model_id: "gpt-5.4-mini".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        "gpt-5.4-nano" => ModelTarget {
-            model_id: "gpt-5.4-nano".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        "gpt-5.3-codex"
-        | "gpt-4o"
-        | "gpt-4o-2024-11-20"
-        | "gpt-4"
-        | "gpt-4-turbo"
-        | "gpt-4-turbo-preview"
-        | "gpt-3.5-turbo"
-        | "gpt-3.5-turbo-0125" => ModelTarget {
-            model_id: "gpt-5.3-codex".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        "gpt-5.3-chat" => ModelTarget {
-            model_id: "gpt-5.3-chat".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        "gpt-5.2-chat" => ModelTarget {
-            model_id: "gpt-5.2-chat".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        // Legacy alias: codex-mini → gpt-5.4-mini (nearest equivalent)
-        "codex-mini" | "gpt-4o-mini" => ModelTarget {
-            model_id: "gpt-5.4-mini".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        m if m.starts_with("gpt-5.") => ModelTarget {
-            model_id: m.to_string(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
-        _ => ModelTarget {
-            model_id: "gpt-5.5".into(),
-            supports_codex_backend: true,
-            supports_responses_api: true,
-            supports_chat_completions: true,
-        },
+        };
+    }
+    ModelTarget {
+        model_id: "gpt-5.5".into(),
+        supports_codex_backend: true,
+        supports_responses_api: true,
+        supports_chat_completions: true,
     }
 }
 
@@ -764,4 +762,84 @@ impl PendingFunctionCall {
             },
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn keyring_account_is_deterministic_and_path_specific() {
+        let a = codex_keyring_account(std::path::Path::new("/tmp/codex-home-a"));
+        let a_again = codex_keyring_account(std::path::Path::new("/tmp/codex-home-a"));
+        let b = codex_keyring_account(std::path::Path::new("/tmp/codex-home-b"));
+
+        assert_eq!(a, a_again, "same codex_home must yield the same account key");
+        assert_ne!(a, b, "different codex_home paths must yield different account keys");
+        assert!(a.starts_with("cli|"), "account key must use Codex CLI's own prefix");
+        assert_eq!(a.len(), "cli|".len() + 16, "account key must be a 16-hex-char digest");
+    }
+
+    #[test]
+    fn load_reads_flat_auth_json() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("auth.json");
+        std::fs::write(
+            &path,
+            r#"{"access_token": "flat-token", "account_id": "acct-1", "api_key": null}"#,
+        )
+        .unwrap();
+
+        let auth = CodexAuth::load(&path).unwrap();
+        assert_eq!(auth.access_token.as_deref(), Some("flat-token"));
+        assert_eq!(auth.account_id.as_deref(), Some("acct-1"));
+    }
+
+    #[test]
+    fn load_reads_nested_tokens_auth_json() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("auth.json");
+        std::fs::write(
+            &path,
+            r#"{"tokens": {"access_token": "nested-token", "account_id": "acct-2"}}"#,
+        )
+        .unwrap();
+
+        let auth = CodexAuth::load(&path).unwrap();
+        assert_eq!(auth.access_token.as_deref(), Some("nested-token"));
+        assert_eq!(auth.account_id.as_deref(), Some("acct-2"));
+    }
+
+    #[test]
+    fn load_returns_clear_error_when_file_and_keyring_both_absent() {
+        // Fresh tempdir: no auth.json, and no OS keyring entry will exist for its
+        // derived account key. This exercises the real fallback path end-to-end
+        // (file miss -> keyring miss -> error) without panicking and without
+        // writing anything to the real OS keychain.
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("auth.json");
+
+        let err = CodexAuth::load(&path).unwrap_err();
+        let message = err.to_string();
+        assert!(message.contains("missing or unreadable"));
+        assert!(message.contains(CODEX_KEYRING_SERVICE));
+    }
+
+    #[test]
+    fn bearer_returns_typed_error_instead_of_panicking_when_credentials_are_empty() {
+        let auth = CodexAuth {
+            access_token: None,
+            account_id: None,
+            api_key: None,
+        };
+
+        let err = auth.bearer().unwrap_err();
+        assert!(matches!(err, crate::error::ProxyError::AuthUnavailable(_)));
+    }
+
+    // NOTE: the "plaintext absent, keyring present" fallback path is exercised
+    // manually/in integration rather than here — a unit test would need to write
+    // a real entry into the OS keychain (macOS prompts interactively for keychain
+    // access and CI runners typically have no keychain at all), which is a live
+    // system side effect this test suite deliberately avoids introducing.
 }

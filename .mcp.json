@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "openai-proxy": {
+      "command": "openai-proxy",
+      "args": ["serve", "--mcp-stdio"]
+    }
+  }
+}

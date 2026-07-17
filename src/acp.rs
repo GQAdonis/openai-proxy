@@ -1,6 +1,6 @@
 use agent_client_protocol::{
     Agent, ByteStreams, Client, ConnectionTo,
-    schema::{
+    schema::v1::{
         AgentCapabilities, ContentBlock, ContentChunk, InitializeRequest, InitializeResponse,
         NewSessionRequest, NewSessionResponse, PromptRequest, PromptResponse, SessionId,
         SessionNotification, SessionUpdate, StopReason, TextContent,

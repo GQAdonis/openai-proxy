@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use clap::Args;
 
+use crate::{codex::BackendProfile, model_catalog};
+
 // ── Serve (default) ──────────────────────────────────────────────────────────
 
 #[derive(Args, Debug, Default)]
@@ -66,6 +68,23 @@ pub struct SetupOpencodeArgs {
     pub force: bool,
 }
 
+/// Human-readable display name for a catalogue model id, e.g. `gpt-5.4-mini` → `GPT-5.4 Mini`.
+fn display_name(model_id: &str) -> String {
+    let mut parts = model_id.splitn(3, '-');
+    let version = parts.nth(1).unwrap_or("");
+    let mut name = format!("GPT-{version}");
+    if let Some(suffix) = parts.next() {
+        for word in suffix.split('-') {
+            if let Some(first) = word.chars().next() {
+                name.push(' ');
+                name.push(first.to_ascii_uppercase());
+                name.push_str(&word[first.len_utf8()..]);
+            }
+        }
+    }
+    name
+}
+
 pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
     let url = base_url
         .map(str::to_owned)
@@ -84,27 +103,34 @@ pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
             .unwrap_or(false)
     };
 
-    let (provider_name, models) = if is_chatgpt_sub {
-        (
-            "OpenAI Proxy (ChatGPT Subscription Plus/Pro)",
-            serde_json::json!({
-                "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context": 400000, "output": 32768 } },
-                "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context": 400000, "output": 32768 } },
-                "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 400000, "output": 32768 } }
-            }),
-        )
+    let profile = if is_chatgpt_sub {
+        BackendProfile::ChatGptCodex
     } else {
-        (
-            "OpenAI Proxy (API Key — Responses API)",
-            serde_json::json!({
-                "gpt-5.5":       { "name": "GPT-5.5",       "limit": { "context": 1000000, "output": 32768 } },
-                "gpt-5.5-pro":   { "name": "GPT-5.5 Pro",   "limit": { "context": 1000000, "output": 32768 } },
-                "gpt-5.4":       { "name": "GPT-5.4",       "limit": { "context": 200000,  "output": 16384 } },
-                "gpt-5.3-codex": { "name": "GPT-5.3 Codex", "limit": { "context": 200000,  "output": 16384 } },
-                "codex-mini":    { "name": "Codex Mini",     "limit": { "context": 96000,   "output": 8192  } }
-            }),
-        )
+        BackendProfile::OpenAiResponses
     };
+    let provider_name = if is_chatgpt_sub {
+        "OpenAI Proxy (ChatGPT Subscription Plus/Pro)"
+    } else {
+        "OpenAI Proxy (API Key — Responses API)"
+    };
+    let models = serde_json::Value::Object(
+        model_catalog::CATALOG
+            .iter()
+            .filter(|entry| entry.supports(profile))
+            .map(|entry| {
+                (
+                    entry.model_id.to_string(),
+                    serde_json::json!({
+                        "name": display_name(entry.model_id),
+                        "limit": {
+                            "context": entry.context_length_for(profile),
+                            "output": entry.max_output_tokens
+                        }
+                    }),
+                )
+            })
+            .collect(),
+    );
 
     let default_model = if is_chatgpt_sub {
         "openai-proxy/gpt-5.5"

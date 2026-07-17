@@ -147,6 +147,21 @@ async fn models_list_contains_codex_mini_for_api_key_profile() {
 }
 
 #[tokio::test]
+async fn models_list_contains_gpt_5_6_tiers_with_correct_limits() {
+    let server = test_server();
+    let body: Value = server.get("/v1/models").await.json();
+    let models = body["data"].as_array().unwrap();
+    for id in ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"] {
+        let model = models
+            .iter()
+            .find(|m| m["id"] == id)
+            .unwrap_or_else(|| panic!("expected {id} in model list"));
+        assert_eq!(model["context_length"], 1_050_000, "{id} context_length");
+        assert_eq!(model["max_output_tokens"], 128_000, "{id} max_output_tokens");
+    }
+}
+
+#[tokio::test]
 async fn models_list_all_have_required_fields() {
     let server = test_server();
     let body: Value = server.get("/v1/models").await.json();
@@ -1270,6 +1285,28 @@ fn resolve_model_gpt54_all_profiles() {
     assert!(t.supports_chat_completions);
 }
 
+#[test]
+fn resolve_model_gpt_5_6_alias_maps_to_sol() {
+    use openai_proxy_lib::codex::resolve_model;
+    let t = resolve_model("gpt-5.6");
+    assert_eq!(t.model_id, "gpt-5.6-sol", "bare gpt-5.6 alias must resolve to the canonical sol id");
+    assert!(t.supports_codex_backend);
+    assert!(t.supports_responses_api);
+    assert!(t.supports_chat_completions);
+}
+
+#[test]
+fn resolve_model_gpt_5_6_tiers_all_profiles() {
+    use openai_proxy_lib::codex::resolve_model;
+    for id in ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"] {
+        let t = resolve_model(id);
+        assert_eq!(t.model_id, id);
+        assert!(t.supports_codex_backend, "{id} should support the ChatGPT Codex backend");
+        assert!(t.supports_responses_api, "{id} should support the Responses API");
+        assert!(t.supports_chat_completions, "{id} should support Chat Completions");
+    }
+}
+
 // ── auth loading ─────────────────────────────────────────────────────────────
 
 #[test]
@@ -1282,7 +1319,7 @@ fn auth_json_loads_from_standard_location() {
 #[test]
 fn auth_bearer_returns_non_empty_header() {
     let (state, _) = load_real_auth();
-    let (header, _) = state.auth.bearer();
+    let (header, _) = state.auth.bearer().expect("bearer() should succeed with real auth");
     assert!(
         header.starts_with("Bearer "),
         "bearer header should start with 'Bearer '"

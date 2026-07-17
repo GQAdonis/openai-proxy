@@ -75,7 +75,7 @@ Shared across all axum handlers via `State<AppState>`. Key fields:
 
 Three variants control both the upstream URL and request shape:
 
-- `ChatGptCodex` — strips `temperature`, `top_p`, `max_output_tokens`; forces `stream=true`, `store=false`; models: gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat
+- `ChatGptCodex` — strips `temperature`, `top_p`, `max_output_tokens`; forces `stream=true`, `store=false`; models: gpt-5.6-sol/terra/luna, gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat (see `src/model_catalog.rs` for the authoritative, single-source-of-truth list)
 - `OpenAiResponses` — Responses API format; passes `max_output_tokens`, tools; adds gpt-5.5-pro vs ChatGptCodex
 - `OpenAiChatCompletions` — Chat Completions wire format; uses `messages[]`, `max_completion_tokens`; same model set as OpenAiResponses
 
@@ -85,12 +85,13 @@ Profile selected at startup based on auth credentials and `CODEX_WIRE_API`. Neve
 
 | Module | Responsibility |
 |--------|---------------|
-| `codex.rs` | Auth loading, `BackendProfile`, model catalogue (`resolve_model`), request converters, Responses API SSE event types |
+| `codex.rs` | Auth loading (incl. OS keyring fallback), `BackendProfile`, `resolve_model()` (delegates to `model_catalog`), request converters, Responses API SSE event types |
+| `model_catalog.rs` | Single source of truth for the gpt-5.x model catalogue (`CATALOG`, `ALIASES`, `lookup()`) — read by `codex.rs`, `models.rs`, `cli/setup.rs` |
 | `proxy.rs` | Axum handlers — `chat_completions()`, streaming/non-streaming paths for both wire formats, `inject_skills()`, `inject_memory()` |
 | `openai.rs` | `ChatCompletionRequest`, `ChatCompletionResponse` — the public-facing OpenAI wire types |
-| `models.rs` | `GET /v1/models` — profile-aware model list with `context_length`/`max_output_tokens` |
+| `models.rs` | `GET /v1/models` — profile-aware model list derived from `model_catalog::CATALOG` |
 | `mcp.rs` | MCP JSON-RPC 2.0 server — stdio (`run_stdio`) + Streamable HTTP (`run_http`) transports |
-| `acp.rs` | ACP v0.11 stdio server — incremental streaming via `bytes_stream()` |
+| `acp.rs` | ACP v1.2 stdio server (`agent-client-protocol` crate) — incremental streaming via `bytes_stream()` |
 | `agui.rs` | AG-UI endpoint — `POST /ag-ui/stream`; 5-event protocol (`RUN_STARTED` → `RUN_FINISHED`) |
 | `config.rs` | `ProxyConfig` TOML loader; XDG paths; `apply_env()` merge; `expand_tilde()` |
 | `cli/` | Clap subcommands: `setup opencode/mcp/config`, `skills list/validate/test`, `config show/path` |
@@ -161,5 +162,5 @@ Responses API events use dot-notation: `response.output_text.delta`, `response.c
 - `cargo build` (no features) must always produce zero warnings; the memory feature may add cfg-attr suppression for non-feature builds
 - The AG-UI `AguiEvent` enum uses `#[serde(rename_all = "SCREAMING_SNAKE_CASE")]` — wire values are `RUN_STARTED`, `TEXT_MESSAGE_CONTENT`, etc.
 - opencode provider config uses `{env:VAR}` (not `${VAR}`) for runtime interpolation; the MCP key is `"mcp"` with `"type": "local"` (not `"mcpServers"` / `"type": "stdio"`)
-- `codex-mini` and `gpt-4o-mini` are legacy aliases that resolve to `gpt-5.4-mini` in `resolve_model()`; the alias mapping lives in `src/codex.rs`
+- `codex-mini` and `gpt-4o-mini` are legacy aliases that resolve to `gpt-5.4-mini`, and `gpt-5.6` resolves to `gpt-5.6-sol`, in `resolve_model()`; the alias table lives in `src/model_catalog.rs` (`ALIASES`), not `src/codex.rs`, since the model catalogue was consolidated into a single source of truth
 - opencode plugin provider ID is `codex` (not `openai-proxy`) — any config or test referencing the old name needs updating

@@ -1,0 +1,32 @@
+{
+  "name": "openai-proxy",
+  "version": "0.1.0",
+  "description": "Use your ChatGPT Plus/Pro subscription as an OpenAI-compatible API via a local Rust proxy. Bridges any OpenAI Chat Completions client to the Codex Responses API with MCP server support for direct agent integration.",
+  "author": {
+    "name": "openai-proxy contributors"
+  },
+  "homepage": "https://github.com/yourusername/openai-proxy",
+  "repository": "https://github.com/yourusername/openai-proxy",
+  "license": "MIT",
+  "skills": "./SKILL.md",
+  "mcpServers": "./.mcp.json",
+  "keywords": [
+    "openai",
+    "codex",
+    "proxy",
+    "mcp",
+    "chatgpt",
+    "opencode"
+  ],
+  "interface": {
+    "displayName": "OpenAI Proxy",
+    "shortDescription": "Use your ChatGPT Plus/Pro subscription as an OpenAI-compatible API",
+    "longDescription": "Bridges any OpenAI Chat Completions client to the ChatGPT Codex Responses API, the OpenAI Responses API, or the OpenAI Chat Completions API, with an MCP server for direct agent integration.",
+    "developerName": "openai-proxy contributors",
+    "category": "Developer Tools",
+    "capabilities": [
+      "MCP",
+      "Read"
+    ]
+  }
+}

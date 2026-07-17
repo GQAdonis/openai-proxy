@@ -25,6 +25,9 @@ pub enum ProxyError {
 
     #[error("model '{model}' is not available on {profile}")]
     ModelNotAvailable { model: String, profile: String },
+
+    #[error("no usable Codex credentials: {0}")]
+    AuthUnavailable(String),
 }
 
 impl IntoResponse for ProxyError {
@@ -50,6 +53,11 @@ impl IntoResponse for ProxyError {
                 StatusCode::BAD_REQUEST,
                 "model_not_available",
                 format!("Model '{model}' is not available on {profile}"),
+            ),
+            ProxyError::AuthUnavailable(msg) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "auth_unavailable",
+                msg.clone(),
             ),
         };
 

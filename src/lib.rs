@@ -9,6 +9,7 @@ pub mod hooks;
 pub mod mcp;
 pub mod mcp_client;
 pub mod memory;
+pub mod model_catalog;
 pub mod models;
 pub mod openai;
 pub mod proxy;
