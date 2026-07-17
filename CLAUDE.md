@@ -75,7 +75,7 @@ Shared across all axum handlers via `State<AppState>`. Key fields:
 
 Three variants control both the upstream URL and request shape:
 
-- `ChatGptCodex` — strips `temperature`, `top_p`, `max_output_tokens`; forces `stream=true`, `store=false`; models: gpt-5.6-sol/terra/luna, gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano, gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat (see `src/model_catalog.rs` for the authoritative, single-source-of-truth list)
+- `ChatGptCodex` — strips `temperature`, `top_p`, `max_output_tokens`; forces `stream=true`, `store=false`; models: gpt-5.6-sol/terra/luna, gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano (gpt-5.3-codex, gpt-5.3-chat, and gpt-5.2-chat are NOT available on this backend — confirmed rejected live 2026-07-17; legacy aliases like gpt-4o/gpt-3.5-turbo now map to gpt-5.4 instead) — see `src/model_catalog.rs` for the authoritative, single-source-of-truth list
 - `OpenAiResponses` — Responses API format; passes `max_output_tokens`, tools; adds gpt-5.5-pro vs ChatGptCodex
 - `OpenAiChatCompletions` — Chat Completions wire format; uses `messages[]`, `max_completion_tokens`; same model set as OpenAiResponses
 

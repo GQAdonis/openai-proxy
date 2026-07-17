@@ -15,9 +15,9 @@ links:
 - completion-only-metadata-for-gpt-5-6-codex-sdk-upgrade
 sources:
 - stdin
-timestamp: 2026-07-17T00:56:32.158535+00:00
-created_at: 2026-07-17T00:56:32.157881+00:00
-updated_at: 2026-07-17T00:56:32.158535+00:00
+timestamp: 2026-07-17T14:18:19.182800+00:00
+created_at: 2026-07-17T14:18:19.182688+00:00
+updated_at: 2026-07-17T14:18:19.182800+00:00
 revision: 1
 ---
 
@@ -27,7 +27,7 @@ revision: 1
 - Change: `unknown`
 
 ## Interpretation
-- The source is a completion-only executor record for the `gpt-5.6-codex-sdk-upgrade` phase.
+- The source records only that an executor session completed for the `gpt-5.6-codex-sdk-upgrade` phase.
 - No implementation details, code changes, diffs, validation results, decisions, or rationale were provided.
 - `change: unknown` means the completed work cannot be classified from this record alone.
 

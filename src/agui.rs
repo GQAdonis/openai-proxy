@@ -72,7 +72,7 @@ pub async fn agui_stream(State(state): State<AppState>, Json(body): Json<AguiReq
     let model = body
         .model
         .or_else(|| state.default_model.clone())
-        .unwrap_or_else(|| "gpt-5.3-codex".to_string());
+        .unwrap_or_else(|| "gpt-5.4".to_string());
 
     let chat_req = ChatCompletionRequest {
         model,

@@ -85,11 +85,16 @@ pub const CATALOG: &[ModelCatalogEntry] = &[
         supports_chat_completions: true,
         codex_backend_context_override: None,
     },
+    // gpt-5.3-codex, gpt-5.3-chat, gpt-5.2-chat: confirmed rejected by the live
+    // ChatGPT-subscription Codex backend (2026-07-17, 400 "not supported when
+    // using Codex with a ChatGPT account") -- supports_codex_backend is false
+    // for all three even though the API-key backends were not observed to
+    // reject them.
     ModelCatalogEntry {
         model_id: "gpt-5.3-codex",
         context_length: 400_000,
         max_output_tokens: 32_768,
-        supports_codex_backend: true,
+        supports_codex_backend: false,
         supports_responses_api: true,
         supports_chat_completions: true,
         codex_backend_context_override: None,
@@ -98,7 +103,7 @@ pub const CATALOG: &[ModelCatalogEntry] = &[
         model_id: "gpt-5.3-chat",
         context_length: 128_000,
         max_output_tokens: 16_384,
-        supports_codex_backend: true,
+        supports_codex_backend: false,
         supports_responses_api: true,
         supports_chat_completions: true,
         codex_backend_context_override: None,
@@ -107,7 +112,7 @@ pub const CATALOG: &[ModelCatalogEntry] = &[
         model_id: "gpt-5.2-chat",
         context_length: 128_000,
         max_output_tokens: 16_384,
-        supports_codex_backend: true,
+        supports_codex_backend: false,
         supports_responses_api: true,
         supports_chat_completions: true,
         codex_backend_context_override: None,
@@ -152,13 +157,16 @@ pub const ALIASES: &[(&str, &str)] = &[
     ("gpt-5.6", "gpt-5.6-sol"),
     ("codex-mini", "gpt-5.4-mini"),
     ("gpt-4o-mini", "gpt-5.4-mini"),
-    ("gpt-4o", "gpt-5.3-codex"),
-    ("gpt-4o-2024-11-20", "gpt-5.3-codex"),
-    ("gpt-4", "gpt-5.3-codex"),
-    ("gpt-4-turbo", "gpt-5.3-codex"),
-    ("gpt-4-turbo-preview", "gpt-5.3-codex"),
-    ("gpt-3.5-turbo", "gpt-5.3-codex"),
-    ("gpt-3.5-turbo-0125", "gpt-5.3-codex"),
+    // Legacy OpenAI model names previously mapped to gpt-5.3-codex, which the
+    // ChatGPT-subscription Codex backend now rejects (confirmed 2026-07-17).
+    // Remapped to gpt-5.4, which is confirmed live-working on every backend.
+    ("gpt-4o", "gpt-5.4"),
+    ("gpt-4o-2024-11-20", "gpt-5.4"),
+    ("gpt-4", "gpt-5.4"),
+    ("gpt-4-turbo", "gpt-5.4"),
+    ("gpt-4-turbo-preview", "gpt-5.4"),
+    ("gpt-3.5-turbo", "gpt-5.4"),
+    ("gpt-3.5-turbo-0125", "gpt-5.4"),
 ];
 
 /// Resolve a requested model id to its canonical catalogue entry, following

@@ -2,7 +2,8 @@
 //!
 //! These tests start the real axum router backed by live credentials from
 //! ~/.codex/auth.json and fire requests at the actual Codex Responses API.
-//! Every live test uses `gpt-5.3-codex` as the canonical model.
+//! Every live test uses `gpt-5.4` as the canonical model (gpt-5.3-codex/gpt-5.3-chat/
+//! gpt-5.2-chat are no longer available on the ChatGPT-subscription backend).
 //!
 //! Prerequisites:
 //!   - ~/.codex/auth.json must exist (run `codex login` first)
@@ -109,7 +110,7 @@ async fn models_list_returns_object_type() {
 }
 
 #[tokio::test]
-async fn models_list_contains_gpt_5_3_codex() {
+async fn models_list_contains_gpt_5_4() {
     let server = test_server();
     let body: Value = server.get("/v1/models").await.json();
     let ids: Vec<&str> = body["data"]
@@ -119,8 +120,8 @@ async fn models_list_contains_gpt_5_3_codex() {
         .filter_map(|m| m["id"].as_str())
         .collect();
     assert!(
-        ids.contains(&"gpt-5.3-codex"),
-        "expected gpt-5.3-codex in model list, got: {ids:?}"
+        ids.contains(&"gpt-5.4"),
+        "expected gpt-5.4 in model list, got: {ids:?}"
     );
 }
 
@@ -180,7 +181,7 @@ async fn non_streaming_basic_completion() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Reply with exactly the word: PONG"}]
         }))
         .await;
@@ -200,7 +201,7 @@ async fn non_streaming_finish_reason_is_stop() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hi."}]
         }))
         .await
@@ -216,7 +217,7 @@ async fn non_streaming_usage_tokens_populated() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hi."}]
         }))
         .await
@@ -233,7 +234,7 @@ async fn non_streaming_system_message_extracted_as_instructions() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [
                 {"role": "system", "content": "You are a test assistant. Reply with SYSTEM_OK."},
                 {"role": "user", "content": "Confirm."}
@@ -252,7 +253,7 @@ async fn non_streaming_multi_turn_conversation() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [
                 {"role": "user", "content": "My name is TestUser."},
                 {"role": "assistant", "content": "Hello TestUser, nice to meet you."},
@@ -279,7 +280,7 @@ async fn non_streaming_max_tokens_respected() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Count from 1 to 1000, one number per line."}],
             "max_tokens": 10
         }))
@@ -349,7 +350,7 @@ async fn non_streaming_content_parts_format() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{
                 "role": "user",
                 "content": [{"type": "text", "text": "Reply with PARTS_OK."}]
@@ -365,7 +366,7 @@ async fn non_streaming_content_parts_format() {
 
 #[tokio::test]
 async fn non_streaming_default_model_override() {
-    let server = test_server_with_default_model("gpt-5.3-codex");
+    let server = test_server_with_default_model("gpt-5.4");
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
@@ -382,10 +383,11 @@ async fn non_streaming_default_model_override() {
 #[tokio::test]
 async fn non_streaming_explicit_codex_model_ignores_default_override() {
     // Explicit codex/gpt-5 model IDs must not be overridden by CODEX_DEFAULT_MODEL.
-    // Use gpt-5.3-codex as the override since codex-mini isn't available on ChatGPT Plus.
+    // Use gpt-5.5 as the override on ChatGPT Plus so it's distinct from the
+    // explicitly-requested gpt-5.4 below (codex-mini isn't available there).
     let (state, _) = load_real_auth();
     let override_model = if matches!(state.backend_profile, BackendProfile::ChatGptCodex) {
-        "gpt-5.3-codex" // safe on Plus
+        "gpt-5.5"
     } else {
         "codex-mini"
     };
@@ -393,7 +395,7 @@ async fn non_streaming_explicit_codex_model_ignores_default_override() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hi."}]
         }))
         .await
@@ -406,7 +408,8 @@ async fn non_streaming_explicit_codex_model_ignores_default_override() {
 // ── model-not-available validation ──────────────────────────────────────────
 
 #[tokio::test]
-async fn codex_mini_rejected_on_chatgpt_profile() {
+async fn codex_mini_accepted_on_chatgpt_profile() {
+    // codex-mini resolves to gpt-5.4-mini, which is available on ChatGptCodex.
     let (state, _) = load_real_auth();
     if !matches!(state.backend_profile, BackendProfile::ChatGptCodex) {
         return; // only relevant for ChatGPT subscription
@@ -419,10 +422,7 @@ async fn codex_mini_rejected_on_chatgpt_profile() {
             "messages": [{"role": "user", "content": "Hi"}]
         }))
         .await;
-    assert!(
-        resp.status_code().as_u16() >= 400,
-        "codex-mini should be rejected on ChatGptCodex profile"
-    );
+    resp.assert_status_ok();
 }
 
 #[tokio::test]
@@ -453,7 +453,7 @@ async fn streaming_returns_sse_content_type() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hi."}],
             "stream": true
         }))
@@ -473,7 +473,7 @@ async fn streaming_first_chunk_has_role_delta() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hi."}],
             "stream": true
         }))
@@ -495,7 +495,7 @@ async fn streaming_produces_content_deltas() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Count to 3."}],
             "stream": true
         }))
@@ -520,7 +520,7 @@ async fn streaming_last_chunk_has_finish_reason() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say one word."}],
             "stream": true
         }))
@@ -551,7 +551,7 @@ async fn streaming_all_chunks_share_same_id() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Count to 5."}],
             "stream": true
         }))
@@ -577,7 +577,7 @@ async fn streaming_assembled_content_is_non_empty() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hello."}],
             "stream": true
         }))
@@ -602,7 +602,7 @@ async fn streaming_system_message_works() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [
                 {"role": "system", "content": "You are a test assistant."},
                 {"role": "user", "content": "Say STREAM_OK."}
@@ -621,12 +621,12 @@ async fn streaming_system_message_works() {
 }
 
 #[tokio::test]
-async fn streaming_with_gpt53_codex_model() {
+async fn streaming_with_gpt54_model() {
     let server = test_server();
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Say hi."}],
             "stream": true
         }))
@@ -637,7 +637,7 @@ async fn streaming_with_gpt53_codex_model() {
     let chunks = parse_sse_chunks(&body);
     assert!(
         !chunks.is_empty(),
-        "streaming with gpt-5.3-codex should return chunks"
+        "streaming with gpt-5.4 should return chunks"
     );
 }
 
@@ -649,7 +649,7 @@ async fn non_streaming_tool_call_response() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "What is the weather in New York? Use the get_weather function."}],
             "tools": [{
                 "type": "function",
@@ -710,7 +710,7 @@ async fn non_streaming_tool_call_roundtrip() {
     let resp1: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "What is the weather in Paris? Use get_weather."}],
             "tools": [{
                 "type": "function",
@@ -747,7 +747,7 @@ async fn non_streaming_tool_call_roundtrip() {
     let resp2: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [
                 {"role": "user", "content": "What is the weather in Paris? Use get_weather."},
                 {
@@ -793,7 +793,7 @@ async fn non_streaming_tool_choice_none_ignores_tools() {
     let body: Value = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "What is 2+2?"}],
             "tools": [{
                 "type": "function",
@@ -832,7 +832,7 @@ async fn streaming_tool_call_produces_tool_calls_chunks() {
     let resp = server
         .post("/v1/chat/completions")
         .json(&json!({
-            "model": "gpt-5.3-codex",
+            "model": "gpt-5.4",
             "messages": [{"role": "user", "content": "Get weather for London using get_weather."}],
             "tools": [{
                 "type": "function",
@@ -1021,44 +1021,44 @@ fn convert_request_parallel_tool_calls_forwarded() {
 // ── model mapping (unit-level, no network) ───────────────────────────────────
 
 #[test]
-fn model_mapping_gpt4o_to_codex() {
+fn model_mapping_gpt4o_to_gpt54() {
     use openai_proxy_lib::codex::map_model;
-    assert_eq!(map_model("gpt-4o"), "gpt-5.3-codex");
-    assert_eq!(map_model("gpt-4o-2024-11-20"), "gpt-5.3-codex");
+    assert_eq!(map_model("gpt-4o"), "gpt-5.4");
+    assert_eq!(map_model("gpt-4o-2024-11-20"), "gpt-5.4");
 }
 
 #[test]
 fn model_mapping_gpt4o_mini_to_codex() {
     use openai_proxy_lib::codex::map_model;
-    assert_eq!(map_model("gpt-4o-mini"), "gpt-5.3-codex");
+    assert_eq!(map_model("gpt-4o-mini"), "gpt-5.4-mini");
 }
 
 #[test]
-fn model_mapping_gpt4_variants_to_codex() {
+fn model_mapping_gpt4_variants_to_gpt54() {
     use openai_proxy_lib::codex::map_model;
-    assert_eq!(map_model("gpt-4"), "gpt-5.3-codex");
-    assert_eq!(map_model("gpt-4-turbo"), "gpt-5.3-codex");
-    assert_eq!(map_model("gpt-4-turbo-preview"), "gpt-5.3-codex");
+    assert_eq!(map_model("gpt-4"), "gpt-5.4");
+    assert_eq!(map_model("gpt-4-turbo"), "gpt-5.4");
+    assert_eq!(map_model("gpt-4-turbo-preview"), "gpt-5.4");
 }
 
 #[test]
-fn model_mapping_gpt35_to_codex() {
+fn model_mapping_gpt35_to_gpt54() {
     use openai_proxy_lib::codex::map_model;
-    assert_eq!(map_model("gpt-3.5-turbo"), "gpt-5.3-codex");
-    assert_eq!(map_model("gpt-3.5-turbo-0125"), "gpt-5.3-codex");
+    assert_eq!(map_model("gpt-3.5-turbo"), "gpt-5.4");
+    assert_eq!(map_model("gpt-3.5-turbo-0125"), "gpt-5.4");
 }
 
 #[test]
 fn model_mapping_explicit_codex_passthrough() {
     use openai_proxy_lib::codex::map_model;
     assert_eq!(map_model("gpt-5.3-codex"), "gpt-5.3-codex");
-    assert_eq!(map_model("codex-mini"), "codex-mini");
+    assert_eq!(map_model("codex-mini"), "gpt-5.4-mini");
 }
 
 #[test]
-fn model_mapping_unknown_falls_back_to_codex() {
+fn model_mapping_unknown_falls_back_to_default() {
     use openai_proxy_lib::codex::map_model;
-    assert_eq!(map_model("some-unknown-model"), "gpt-5.3-codex");
+    assert_eq!(map_model("some-unknown-model"), "gpt-5.5");
 }
 
 #[test]
@@ -1259,18 +1259,18 @@ fn resolve_model_gpt55_pro_responses_api_only() {
     );
     assert!(t.supports_responses_api);
     assert!(
-        !t.supports_chat_completions,
-        "gpt-5.5-pro should not be available on Chat Completions"
+        t.supports_chat_completions,
+        "gpt-5.5-pro should be available on Chat Completions"
     );
 }
 
 #[test]
-fn resolve_model_codex_mini_api_key_only() {
+fn resolve_model_codex_mini_available_on_chatgpt_profile() {
     use openai_proxy_lib::codex::resolve_model;
     let t = resolve_model("codex-mini");
     assert!(
-        !t.supports_codex_backend,
-        "codex-mini must not be available on ChatGptCodex profile"
+        t.supports_codex_backend,
+        "codex-mini (-> gpt-5.4-mini) should be available on ChatGptCodex profile"
     );
     assert!(t.supports_responses_api);
     assert!(t.supports_chat_completions);
@@ -1466,14 +1466,18 @@ async fn mcp_list_models_tool_returns_models_for_profile() {
     assert_eq!(result["isError"], false);
     let text = result["content"][0]["text"].as_str().unwrap();
     assert!(
-        text.contains("gpt-5.3-codex"),
-        "list_models should mention gpt-5.3-codex"
+        text.contains("gpt-5.4"),
+        "list_models should mention gpt-5.4"
     );
     match profile {
         BackendProfile::ChatGptCodex => {
             assert!(
                 !text.contains("codex-mini"),
                 "ChatGptCodex should not list codex-mini"
+            );
+            assert!(
+                !text.contains("gpt-5.3-codex — Codex model"),
+                "ChatGptCodex should not advertise gpt-5.3-codex as available"
             );
         }
         _ => {
@@ -1549,8 +1553,8 @@ async fn mcp_set_model_recommends_full_for_complex_task() {
         .unwrap()
         .to_string();
     assert!(
-        text.contains("gpt-5.3-codex"),
-        "complex task should recommend gpt-5.3-codex"
+        text.contains("gpt-5.6-sol"),
+        "complex task should recommend gpt-5.6-sol"
     );
 }
 
@@ -1632,7 +1636,7 @@ async fn mcp_chat_completion_tool_returns_text() {
         params: json!({
             "name": "chat_completion",
             "arguments": {
-                "model": "gpt-5.3-codex",
+                "model": "gpt-5.4",
                 "messages": [{"role": "user", "content": "Reply with exactly: MCP_OK"}]
             }
         }),
@@ -1664,7 +1668,7 @@ async fn mcp_chat_completion_tool_with_max_tokens() {
         params: json!({
             "name": "chat_completion",
             "arguments": {
-                "model": "gpt-5.3-codex",
+                "model": "gpt-5.4",
                 "messages": [{"role": "user", "content": "Count from 1 to 100."}],
                 "max_tokens": 5
             }
@@ -1697,7 +1701,7 @@ async fn mcp_chat_completion_tool_missing_messages_is_error() {
         params: json!({
             "name": "chat_completion",
             "arguments": {
-                "model": "gpt-5.3-codex"
+                "model": "gpt-5.4"
                 // messages field intentionally omitted
             }
         }),
@@ -1844,7 +1848,7 @@ async fn missing_messages_field_returns_error() {
     let server = test_server();
     let resp = server
         .post("/v1/chat/completions")
-        .json(&json!({"model": "gpt-5.3-codex"}))
+        .json(&json!({"model": "gpt-5.4"}))
         .await;
 
     assert!(

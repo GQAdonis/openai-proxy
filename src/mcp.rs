@@ -88,8 +88,8 @@ fn tool_definitions() -> Value {
                 "properties": {
                     "model": {
                         "type": "string",
-                        "description": "Model to use (e.g. gpt-5.3-codex, codex-mini). Defaults to gpt-5.3-codex.",
-                        "default": "gpt-5.3-codex"
+                        "description": "Model to use (e.g. gpt-5.4, codex-mini). Defaults to gpt-5.4.",
+                        "default": "gpt-5.4"
                     },
                     "messages": {
                         "type": "array",
@@ -163,7 +163,7 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
     let model_str = params
         .get("model")
         .and_then(Value::as_str)
-        .unwrap_or("gpt-5.3-codex");
+        .unwrap_or("gpt-5.4");
 
     // Apply default model override from state if the client didn't specify explicitly.
     let effective_model = if params.get("model").is_none() {
@@ -284,14 +284,15 @@ fn list_models_tool(state: &AppState) -> String {
     match state.backend_profile {
         BackendProfile::ChatGptCodex => {
             "Available models (ChatGPT subscription):\n\
-             • gpt-5.3-codex — Codex model (400K context)\n\
-             • gpt-5.4 — GPT-5.4 (400K context)\n\
+             • gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna — GPT-5.6 tiers (1.05M context)\n\
              • gpt-5.5 — GPT-5.5 (400K context)\n\
+             • gpt-5.4 — GPT-5.4 (400K context)\n\
              \n\
-             Aliases: gpt-4o, gpt-4, gpt-4-turbo, gpt-3.5-turbo → gpt-5.3-codex"
+             Aliases: gpt-4o, gpt-4, gpt-4-turbo, gpt-3.5-turbo → gpt-5.4. gpt-5.3-codex/gpt-5.3-chat/gpt-5.2-chat are not available on this backend."
         }
         BackendProfile::OpenAiResponses => {
             "Available models (OpenAI Responses API):\n\
+             • gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna — GPT-5.6 tiers (1.05M context)\n\
              • gpt-5.5 — GPT-5.5 (1M context)\n\
              • gpt-5.5-pro — GPT-5.5 Pro (Pro/Business/Enterprise only)\n\
              • gpt-5.4 — GPT-5.4\n\
@@ -300,6 +301,7 @@ fn list_models_tool(state: &AppState) -> String {
         }
         BackendProfile::OpenAiChatCompletions => {
             "Available models (OpenAI Chat Completions):\n\
+             • gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna — GPT-5.6 tiers (1.05M context)\n\
              • gpt-5.5 — GPT-5.5\n\
              • gpt-5.4 — GPT-5.4\n\
              • gpt-5.3-codex — Codex model\n\
@@ -351,9 +353,9 @@ fn set_model_tool(params: &Value) -> String {
         || task_lower.contains("design")
         || task_lower.contains("long")
     {
-        ("gpt-5.3-codex", "deeper reasoning for complex tasks")
+        ("gpt-5.6-sol", "deeper reasoning for complex tasks")
     } else {
-        ("gpt-5.3-codex", "general-purpose default")
+        ("gpt-5.4", "general-purpose default")
     };
 
     format!(
