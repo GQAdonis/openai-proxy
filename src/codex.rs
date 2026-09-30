@@ -184,7 +184,7 @@ pub fn resolve_model(input: &str) -> ModelTarget {
             supports_chat_completions: entry.supports_chat_completions,
         };
     }
-    if input.starts_with("gpt-5.") {
+    if input.starts_with("gpt-5.") || input.starts_with("gpt-6.") {
         return ModelTarget {
             model_id: input.to_string(),
             supports_codex_backend: true,
@@ -193,7 +193,7 @@ pub fn resolve_model(input: &str) -> ModelTarget {
         };
     }
     ModelTarget {
-        model_id: "gpt-5.5".into(),
+        model_id: "gpt-6.1-sol".into(),
         supports_codex_backend: true,
         supports_responses_api: true,
         supports_chat_completions: true,
@@ -374,7 +374,8 @@ pub struct ChatCompletionsOutbound {
 fn resolve_model_id(req_model: &str, default_model: Option<&str>) -> String {
     let target = resolve_model(req_model);
     if let Some(dm) = default_model {
-        let is_explicit = req_model.starts_with("gpt-5.") || req_model.starts_with("codex");
+        let is_explicit =
+            req_model.starts_with("gpt-5.") || req_model.starts_with("gpt-6.") || req_model.starts_with("codex");
         if is_explicit {
             target.model_id
         } else {

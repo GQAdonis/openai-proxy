@@ -40,6 +40,20 @@ impl ModelCatalogEntry {
 }
 
 pub const CATALOG: &[ModelCatalogEntry] = &[
+    // gpt-6.1-sol: the current default model (2026-09-30). Before this entry
+    // existed, a "gpt-6.1-sol" request matched neither the catalogue nor the
+    // `gpt-5.` passthrough in `resolve_model` and was silently served as the
+    // gpt-5.5 fallback. Limits mirror the gpt-5.6-sol tier and are not yet
+    // confirmed against the upstream model card.
+    ModelCatalogEntry {
+        model_id: "gpt-6.1-sol",
+        context_length: 1_050_000,
+        max_output_tokens: 128_000,
+        supports_codex_backend: true,
+        supports_responses_api: true,
+        supports_chat_completions: true,
+        codex_backend_context_override: None,
+    },
     ModelCatalogEntry {
         model_id: "gpt-5.5",
         context_length: 1_000_000,

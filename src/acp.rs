@@ -156,7 +156,7 @@ async fn handle_prompt(
         model: state
             .default_model
             .clone()
-            .unwrap_or_else(|| "gpt-5.4".to_string()),
+            .unwrap_or_else(|| "gpt-6.1-sol".to_string()),
         messages,
         stream: true,
         max_tokens: None,
