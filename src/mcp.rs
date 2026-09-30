@@ -88,8 +88,8 @@ fn tool_definitions() -> Value {
                 "properties": {
                     "model": {
                         "type": "string",
-                        "description": "Model to use (e.g. gpt-5.4, codex-mini). Defaults to gpt-5.4.",
-                        "default": "gpt-5.4"
+                        "description": "Model to use (e.g. gpt-6.1-sol, gpt-5.6-sol). Defaults to gpt-6.1-sol.",
+                        "default": "gpt-6.1-sol"
                     },
                     "messages": {
                         "type": "array",
@@ -163,7 +163,7 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
     let model_str = params
         .get("model")
         .and_then(Value::as_str)
-        .unwrap_or("gpt-5.4");
+        .unwrap_or("gpt-6.1-sol");
 
     // Apply default model override from state if the client didn't specify explicitly.
     let effective_model = if params.get("model").is_none() {
@@ -355,7 +355,7 @@ fn set_model_tool(params: &Value) -> String {
     {
         ("gpt-5.6-sol", "deeper reasoning for complex tasks")
     } else {
-        ("gpt-5.4", "general-purpose default")
+        ("gpt-6.1-sol", "general-purpose default")
     };
 
     format!(

@@ -133,9 +133,9 @@ pub fn setup_opencode(args: &SetupOpencodeArgs, base_url: Option<&str>) {
     );
 
     let default_model = if is_chatgpt_sub {
-        "openai-proxy/gpt-5.5"
+        "openai-proxy/gpt-6.1-sol"
     } else {
-        "openai-proxy/gpt-5.5"
+        "openai-proxy/gpt-6.1-sol"
     };
 
     let config_dir = if args.global {
