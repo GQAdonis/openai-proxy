@@ -405,7 +405,10 @@ async fn stream_responses(
         let model = model.clone();
         // We need mutable state for call_index_map inside filter_map.
         // Use a Mutex-wrapped map to share across the async closure.
-        let call_index_map = std::sync::Arc::new(std::sync::Mutex::new(HashMap::<u32, u32>::new()));
+        let call_index_map = std::sync::Arc::new(std::sync::Mutex::new(HashMap::<
+            u32,
+            StreamingFunctionCall,
+        >::new()));
         // Pending call_ids for streaming hook purposes (call_id by output_index).
         let pending_call_ids =
             std::sync::Arc::new(std::sync::Mutex::new(HashMap::<u32, String>::new()));
@@ -733,13 +736,58 @@ fn parse_chat_completions_tool_calls(value: &serde_json::Value) -> Option<Vec<To
     if calls.is_empty() { None } else { Some(calls) }
 }
 
+struct StreamingFunctionCall {
+    index: u32,
+    arguments: String,
+}
+
 fn build_sse_event(
     id: &str,
     created: u64,
     model: &str,
     event: ResponseStreamEvent,
-    call_index_map: &std::sync::Arc<std::sync::Mutex<HashMap<u32, u32>>>,
+    call_index_map: &std::sync::Arc<std::sync::Mutex<HashMap<u32, StreamingFunctionCall>>>,
 ) -> Option<Result<Event, std::convert::Infallible>> {
+    // Responses can send arguments only in the final events, without any deltas.
+    let final_arguments = match &event {
+        ResponseStreamEvent::ResponseFunctionCallArgumentsDone {
+            output_index,
+            arguments,
+        } => Some((*output_index, arguments.as_str())),
+        ResponseStreamEvent::ResponseOutputItemDone { output_index, item }
+            if item.item_type.as_deref() == Some("function_call") =>
+        {
+            item.arguments
+                .as_deref()
+                .map(|arguments| (*output_index, arguments))
+        }
+        _ => None,
+    };
+    let event = if let Some((output_index, arguments)) = final_arguments {
+        let missing = {
+            let map = call_index_map.lock().ok()?;
+            let call = map.get(&output_index)?;
+            let Some(missing) = arguments.strip_prefix(call.arguments.as_str()) else {
+                // Upstream arguments cannot replace bytes already sent to the client.
+                let error = serde_json::json!({ "error": {
+                    "code": "proxy_tool_arguments_conflict",
+                    "status_code": 502,
+                    "message": "Final tool arguments conflict with streamed arguments"
+                }});
+                return Some(Ok(Event::default().data(error.to_string())));
+            };
+            if missing.is_empty() {
+                return None;
+            }
+            missing.to_owned()
+        };
+        ResponseStreamEvent::ResponseFunctionCallArgumentsDelta {
+            output_index,
+            delta: missing,
+        }
+    } else {
+        event
+    };
     let chunk: Option<ChatCompletionChunk> = match event {
         ResponseStreamEvent::ResponseCreated { .. } => Some(ChatCompletionChunk {
             id: id.to_string(),
@@ -763,7 +811,13 @@ fn build_sse_event(
                 let tc_index = {
                     let mut map = call_index_map.lock().unwrap();
                     let next = map.len() as u32;
-                    map.insert(output_index, next);
+                    map.insert(
+                        output_index,
+                        StreamingFunctionCall {
+                            index: next,
+                            arguments: String::new(),
+                        },
+                    );
                     next
                 };
                 let call_id = item.call_id.clone().unwrap_or_default();
@@ -802,8 +856,10 @@ fn build_sse_event(
             delta,
         } => {
             let tc_index = {
-                let map = call_index_map.lock().unwrap();
-                *map.get(&output_index)?
+                let mut map = call_index_map.lock().unwrap();
+                let call = map.get_mut(&output_index)?;
+                call.arguments.push_str(&delta);
+                call.index
             };
             Some(ChatCompletionChunk {
                 id: id.to_string(),
@@ -830,36 +886,7 @@ fn build_sse_event(
             })
         }
 
-        ResponseStreamEvent::ResponseOutputItemDone { output_index, item } => {
-            // For function_call items, emit a finish_reason="tool_calls" chunk.
-            if item.item_type.as_deref() == Some("function_call") {
-                let tc_index = {
-                    let map = call_index_map.lock().unwrap();
-                    *map.get(&output_index)?
-                };
-                // If this is the last (or only) tool call, emit the finish chunk.
-                // We emit a zero-content delta with finish_reason="tool_calls".
-                let _ = tc_index; // used above for index lookup; chunk emitted below
-                let finish_chunk = ChatCompletionChunk {
-                    id: id.to_string(),
-                    object: "chat.completion.chunk",
-                    created,
-                    model: model.to_string(),
-                    choices: vec![ChunkChoice {
-                        index: 0,
-                        delta: Delta {
-                            role: None,
-                            content: None,
-                            tool_calls: None,
-                        },
-                        finish_reason: Some("tool_calls".to_string()),
-                    }],
-                };
-                let json = serde_json::to_string(&finish_chunk).ok()?;
-                return Some(Ok(Event::default().data(json)));
-            }
-            None
-        }
+        ResponseStreamEvent::ResponseOutputItemDone { .. } => None,
 
         ResponseStreamEvent::ResponseOutputTextDelta { delta, .. } => Some(ChatCompletionChunk {
             id: id.to_string(),
@@ -878,16 +905,15 @@ fn build_sse_event(
         }),
 
         ResponseStreamEvent::ResponseDone { response } => {
-            let finish = codex::map_finish_reason(response.status.as_deref());
-            // Only emit text-path finish chunk if no function calls were in progress.
-            // (Function calls emit their own finish chunk via ResponseOutputItemDone.)
             let has_calls = {
                 let map = call_index_map.lock().unwrap();
                 !map.is_empty()
             };
-            if has_calls {
-                return None;
-            }
+            let finish = if has_calls {
+                "tool_calls".to_string()
+            } else {
+                codex::map_finish_reason(response.status.as_deref())
+            };
             let finish_chunk = ChatCompletionChunk {
                 id: id.to_string(),
                 object: "chat.completion.chunk",
