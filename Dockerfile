@@ -1,6 +1,9 @@
 # ── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM rust:1.87-slim AS builder
 
+ENV RUSTUP_TOOLCHAIN=nightly-2026-07-18
+RUN rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
+
 # System deps for reqwest (rustls, no OpenSSL needed)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
@@ -10,8 +13,9 @@ WORKDIR /build
 
 # Cache dependencies before copying source
 COPY Cargo.toml Cargo.lock ./
+COPY vendor/patches ./vendor/patches
 RUN mkdir -p src && echo 'fn main() {}' > src/main.rs && echo '' > src/lib.rs
-RUN cargo build --release --locked 2>/dev/null || true
+RUN cargo build --release --locked
 RUN rm -rf src
 
 # Build the real binary

@@ -34,10 +34,12 @@ pub use memory_impl::{DocumentRecord, MemoryStore, SearchResult};
 mod memory_impl {
     use std::{path::Path, sync::Arc, time::Duration};
 
+    use anyhow::{Context, ensure};
     use serde::{Deserialize, Serialize};
     use surrealdb::{
         Surreal,
-        engine::local::{Db, RocksDb},
+        engine::local::{Db, SurrealKv},
+        opt::Config,
         types::SurrealValue,
     };
     use tokio::time::timeout;
@@ -85,10 +87,14 @@ mod memory_impl {
             embedding_model: String,
             api_key: Option<String>,
         ) -> anyhow::Result<Arc<Self>> {
+            let path_str = path.to_str().context("memory database path must be valid UTF-8")?;
+            // The SDK treats a path suffix starting with `?` as datastore options.
+            ensure!(!path_str.contains('?'), "memory database path must not contain '?'");
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent)?;
             }
-            let db = Surreal::new::<RocksDb>(path.to_string_lossy().as_ref()).await?;
+            let config = Config::new().datastore_option("experimental_upgrade_from_3x", false);
+            let db = Surreal::new::<SurrealKv>((path, config)).await?;
             db.use_ns("oproxy").use_db("memory").await?;
             Self::migrate(&db).await?;
             Ok(Arc::new(Self {
@@ -102,16 +108,16 @@ mod memory_impl {
         async fn migrate(db: &Surreal<Db>) -> anyhow::Result<()> {
             db.query(
                 "DEFINE TABLE IF NOT EXISTS document SCHEMAFULL;
-                 DEFINE FIELD IF NOT EXISTS id           ON document TYPE string;
                  DEFINE FIELD IF NOT EXISTS scope        ON document TYPE string;
                  DEFINE FIELD IF NOT EXISTS text         ON document TYPE string;
-                 DEFINE FIELD IF NOT EXISTS embedding    ON document TYPE array<float>;
-                 DEFINE FIELD IF NOT EXISTS metadata     ON document TYPE object;
+                 DEFINE FIELD IF NOT EXISTS embedding    ON document TYPE option<array<float>>;
+                 DEFINE FIELD IF NOT EXISTS metadata     ON document TYPE object | null FLEXIBLE;
                  DEFINE FIELD IF NOT EXISTS created_at   ON document TYPE datetime;
                  DEFINE INDEX IF NOT EXISTS hnsw_embed   ON document FIELDS embedding
                      HNSW DIMENSION 1536 DIST COSINE TYPE F32;",
             )
-            .await?;
+            .await?
+            .check()?;
             Ok(())
         }
 
@@ -169,34 +175,36 @@ mod memory_impl {
             let id_for_query = id.clone();
             let scope_owned = scope.to_string();
             let text_owned = text.to_string();
-            let metadata_owned = metadata.clone();
             let now = chrono::Utc::now().to_rfc3339();
             let embedding = self.embed_text(text).await;
+            let embedding = (!embedding.is_empty()).then_some(embedding);
             self.db
-                .query("CREATE type::thing('document', $id) SET id = $id, scope = $scope, text = $text, embedding = $embedding, metadata = $metadata, created_at = <datetime>$now")
+                .query("CREATE type::record('document', $id) SET scope = $scope, text = $text, embedding = $embedding, metadata = $metadata, created_at = <datetime>$now")
                 .bind(("id", id_for_query))
                 .bind(("scope", scope_owned))
                 .bind(("text", text_owned))
                 .bind(("embedding", embedding))
-                .bind(("metadata", metadata_owned))
+                .bind(("metadata", metadata))
                 .bind(("now", now))
-                .await?;
+                .await?
+                .check()?;
             Ok(id)
         }
 
         pub async fn delete_document(&self, id: &str) -> anyhow::Result<()> {
             let id_owned = id.to_string();
             self.db
-                .query("DELETE type::thing('document', $id)")
+                .query("DELETE type::record('document', $id)")
                 .bind(("id", id_owned))
-                .await?;
+                .await?
+                .check()?;
             Ok(())
         }
 
         pub async fn list_documents(&self, scope: &str) -> anyhow::Result<Vec<DocumentRecord>> {
             let scope_owned = scope.to_string();
             let mut resp = self.db
-                .query("SELECT id, scope, text, metadata, time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at FROM document WHERE scope = $scope")
+                .query("SELECT record::id(id) AS id, scope, text, metadata, time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at FROM document WHERE scope = $scope")
                 .bind(("scope", scope_owned))
                 .await?;
             let docs: Vec<DocumentRecord> = resp.take(0)?;
@@ -230,7 +238,7 @@ mod memory_impl {
             let mut resp = self
                 .db
                 .query(format!(
-                    "SELECT id, scope, text, metadata, \
+                    "SELECT record::id(id) AS id, scope, text, metadata, \
                      time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at, \
                      vector::distance::knn() AS distance \
                      FROM document WHERE scope = $scope \

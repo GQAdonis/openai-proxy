@@ -10,7 +10,8 @@ The proxy includes an optional SurrealDB-backed memory system for RAG (Retrieval
 cargo build --release --features memory
 ```
 
-The default build excludes SurrealDB (~+35MB binary size increase). Use `--features memory` only when you need persistent context.
+The `memory` feature embeds SurrealDB 4.0.0 with SurrealKV. The default build excludes SurrealDB.
+The container builder uses `nightly-2026-07-18` for the locked dependencies.
 
 ---
 
@@ -25,9 +26,16 @@ db_path = ""                          # defaults to ~/.local/share/oproxy/memory
 embedding_model = "text-embedding-3-small"
 ```
 
-`db_path` supports tilde expansion: `~/.local/share/oproxy/memory.db`
+`db_path` accepts a UTF-8 filesystem path and supports tilde expansion. The path cannot contain `?`.
 
 An OpenAI API key is required for embedding generation. The proxy reads `OPENAI_API_KEY` or `~/.codex/auth.json`.
+
+### Existing RocksDB stores
+
+The proxy refuses to open a legacy RocksDB memory directory. Startup logs the
+failed open and chat forwarding continues with memory disabled. Memory endpoints
+return HTTP 503. Keep the old directory offline. Set `db_path` to a fresh
+SurrealKV store or a verified SurrealDB 4.0 backup.
 
 ---
 
