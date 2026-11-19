@@ -1,7 +1,5 @@
 # KBD current waypoint
 
-The active phase is `codex-live-auth-opencode-console`. The team is preparing the assessment for automatic Codex credential refresh and login pickup, an OpenCode 2.x plugin using Codex with the highest ChatGPT Pro tier, and the embedded chat and settings interface.
+The active phase is `codex-live-auth-opencode-console`. Assess is complete. The next command is `/kbd-analyze codex-live-auth-opencode-console`.
 
-The canonical runtime records the active phase and its next action. Run `prometheus kbd status` to read the current position. At kickoff the next action is `/kbd-assess codex-live-auth-opencode-console`.
-
-[Phase goals and team kickoff](phases/codex-live-auth-opencode-console/goals.md)
+Read the [assessment](phases/codex-live-auth-opencode-console/assessment.md), [settings inventory](phases/codex-live-auth-opencode-console/settings-inventory.md) and [candidate acceptance scenarios](phases/codex-live-auth-opencode-console/scenario-candidates.md) before analysis. The [stage handoff](phases/codex-live-auth-opencode-console/handoffs/assess.handoff.json) records the outstanding calibration and entitlement questions. `prometheus kbd status` reports the canonical position.

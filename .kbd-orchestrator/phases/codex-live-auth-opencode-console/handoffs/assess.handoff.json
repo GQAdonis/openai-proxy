@@ -1,0 +1,14 @@
+{
+  "stage": "assess",
+  "completedAt": "2026-11-19T20:00:54Z",
+  "outputs": [
+    "assessment.md",
+    "settings-inventory.md",
+    "scenario-candidates.md",
+    "review/assess/findings.json"
+  ],
+  "nextStage": "analyze",
+  "summaryForNext": "Next analyze the credential owner and pickup bounds, OpenCode V2 and both SDK drivers, the embedded console including validated A2UI, and safe service-host ACP/MCP setup. The reviewer warning about CLI credential propagation is addressed in the assessment and first scenario; timings, client versions and real Pro entitlement still require validation.",
+  "skipped": false,
+  "skipReason": null
+}

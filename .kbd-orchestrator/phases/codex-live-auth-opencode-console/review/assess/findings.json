@@ -1,0 +1,19 @@
+{
+  "mode": "artifact",
+  "verdict": "PASS",
+  "judge_model": "gpt-6.1-terra",
+  "isolation_mode": "harness-native",
+  "producer_model": "gpt-6",
+  "cross_model_check": "verified-distinct",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": "assessment.md",
+      "claim": "The assessment omits the CLI from its credential propagation analysis, although the phase goals explicitly require tracing long-lived credential copies through it.",
+      "evidence": "The goals require: ‘Include CLI, HTTP, MCP and the optional embedding client when tracing long-lived credential copies.’ The assessment instead says: ‘Trace request-time use in REST, AG-UI, ACP, both MCP transports, model discovery and the optional embedding client,’ with no corresponding CLI assessment or identified gap.",
+      "suggested_fix": "Assess which CLI commands load or retain credentials and identify whether they must observe credential changes or require separate verification.",
+      "follow_up": "The independent reviewer checked the revised assessment and scenario 1 against src/main.rs and src/cli/setup.rs and confirmed the warning was resolved."
+    }
+  ],
+  "checked_classes": []
+}
