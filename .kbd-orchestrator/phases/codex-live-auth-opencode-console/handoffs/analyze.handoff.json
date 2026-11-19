@@ -1,0 +1,15 @@
+{
+  "stage": "analyze",
+  "completedAt": "2026-11-19T20:24:44Z",
+  "outputs": [
+    "analysis.md",
+    "library-candidates.json",
+    "decision-log.md",
+    "review/analyze/findings.json",
+    "review/analyze/quality-screen.json"
+  ],
+  "nextStage": "spec",
+  "summaryForNext": "Ready for Spec with 14 candidate decisions and seven areas of custom work covering managed login, the V2 provider and both SDK drivers, all 16 settings areas and validated A2UI. The independent maintenance warning was resolved with dated evidence and conditional production pins. Spec should calibrate pickup bounds, credential and workspace ownership, Pro attribution evidence, native runtime packaging, tool ownership and supported client versions.",
+  "skipped": false,
+  "skipReason": null
+}

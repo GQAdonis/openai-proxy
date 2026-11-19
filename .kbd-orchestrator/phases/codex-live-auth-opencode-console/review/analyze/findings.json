@@ -1,0 +1,18 @@
+{
+  "mode": "artifact",
+  "verdict": "PASS",
+  "producer_model": "gpt-6",
+  "judge_model": "gpt-6.1-terra",
+  "cross_model_check": "verified-distinct",
+  "isolation_mode": "harness-native",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": "library-candidates.json",
+      "claim": "The adopted dependencies lack a documented maintenance assessment.",
+      "evidence": "Candidates 002, 008, 009, 010 and 012 are adopted or adapted based on release availability, documentation and functional fit, but their evidence and risks do not assess maintenance activity, support status or dependency sustainability.",
+      "suggested_fix": "Record a dated maintenance check for each newly adopted dependency, including release activity and support status, or explicitly defer the decision pending that check.",
+      "resolution": "Added dated release activity, upstream support status and explicit production adoption conditions per candidate and a dependency maintenance section in the analysis. The independent reviewer confirmed closure and did not independently verify external evidence."
+    }
+  ]
+}

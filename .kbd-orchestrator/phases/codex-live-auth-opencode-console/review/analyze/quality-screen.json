@@ -1,0 +1,10 @@
+{
+  "artifact": "findings.json",
+  "status": "PASS",
+  "score": 0.0,
+  "strictness": "strict",
+  "network_access": false,
+  "reject_cap": 2,
+  "cap_overridden": false,
+  "cap_default": 2
+}

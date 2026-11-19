@@ -1,0 +1,498 @@
+{
+  "phase": "codex-live-auth-opencode-console",
+  "generated_at": "2026-11-19T20:18:34Z",
+  "research_budget": {
+    "max_queries_per_tier": 8,
+    "max_minutes": 20,
+    "queries_used": {
+      "tier_1": 5,
+      "tier_2": 8,
+      "tier_3": 8,
+      "tier_4": 0
+    }
+  },
+  "gaps_addressed": [
+    "identity and login pickup",
+    "OpenCode extension and Pro identity",
+    "REST conversation drivers",
+    "embedded chat and packaging",
+    "AG-UI and validated A2UI",
+    "authorized settings and client registration",
+    "ACP, MCP and service features"
+  ],
+  "candidates": [
+    {
+      "id": "cand-001",
+      "name": "Codex CLI and App Server 0.169.0",
+      "kind": "service",
+      "registry": "none",
+      "fit_for_gap": "identity and login pickup",
+      "verdict": "adapt",
+      "decision_rationale": "Wrap Codex's managed credential owner. Reconcile store changes and replace stale helpers across login generations.",
+      "risks": [
+        "An account/read reply can be successful after failed renewal. Platform stores and external-token mode differ."
+      ],
+      "evidence": [
+        {
+          "tier": 2,
+          "source_url": "https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/app-server/src/request_processors/account_processor/workspace_routing.rs#L259-L294",
+          "claim": "The account read path can return metadata after attempting refresh."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/login/src/auth/manager.rs#L3455-L3517",
+          "claim": "Managed refresh rechecks account identity when reading storage."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Codex CLI 0.169.0 is installed and matches the researched official App Server source.",
+        "support_status": "OpenAI upstream. Recheck managed auth behavior on every CLI upgrade; no LTS guarantee established."
+      }
+    },
+    {
+      "id": "cand-002",
+      "name": "notify 8.2.2 and Tokio reconciliation",
+      "kind": "library",
+      "registry": "crates",
+      "fit_for_gap": "identity and login pickup",
+      "verdict": "adopt",
+      "decision_rationale": "Watch the resolved parent directory for file replacement, debounce hints and schedule same-owner reconciliation.",
+      "risks": [
+        "Keyring changes, missed events and stale single-file bind mounts need a separate recovery path."
+      ],
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://crates.io/crates/notify/8.2.2",
+          "claim": "Stable native watcher release."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://docs.rs/notify/8.2.2/notify/",
+          "claim": "Documents filesystem notification backends, polling and platform limitations."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Registry shows 8.2.2 as stable and crate metadata updated 2026-11-15.",
+        "support_status": "notify-rs upstream. Current registry activity is visible; verify supported OS backends and advisories before locking."
+      }
+    },
+    {
+      "id": "cand-003",
+      "name": "@openai/codex-sdk 0.169.0",
+      "kind": "library",
+      "registry": "npm",
+      "fit_for_gap": "REST conversation drivers",
+      "verdict": "adapt",
+      "decision_rationale": "Wrap native start/resume and streamed items in the REST conversation contract and in the Codex-targeted plugin route.",
+      "risks": [
+        "Explicit API key or inherited environment can select another credential. Generic caller-tool callbacks are absent."
+      ],
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@openai/codex-sdk/v/0.169.0",
+          "claim": "Release depends on the matching Codex CLI package."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/openai/codex/blob/rust-v0.169.0/sdk/typescript/src/exec.ts",
+          "claim": "The adapter starts the CLI per turn and constructs its child environment."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/openai/codex/blob/rust-v0.169.0/sdk/typescript/src/thread.ts",
+          "claim": "The thread API exposes text or supported input items and streamed native events."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Published 0.169.0 TypeScript SDK pins the matching Codex CLI 0.169.0.",
+        "support_status": "OpenAI upstream. Accept this pair for Spec; defer production pin until recent release cadence, advisory status and binary availability are checked."
+      }
+    },
+    {
+      "id": "cand-004",
+      "name": "@opencode/plugin 2.3.0",
+      "kind": "library",
+      "registry": "npm",
+      "fit_for_gap": "OpenCode extension and Pro identity",
+      "verdict": "adapt",
+      "decision_rationale": "Register a V2 provider with explicit model and tool capabilities, a pinned Codex execution route and preserved user overrides.",
+      "risks": [
+        "A native OpenCode ChatGPT entitlement does not establish third-party usage attribution."
+      ],
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/build/plugins/server.mdx",
+          "claim": "V2 server plugins register through Plugin.define and provider hooks."
+        },
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@opencode/plugin/v/2.3.0",
+          "claim": "The V2 plugin contract is published in the new namespace."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/providers.mdx#chatgpt",
+          "claim": "OpenCode documents its own subscription sign-in."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "2.3.0 plugin release matches the installed 2.3.0 host and its tagged API.",
+        "support_status": "OpenCode upstream. Pin with the host; the supported minor range and upstream maintenance commitment are unverified."
+      }
+    },
+    {
+      "id": "cand-005",
+      "name": "@opencode/sdk 2.3.0",
+      "kind": "library",
+      "registry": "npm",
+      "fit_for_gap": "REST conversation drivers",
+      "verdict": "adapt",
+      "decision_rationale": "Embed the server-side runtime with durable owner-scoped sessions and interrupted turns.",
+      "risks": [
+        "Admission can precede subscription and a default memory database cannot support durable resume."
+      ],
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/packages/sdk/README.md",
+          "claim": "The embedded SDK owns runtime and session creation and supports configuring storage."
+        },
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@opencode/sdk/v/2.3.0",
+          "claim": "The separate in-process SDK package is published."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/packages/sdk/script/verify-package.ts",
+          "claim": "Package checks cover imports under Node and Bun. Real release turns still require verification."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "2.3.0 SDK is published and the tagged repository has package verification for Node/Bun.",
+        "support_status": "OpenCode upstream. Treat production selection as conditional on release cadence, native dependency support and supported runtime platforms."
+      }
+    },
+    {
+      "id": "cand-006",
+      "name": "@opencode/client 2.3 tagged source",
+      "kind": "library",
+      "registry": "npm",
+      "fit_for_gap": "REST conversation drivers",
+      "verdict": "reference",
+      "decision_rationale": "Use as reference for attaching to a remote OpenCode server if remote attachment is later selected.",
+      "risks": [
+        "It introduces a separately operated server and cannot supply the in-process runtime."
+      ],
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/packages/client/src/promise/generated/client.ts",
+          "claim": "The transport client calls a server over its client interface."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "2.3.0 tagged client source documents a remote alternative.",
+        "support_status": "Reference only; remote-client maintenance is outside the selected driver."
+      }
+    },
+    {
+      "id": "cand-007",
+      "name": "React 19, Vite 8 and Cargo build scripts",
+      "kind": "framework",
+      "registry": "none",
+      "fit_for_gap": "embedded chat and packaging",
+      "verdict": "adopt",
+      "decision_rationale": "Compile locked frontend assets through build.rs, generate an asset map in OUT_DIR and embed it in the Rust executable.",
+      "risks": [
+        "Build-time tools can be absent from a production image that still requires a separate SDK worker to run harness turns."
+      ],
+      "evidence": [
+        {
+          "tier": 2,
+          "source_url": "https://react.dev/blog/2024/12/05/react-19",
+          "claim": "React 19 supplies the requested UI foundation."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://vite.dev/guide/build.html",
+          "claim": "Vite produces a browser deployment bundle."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://doc.rust-lang.org/cargo/reference/build-scripts.html",
+          "claim": "Cargo supports generated outputs and explicit build-script inputs."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "React 19 has an official stable release and Vite 8 is the specified major. Cargo build scripts are documented by the Rust project.",
+        "support_status": "Keep the requested majors. Exact patch releases, toolchain support windows and build image pins require a release check in Spec."
+      }
+    },
+    {
+      "id": "cand-008",
+      "name": "@ag-ui/client and @ag-ui/core 1.0.5 with upstream A2UI middleware contract",
+      "kind": "library",
+      "registry": "npm",
+      "fit_for_gap": "AG-UI and validated A2UI",
+      "verdict": "adapt",
+      "decision_rationale": "Adopt the browser SSE client and adapt the activity-snapshot wire contract in Rust.",
+      "risks": [
+        "Correct camel-case IDs, replay handling, explicit terminal errors and action correlation require interoperability fixtures."
+      ],
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@ag-ui/client/v/1.0.5",
+          "claim": "Published client pins the same core version."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/ag-ui-protocol/ag-ui/blob/3416b86da4b3288e87f827c7f2759a7fa18b5231/middlewares/a2ui-middleware/src/activity-snapshots.ts",
+          "claim": "Upstream represents painted A2UI surfaces as activity snapshots."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/ag-ui-protocol/ag-ui/blob/3416b86da4b3288e87f827c7f2759a7fa18b5231/middlewares/a2ui-middleware/src/index.ts#L443-L480",
+          "claim": "The middleware receives actions in forwardedProps.a2uiAction.userAction."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Published 1.0.5 client pairs with 1.0.5 core; a pinned upstream commit implements the middleware convention.",
+        "support_status": "AG-UI project. Stable release availability and source are verified; defer production pin until maintenance cadence and changes to the middleware/client contract are checked."
+      }
+    },
+    {
+      "id": "cand-009",
+      "name": "@a2ui/react and @a2ui/web_core 0.15.0, v0.9 wire profile",
+      "kind": "library",
+      "registry": "npm",
+      "fit_for_gap": "AG-UI and validated A2UI",
+      "verdict": "adopt",
+      "decision_rationale": "Use the published v0_9 React surface component and processor with local catalog/schema validation.",
+      "risks": [
+        "Renderer package version differs from the protocol revision. Reject unsupported versions and catalog operations."
+      ],
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://www.npmjs.com/package/@a2ui/react/v/0.15.0",
+          "claim": "Stable renderer declares React 19 support and a v0_9 export."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://unpkg.com/@a2ui/web_core@0.15.0/src/processing/message-processor.d.ts",
+          "claim": "The published processor accepts selected catalogs and an action handler."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/a2ui-project/a2ui/blob/28e3d6bd4fb21a38be5abb0959bf73fd9708ffe0/specification/v0_9/json/client_to_server.json",
+          "claim": "Client action schema identifies originating surface and component."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Published 0.15.0 React and web_core declarations expose v0_9. React v1 wire export was absent from this release.",
+        "support_status": "A2UI project. Pre-1.0 API stability and long-term v0.9 support are unconfirmed. Recheck maintainer activity, browser peer support and wire compatibility before production adoption."
+      }
+    },
+    {
+      "id": "cand-010",
+      "name": "jsonc-parser 0.34.0 and toml_edit",
+      "kind": "library",
+      "registry": "crates",
+      "fit_for_gap": "authorized settings and client registration",
+      "verdict": "adopt",
+      "decision_rationale": "Use syntax-tree edits for user-owned JSONC and TOML. Prefer native client setup where its scope and reversibility are verified.",
+      "risks": [
+        "Parsers alone do not implement ownership, scope, symlink policy, concurrency checks or atomic writes."
+      ],
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://crates.io/crates/jsonc-parser/0.34.0",
+          "claim": "Published Rust JSONC parser and editor."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/dprint/jsonc-parser/blob/0.34.0/src/cst/mod.rs",
+          "claim": "The concrete syntax tree retains existing comments and whitespace."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/toml-rs/toml/tree/main/crates/toml_edit",
+          "claim": "The formatting-preserving TOML editor fits Codex configuration."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "jsonc-parser 0.34.0 is stable; registry metadata updated 2026-09-27. Cargo.lock also includes toml_edit 0.22.27 and 0.25.11+spec-1.1.0 transitively.",
+        "support_status": "The editors have upstream ownership. Decide the direct toml_edit version after a maintenance/advisory check and round-trip examples; lockfile presence alone does not qualify it."
+      }
+    },
+    {
+      "id": "cand-011",
+      "name": "agent-client-protocol 1.2.0, existing Rust adapter",
+      "kind": "library",
+      "registry": "crates",
+      "fit_for_gap": "ACP, MCP and service features",
+      "verdict": "adapt",
+      "decision_rationale": "Keep the repository's locked stdio ACP SDK and extend capability/error fidelity and editor provisioning.",
+      "risks": [
+        "An editor registration can succeed even if the executable cannot complete a prompt."
+      ],
+      "evidence": [
+        {
+          "tier": 2,
+          "source_url": "https://zed.dev/docs/ai/external-agents",
+          "claim": "Zed launches custom ACP agents using an agent_servers entry."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://www.jetbrains.com/help/ai-assistant/acp.html",
+          "claim": "AI Assistant documents a custom acp.json and stdio launch."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Cargo.lock selects agent-client-protocol 1.2.0, already used by the service.",
+        "support_status": "Retain the incumbent until protocol/client parity is established. Upstream maintenance cadence and new release support were not checked for this existing dependency."
+      }
+    },
+    {
+      "id": "cand-012",
+      "name": "rmcp 3.11.0",
+      "kind": "library",
+      "registry": "crates",
+      "fit_for_gap": "ACP, MCP and service features",
+      "verdict": "adapt",
+      "decision_rationale": "Use the official SDK as the target transport layer for the four existing tools, gated on current-client and legacy behavior checks.",
+      "risks": [
+        "Existing callers may depend on the hand-written 2024-11-05 response. Replacing transport before establishing client parity could break them."
+      ],
+      "evidence": [
+        {
+          "tier": 3,
+          "source_url": "https://crates.io/crates/rmcp/3.11.0",
+          "claim": "Published Rust MCP SDK."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/modelcontextprotocol/rust-sdk/blob/rmcp-v3.11.0/crates/rmcp/Cargo.toml",
+          "claim": "Release provides stdio and Streamable HTTP server features."
+        },
+        {
+          "tier": 2,
+          "source_url": "https://github.com/modelcontextprotocol/rust-sdk",
+          "claim": "The official SDK documents transport- and version-dependent behavior."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Official SDK rmcp 3.11.0 is stable; registry metadata updated 2026-11-17 and the release tag includes the required feature flags.",
+        "support_status": "Model Context Protocol upstream. No legacy-transport or support-window guarantee inferred. Defer replacing the shipping server until pinned-version compatibility and advisory review."
+      }
+    },
+    {
+      "id": "cand-013",
+      "name": "Proxy-owned OAuth grant exchange",
+      "kind": "pattern",
+      "registry": "none",
+      "fit_for_gap": "identity and login pickup",
+      "verdict": "reject",
+      "decision_rationale": "Keeping the refresh grant inside its documented owner avoids competing rotating-token writers.",
+      "risks": [
+        "Reusing a previous refresh token after an uncertain exchange can invalidate or confuse the session."
+      ],
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/login/src/auth/manager.rs#L3759-L3789",
+          "claim": "Network exchange and storage publication are distinct operations."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Rejected approach; no dependency selected.",
+        "support_status": "No production support obligation."
+      }
+    },
+    {
+      "id": "cand-014",
+      "name": "Existing OpenCode V1 plugin package as V2 adapter",
+      "kind": "pattern",
+      "registry": "none",
+      "fit_for_gap": "OpenCode extension and Pro identity",
+      "verdict": "reject",
+      "decision_rationale": "The checked-in V1 registration, keys and lifecycle do not implement the tagged V2 host contract.",
+      "risks": [
+        "An existing project provider can mask a plugin that fails to load globally."
+      ],
+      "evidence": [
+        {
+          "tier": 1,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/build/plugins/index.mdx",
+          "claim": "V2 documents plugin export points and installation."
+        },
+        {
+          "tier": 1,
+          "source_url": "https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/config.mdx",
+          "claim": "Versioned configuration uses scoped precedence."
+        }
+      ],
+      "maintenance": {
+        "checked_on": "2026-11-19",
+        "release_activity": "Repository's V1 dependency and V2 host are different contracts.",
+        "support_status": "Rejected for the V2 target. Existing V1 migration rules belong to Spec."
+      }
+    }
+  ],
+  "build_required": [
+    {
+      "capability_gap_id": "identity-publish",
+      "need": "Generation-bound credential resolution, watcher recovery, single-flight and redacted status",
+      "why_no_candidate": "Codex owns exchange and storage. Proxy paths, keyring notification, request routing and in-flight ownership remain application responsibilities."
+    },
+    {
+      "capability_gap_id": "subscribed-provider",
+      "need": "A non-recursive V2 provider bridge that preserves actual Pro entitlement and reports its tool contract",
+      "why_no_candidate": "Neither SDK proves an arbitrary app's billing path or transfers native tool ownership to the other host."
+    },
+    {
+      "capability_gap_id": "harness-sessions",
+      "need": "Common REST conversation/events and an owner-scoped server-side SDK worker",
+      "why_no_candidate": "The native SDKs differ on execution, events, persistence, tool effects, cancellation and approvals."
+    },
+    {
+      "capability_gap_id": "configuration",
+      "need": "Effective settings API and reversible, versioned host provisioning for the full inventory",
+      "why_no_candidate": "Syntax editors and client schemas cannot enforce application roles, effective precedence or safe machine changes."
+    },
+    {
+      "capability_gap_id": "console",
+      "need": "Embedded chat, settings screens, asset route and deterministic build",
+      "why_no_candidate": "UI and Cargo frameworks provide primitives. Product screens, runtime capabilities and release packaging are project-specific."
+    },
+    {
+      "capability_gap_id": "surfaces",
+      "need": "AG-UI snapshot projection, A2UI validation and action authorization",
+      "why_no_candidate": "The renderer and schemas accept protocol data. Isolation, budgets, replay, actor authorization and revocation belong to the proxy."
+    },
+    {
+      "capability_gap_id": "protocols",
+      "need": "Existing direct REST, streaming ACP/MCP, discovery, hooks and scoped memory parity",
+      "why_no_candidate": "Transport libraries cannot decide application-level auth, model selection, feature status or compatibility promises."
+    }
+  ]
+}
