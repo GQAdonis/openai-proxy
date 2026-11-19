@@ -5,23 +5,23 @@
     "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
     "runId": "codex-live-auth-opencode-console-20261119T193635Z",
     "phaseId": "codex-live-auth-opencode-console",
-    "planRevision": 1,
-    "contractDigest": "7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc"
+    "planRevision": null,
+    "contractDigest": null
   },
   "digestNormalization": {
     "algorithm": "sha256",
     "command": "jq -S -c 'del(.identity.contractDigest) | del(.identity.planRevision)'",
     "stalenessRule": "Recompute normalized SHA-256 and compare with the latest non-superseded canonical decision, current spec-delta digest and calibration bytes."
   },
-  "adoptionSource": "The project owner explicitly requested both deployment modes, highest-tier ChatGPT Pro, both SDK drivers and validated A2UI. The operative approval for the complete matrix and its thresholds is the separate project-owner decision linked by the canonical phase binding. Before that binding this artifact is proposed and behavioral acceptance is blocked.",
+  "adoptionSource": "The project owner adopted revision 1 (7bce50fc) and subsequently specified OpenCode 2.x APIs exclusively, released A2UI 1.0, and the latest compatible stable AG-UI. The signed superseding binding identifies when this proposal is authorized for implementation.",
   "decisionOwner": "Project owner of openai-proxy",
   "amendmentPolicy": "Any later change to scope, evidence, fixture identity, limits or scenario uses an explicit owner-approved superseding decision. Preserve the consumed budget and original receipts.",
   "releaseClaim": {
     "userOperation": "Continue chatting after external Codex login or managed expiry; use a V2 OpenCode provider with the user's verified Pro allowance; select either native REST harness, use embedded chat and validated surfaces, and administer supported modes and local clients.",
     "supportedEnvironments": [
       "Native macOS service-host and Linux release container with an explicit host-owned or dedicated file-backed Codex store",
-      "Local-owner and authenticated shared deployments; configured native Codex 0.169.0 and OpenCode 2.3.0 runtimes",
-      "Embedded React 19/Vite 8 and A2UI v0.9 browser client; current-host editor/CLI versions captured for each supported registration"
+      "Local-owner and authenticated shared deployments using Codex CLI/SDK 0.169.0 and OpenCode 2.x. Host, SDK and plugin 2.3.0 are the first certification target. Record tested triples and treat other combinations as unverified.",
+      "Embedded React 19/Vite 8 with A2UI wire 1.0 exclusively, canonical schema at 28e3d6bd4fb21a38be5abb0959bf73fd9708ffe0, @a2ui/react and @a2ui/web_core 0.15.0, @ag-ui/client and @ag-ui/core 1.0.5, and the @ag-ui/a2ui-middleware 0.0.16 bridge contract. Capture actual host/editor/CLI versions."
     ],
     "currentCapabilities": "Existing Rust service provides direct REST, streaming text, basic MCP/ACP and optional A2A discovery and memory. Startup snapshots credentials, OpenCode uses V1 hooks and the embedded UI is absent at the analysis baseline.",
     "explicitUnknowns": [
@@ -181,7 +181,7 @@
       "likelihood": "UNKNOWN",
       "mandatory": true,
       "ownerTask": "integrate-opencode-and-sdk-drivers/1.1",
-      "productionEntry": "Launch opencode 2.3.0 with the local plugin, then the packed export; select the Codex provider and send an authorized turn.",
+      "productionEntry": "Launch opencode 2.3.0 with the local plugin, then the packed export; select the Codex provider and send an authorized turn. Inspect the packed manifest/graph and project configuration for V2-only imports/exports before exercising both real installs on the pinned V2 host.",
       "realCollaborators": [
         "Actual OpenCode host",
         "packaged plugin",
@@ -197,8 +197,8 @@
         "comparator": "Correlate native turn, owner and account allowance. A plan label, generic response or zero cost estimate alone fails attribution. Keep native and custom authorization paths identifiable."
       },
       "negativeControl": {
-        "input": "Remove paid fallback, deny model access or exhaust the subscription allowance.",
-        "expectedRejection": "Account/model/quota denial surfaces without charging an API key or another user.",
+        "input": "Remove paid fallback, deny model access or exhaust the subscription allowance. Attempt to load on a V1 host.",
+        "expectedRejection": "Account/model/quota denial surfaces without charging an API key or another user. A V1 host cannot register the plugin or start a Codex turn.",
         "commandRef": "negative-PLUGIN-1"
       },
       "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
@@ -238,7 +238,7 @@
       "oracle": {
         "observation": "Stream, replay after reconnect, interrupt native work and resume after worker restart on each driver. Existing direct clients retain compatibility.",
         "expectedTruthSource": "External SSE capture, client inputs and the respective native session/interrupt trace.",
-        "comparator": "Native identity bound to the same user/workspace and driver; exactly one terminal state and no duplicated snapshot text. Compare actual native interruption as well as visible UI state."
+        "comparator": "Native identity bound to the same user/workspace and driver; exactly one terminal state and no duplicated snapshot text. Compare actual native interruption as well as visible UI state. Correlate the OpenCode worker to its actual @opencode/sdk 2.x binary/package and isolate it from V1 clients; the direct route and Codex SDK have distinct receipts."
       },
       "negativeControl": {
         "input": "Use a foreign native session, mismatched workspace or driver, expired replay cursor and repeated cancel after terminal.",
@@ -357,9 +357,9 @@
       "likelihood": "UNKNOWN",
       "mandatory": true,
       "ownerTask": "embed-chat-and-validated-surfaces/3.2",
-      "productionEntry": "Use the packaged browser and versioned AG-UI endpoint. Send a typed create/update/replayed snapshot, activate by keyboard, then delete the surface. POST /api/v1/ag-ui/stream carries structured runs; POST /ag-ui/stream keeps text compatibility.",
+      "productionEntry": "Use the packaged browser and versioned AG-UI endpoint. Send a typed create/update/replayed snapshot, activate by keyboard, then delete the surface. POST /api/v1/ag-ui/stream carries structured runs; POST /ag-ui/stream keeps text compatibility. Use AG-UI ACTIVITY_SNAPSHOT with activityType a2ui-surface, stable messageId, replace:true and content.a2ui_operations. Select wire 1.0 and the registered v1 catalog at both ends.",
       "realCollaborators": [
-        "Real AG-UI JS client and A2UI v0.9 React renderer",
+        "@ag-ui/client and @ag-ui/core 1.0.5, the @ag-ui/a2ui-middleware 0.0.16 envelope and action contract, and @a2ui/react and @a2ui/web_core 0.15.0 in the packaged browser",
         "Rust stream and validator",
         "two authenticated browsers",
         "action receiver"
@@ -370,11 +370,11 @@
       "oracle": {
         "observation": "Visible/accessible surface follows the valid event sequence. Text stays readable and does not become executable UI.",
         "expectedTruthSource": "Known catalog, independently declared expected component tree and action receiver's scoped counter.",
-        "comparator": "Compare actual component value and identity, event order, deletion and exactly one authorized action. Replay replaces state and two users with matching surface IDs remain isolated."
+        "comparator": "Compare actual component value and identity, event order, deletion and exactly one authorized action. Replay replaces state and two users with matching surface IDs remain isolated. Compare the final canonical 1.0 component @accessibility input to the browser accessibility tree. Validate the renderer-to-agent action against the final schema and match its scoped receiver effect. Assert no downgrade after an invalid payload."
       },
       "negativeControl": {
-        "input": "Inject text containing surface-shaped JSON, unknown catalog, oversized/partial/invalid frame, replayed or foreign/deleted action.",
-        "expectedRejection": "No untrusted or duplicated action, privilege transition or corruption of unrelated text/surfaces.",
+        "input": "Inject text containing surface-shaped JSON, unknown catalog, oversized/partial/invalid frame, replayed or foreign/deleted action. Include draft/0.9 wire data, a wrong version spelling, unknown reserved fields, unsupported RPC, and forged action context.",
+        "expectedRejection": "No untrusted or duplicated action, privilege transition or corruption of unrelated text/surfaces. Never render legacy wire or dispatch an unsupported command. Preserve subsequent valid text and surface activity.",
         "commandRef": "negative-SURFACE-1"
       },
       "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
@@ -385,7 +385,8 @@
       "invalidationKeys": [
         "production build, source and dependency versions",
         "SURFACE-1 configuration, protocol and oracle",
-        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b",
+        "Final 1.0 schema and v1 catalog, reserved-field adapter, AG-UI package pins, action envelope, renderer package and observed browser accessibility"
       ],
       "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
       "scopeRefs": [
@@ -453,13 +454,13 @@
       ],
       "substitutedBoundaries": [],
       "oracle": {
-        "observation": "Resolved destination/override match the preview; second apply is byte-identical and undo removes only owned entries.",
+        "observation": "Resolved destination/override match the preview; second apply is byte-identical and undo removes only owned entries. Verify V2 plugins, providers and mcp.servers as appropriate. Preserve the operator's global model and existing overrides.",
         "expectedTruthSource": "Before/after raw file snapshots, file metadata and actual host provider discovery outside the checkout.",
         "comparator": "Compare file bytes and permission bits beyond the owned edit, then match real host model/provider resolution for each scope. Verify export for another machine."
       },
       "negativeControl": {
-        "input": "Change the file after preview, inject malformed JSONC, redirect destination to an unapproved path or undo after a conflicting edit.",
-        "expectedRejection": "A clear conflict or validation failure preserves all user content and never writes to the unapproved host/path.",
+        "input": "Change the file after preview, inject malformed JSONC, redirect destination to an unapproved path or undo after a conflicting edit. Include V1 and mixed project/global files, a V1 executable and an unknown host. Try force and compare bytes.",
+        "expectedRejection": "A clear conflict or validation failure preserves all user content and never writes to the unapproved host/path. Report upgrade or standalone V2 export; no V1/mixed/uncertain target is modified.",
         "commandRef": "negative-SETUP-1"
       },
       "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
@@ -541,7 +542,7 @@
       "oracle": {
         "observation": "Clients see four public tools, meaningful results, scoped auth status and advisory set_model. Reapplying and removing preserves unrelated servers.",
         "expectedTruthSource": "Actual client descriptor and call results, plus independently selected test owner/profile model catalog.",
-        "comparator": "Record every required client and its declared supported transport, with version and call/correlation receipt. Both stdio and Streamable HTTP must be represented. Configuration text or health alone is insufficient."
+        "comparator": "Record every required client and its declared supported transport, with version and call/correlation receipt. Both stdio and Streamable HTTP must be represented. Configuration text or health alone is insufficient. Confirm OpenCode uses its V2 mcp.servers registration. Attempt V1/mixed configuration and verify zero on-disk changes."
       },
       "negativeControl": {
         "input": "Present an unsupported protocol/version, absent listener or denied shared user account scope.",
@@ -633,7 +634,9 @@
   "exclusions": [
     "Using a shared operator subscription for chat users or automatically falling back to separate paid API billing",
     "Silent arbitrary function passthrough over the pinned Codex SDK",
-    "Public registry publication, changing personal workstation configurations during Spec, and automatic deployment"
+    "Public registry publication, changing personal workstation configurations during Spec, and automatic deployment",
+    "OpenCode V1 plugin/SDK dependencies, legacy hooks, V1 config mutation and downgrade paths. This limit applies to OpenCode, independently of the proxy's OpenAI-compatible HTTP routes and versioned conversation API.",
+    "A2UI drafts, v0.9 and unregistered catalogs on the structured endpoint. The legacy AG-UI plain-text route stays available."
   ],
   "requiredSafetyChecks": [
     {
@@ -1116,15 +1119,15 @@
     "implementationComplete": false
   },
   "calibration": {
-    "examplesPath": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/calibration-examples.md",
-    "sha256": "2c8f6ee69896758e8e2b7a2a4b74f47d883af11fdd1dacd6c993c43acc3cdd0e"
+    "examplesPath": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/opencode-v2-a2ui-1/calibration-examples.md",
+    "sha256": "52106be130a0802fc3a78e6f27e6fa3b5fb3e8d7e5f34964eff3596b74b7e5f4"
   },
   "method": {
     "name": "VLBV",
     "packVersion": "1.15.0",
     "referenceSha256": "2377a56733c735e8bf92b3d6fe931da2c1c72ce930fdebd35a87b129065c3c67",
     "openspecVersion": "2.1.0",
-    "specDeltaDigest": "ac20c0b88a6b0e4658a492472c8c4c8c31bd688402b914b66ecf00803e176505"
+    "specDeltaDigest": "00a9336a9f55ab96d906bd9220e432ac418d9a5503edf66c27443f673b71cf6e"
   },
   "closure": {
     "implementationComplete": false,

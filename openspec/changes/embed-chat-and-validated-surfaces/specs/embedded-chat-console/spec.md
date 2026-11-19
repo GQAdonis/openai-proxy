@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The embedded chat console lets an authorized user stream conversations and see effective settings from the running proxy. Its versioned AG-UI interface renders validated interactive A2UI messages in the originating chat.
+The embedded chat console lets an authorized user stream conversations and see effective settings from the running proxy. Its versioned AG-UI interface renders validated interactive A2UI 1.0 messages in the originating chat.
 
 ## ADDED Requirements
 
@@ -44,7 +44,7 @@ The HTTP service SHALL serve an accessible React 19 and Vite 8 chat and settings
 
 ### Requirement: Versioned AG-UI streaming and validated A2UI interactions
 
-The service SHALL accept typed AG-UI run inputs at `POST /api/v1/ag-ui/stream`, emit interoperable SSE events and retain the existing `POST /ag-ui/stream` text contract. The console SHALL render only validated A2UI v0.9 activity snapshots using pinned React-compatible package exports and SHALL submit only authorized actions scoped to a live surface. The protocol and user-visible outcomes are tracked as SURFACE-1.
+The service SHALL serve typed AG-UI SSE at `POST /api/v1/ag-ui/stream` and preserve the legacy text route. The console SHALL validate the stable A2UI 1.0 wire schema and local catalog, render authorized surfaces with the pinned React 19 adapter and send only scoped user actions. SURFACE-1 uses AG-UI client/core 1.0.5 and wire discriminator `"1.0"`.
 
 #### Scenario: Typed clients distinguish successful and failed runs
 
@@ -55,18 +55,29 @@ The service SHALL accept typed AG-UI run inputs at `POST /api/v1/ag-ui/stream`, 
 #### Scenario: An authorized surface can be created, updated, replayed and deleted
 
 - **WHEN** an authorized run delivers an `ACTIVITY_SNAPSHOT` for `activityType: "a2ui-surface"` with a stable `messageId`, `replace: true` and a complete valid `content.a2ui_operations` sequence
-- **THEN** the pinned v0.9 processor and React renderer display only the approved catalog's accessible components, apply component/data updates, remove deleted surfaces and give focus a valid destination
+- **THEN** the pinned processor and React renderer for the stable 1.0 wire profile display only the approved catalog's accessible components, apply component/data updates, remove deleted surfaces and give focus a valid destination
 - **AND** reapplying the same snapshot produces the same visible state, and another actor's same-named surface or another run's updates cannot change it
+
+#### Scenario: Released wire properties reach the accessible control
+
+- **WHEN** a stable 1.0 component has `@accessibility.label` and `@accessibility.description` and declares an approved local catalog
+- **THEN** the actual rendered control exposes the resolved accessible name and description and remains keyboard operable after a component or data update
+- **AND** the compatibility adapter translates only permitted component-envelope fields for the pinned renderer, preserves user-data keys verbatim and rejects conflicting legacy spellings or an unauthorized catalog before committing the snapshot
 
 #### Scenario: Keyboard activation dispatches one scoped action
 
-- **WHEN** the user activates a permitted live control from the keyboard and the client validates the v0.9 `{version,action}` message and forwards the action in `forwardedProps.a2uiAction.userAction` on a correlated run
+- **WHEN** the user activates a permitted live control from the keyboard and the client validates the stable `{version:"1.0",action}` renderer-to-agent message and forwards the action in `forwardedProps.a2uiAction.userAction` on a correlated run
 - **THEN** the server checks authenticated actor, owning conversation/run, current surface and component, allowed action, trusted origin, context schema and deduplication key before dispatch
 - **AND** a valid activation produces one observable effect and a repeated delivery produces no additional effect
 - **AND** a forged, stale, foreign or deleted control, an attempted admin action, or a request without the required session/origin protection produces no effect
 
 #### Scenario: Invalid surface content preserves usable chat
 
-- **WHEN** a stream contains plain JSON-looking text or a malformed, unsupported, oversized, truncated, disallowed or out-of-order surface payload
+- **WHEN** a stream contains plain JSON-looking text or a payload with `version: "v0.9"`, `"v1.0"` or another unsupported version, an unapproved RPC/function, or malformed, oversized, truncated or out-of-order operations
 - **THEN** text remains inert, invalid surface input makes no partial change, and the last safe surface and accessible text/error fallback remain usable
 - **AND** unregistered components, functions, unsafe resource URLs and generated privileged callbacks cannot trigger execution, fetch a remote catalog or access service settings
+
+#### Scenario: Legacy demo text remains available
+
+- **WHEN** an existing demo or client requests `POST /ag-ui/stream` and receives text containing JSON that resembles an A2UI operation
+- **THEN** the original text event sequence and field conventions remain usable, and the structured renderer and action dispatcher receive no operation from that text

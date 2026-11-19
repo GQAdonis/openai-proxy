@@ -6,6 +6,7 @@ Configuring this proxy currently means combining CLI flags, TOML, environment va
 
 - Add an authenticated settings API and settings panels for every supported deployment, integration and optional feature.
 - Provide scoped discovery, effective configuration, preview, apply and undo for local OpenCode, ACP and MCP clients.
+- **BREAKING** OpenCode setup in both CLI and admin UI emits only V2 plugin, static provider and MCP configuration. Unsupported binaries and legacy or mixed local files receive upgrade guidance with no write.
 - Make real client behavior, account isolation and preservation of operator files acceptance requirements.
 
 ## Capabilities

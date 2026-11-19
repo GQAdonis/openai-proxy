@@ -1,13 +1,25 @@
 # Codex live auth, OpenCode and embedded console specification
 
-**Analysis baseline:** `1141700` on `main`. This phase specifies four OpenSpec changes. Their normative requirements and task lists are linked below. The [verification contract](adopted-contract.json) contains 13 scenarios. The owner adopted contract `7bce50fc` and KBD bound revision 1. The [immutable snapshot](adopted/7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc.json) preserves the approved criteria. Use `prometheus kbd phase disposition --id codex-live-auth-opencode-console --json` to check the authoritative state.
+**Analysis baseline:** `1141700` on `main`. This phase specifies four OpenSpec changes. Their normative requirements and task lists are linked below. The [working verification contract](adopted-contract.json) contains 13 scenarios. The owner adopted the earlier contract `7bce50fc` and KBD bound revision 1. The [immutable snapshot](adopted/7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc.json) preserves the approved criteria. The [scope amendment](amendments/opencode-v2-a2ui-1/amend-contract.json) names the replacement. Its operator signature and typed KBD binding govern the transition. Use `prometheus kbd phase disposition --id codex-live-auth-opencode-console --json` to check the authoritative state.
 
 | Change | Required outcome | Acceptance IDs |
 |---|---|---|
 | [Live Codex identity](../../../openspec/changes/reconcile-codex-login/specs/live-codex-identity/spec.md) · [tasks](../../../openspec/changes/reconcile-codex-login/tasks.md) | Adopt an external login without restarting, verify managed refresh, and handle logout, races, independent credentials and billing across transports. | AUTH-1, AUTH-2, AUTH-3 |
-| [OpenCode plugin and SDK chat drivers](../../../openspec/changes/integrate-opencode-and-sdk-drivers/specs/sdk-chat-drivers/spec.md) · [tasks](../../../openspec/changes/integrate-opencode-and-sdk-drivers/tasks.md) | Load a native V2 provider with an explicitly attributable Pro turn. Run both REST drivers, preserve native session/cancellation and enforce one tool executor. | PLUGIN-1, CHAT-1, TOOL-1 |
-| [Embedded console and validated surfaces](../../../openspec/changes/embed-chat-and-validated-surfaces/specs/embedded-chat-console/spec.md) · [tasks](../../../openspec/changes/embed-chat-and-validated-surfaces/tasks.md) | Build React 19/Vite 8 through Cargo, serve packaged UI at `/ui/`, and support typed AG-UI/A2UI v0.9 rendering, replay and authorized actions. | UI-1, SURFACE-1 |
+| [OpenCode plugin and SDK chat drivers](../../../openspec/changes/integrate-opencode-and-sdk-drivers/specs/sdk-chat-drivers/spec.md) · [tasks](../../../openspec/changes/integrate-opencode-and-sdk-drivers/tasks.md) | Use OpenCode 2.x APIs exclusively and load a native V2 provider with an explicitly attributable Pro turn. Run both REST drivers, preserve native session/cancellation and enforce one tool executor. | PLUGIN-1, CHAT-1, TOOL-1 |
+| [Embedded console and validated surfaces](../../../openspec/changes/embed-chat-and-validated-surfaces/specs/embedded-chat-console/spec.md) · [tasks](../../../openspec/changes/embed-chat-and-validated-surfaces/tasks.md) | Build React 19/Vite 8 through Cargo, serve packaged UI at `/ui/`, and support typed AG-UI 1.0.5 and A2UI wire 1.0 rendering, replay and authorized actions. | UI-1, SURFACE-1 |
 | [Proxy administration and local clients](../../../openspec/changes/administer-proxy-and-local-clients/specs/proxy-administration/spec.md) · [tasks](../../../openspec/changes/administer-proxy-and-local-clients/tasks.md) | Expose all 16 [settings areas](settings-inventory.md), preserve files during host setup, launch ACP in Zed and JetBrains and register five MCP clients. | ADMIN-1, SETUP-1, ACP-1, MCP-1, FEATURE-1 |
+
+## Compatibility amendment
+
+Five acceptance scenarios change in proposal `68d8aad4`. The eight other scenarios, four change owners, credential pickup deadlines and verification budgets carry forward from revision one.
+
+| Scenarios | Delivery and evidence |
+|---|---|
+| PLUGIN-1, CHAT-1 | Package V2 plugin and SDK dependencies exclusively. Certify the 2.3.0 host, plugin and SDK together. Exercise both native drivers and keep a separate receipt for the consenting owner's highest-tier ChatGPT Pro allowance. |
+| SETUP-1, MCP-1 | Use the 2.x plugin, provider and MCP settings schemas on the service host. Detect the installed binary and config shape, preserve operator-owned files on an unsupported or mixed configuration, and offer standalone V2 export. |
+| SURFACE-1 | Use released A2UI wire `1.0` with AG-UI client/core 1.0.5 and the 0.0.16 middleware convention. Select 1.0 explicitly. Validate canonical messages before adapting the renderer's older field names. Observe the accessible name and description, the scoped action and replay in the packaged browser. |
+
+The [console design](../../../openspec/changes/embed-chat-and-validated-surfaces/design.md) records the pinned upstream schemas, package evidence and permitted field mappings. The [driver design](../../../openspec/changes/integrate-opencode-and-sdk-drivers/design.md) identifies the OpenCode V1 imports and setup paths to remove. The service's OpenAI-compatible HTTP routes and versioned admin API have independent contracts.
 
 ## Integration order and ownership
 
@@ -18,4 +30,4 @@
 
 ## Evidence and decisions
 
-The [calibration examples](calibration-examples.md) distinguish owner-supplied outcomes from timing, compatibility and verification-budget proposals. The [fixture manifest](fixture-manifest.json) supplies reproducible non-secret inputs. Record the installed branch/release artifacts, actual client/OS versions, real versus fixture-assisted results and cleanup independently. Missing live account consent or usable attribution blocks the Pro claim. A passed document check does not certify runtime behavior. Contract adoption, implementation, behavioral acceptance, release eligibility and publication are distinct events.
+The [amended calibration examples](amendments/opencode-v2-a2ui-1/calibration-examples.md) distinguish owner-supplied outcomes from timing, compatibility and verification-budget proposals. The [fixture manifest](fixture-manifest.json) supplies reproducible non-secret inputs. Record the installed branch/release artifacts, actual client/OS versions, real versus fixture-assisted results and cleanup independently. Missing live account consent or usable attribution blocks the Pro claim. A passed document check does not certify runtime behavior. Contract adoption, implementation, behavioral acceptance, release eligibility and publication are distinct events.

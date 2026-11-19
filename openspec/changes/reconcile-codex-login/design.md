@@ -42,3 +42,9 @@ HTTP streaming and buffered requests, MCP stdio/HTTP tools, ACP and AG-UI must b
 ## Risks / Trade-offs
 
 Filesystem events may be dropped. Polling the owner recovers missed changes at bounded cost. Storage or issuer outages may make freshness unknowable. Represent unavailable or pending status and preserve tenant isolation. Learn from the earlier packaged-artifact and installer-dispatch lessons: exercise real `serve` modes and actual `setup opencode` with disposable stores at the phase boundary. Record redacted observations, process identity and upstream counters so a restarted process, changed UI badge or mocked helper alone cannot pass.
+
+## Library decisions
+
+- **library: cand-001** — adapt the Codex 0.169.0 managed credential owner. Re-read the actual store under the active account and generation, and verify the receiving backend accepts a refreshed credential. An account metadata response can survive an unsuccessful refresh. [Tagged account processor](https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/app-server/src/request_processors/account_processor/workspace_routing.rs#L259-L294)
+- **library: cand-002** — use notify 8.2.2 on the parent directory and a separate Tokio reconciliation timer to cover atomic replacement, missed events and stores without file notifications. [notify documentation](https://docs.rs/notify/8.2.2/notify/)
+- **cand-013** — reject an independent proxy OAuth exchange. Keep one native grant writer per owner, including after an uncertain response.

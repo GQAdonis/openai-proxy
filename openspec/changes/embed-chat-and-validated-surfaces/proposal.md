@@ -9,7 +9,7 @@ A developer who starts the proxy currently needs a separate chat client. A share
 - Build a React 19 and Vite 8 console from Cargo and embed it in the distributed binary and container. Serve chat and settings under the same origin at `/ui/`.
 - Let users choose a Codex SDK or OpenCode SDK conversation, stream and stop turns, keep partial text, and recover without duplicating an executor or tool action.
 - Present settings according to server-reported scope, source, effective value, authority and time of effect in local-owner and shared deployments.
-- Add a versioned AG-UI SSE endpoint for typed text and A2UI v0.9 activity snapshots. Render approved accessible components and route allowed user actions to their originating conversation.
+- Add a versioned AG-UI SSE endpoint for typed text and released A2UI 1.0 activity snapshots using AG-UI client/core 1.0.5. Validate the stable wire schema, adapt supported component fields to the pinned React renderer, and route keyboard actions to their originating conversation. Keep the existing text-only demo available through its original endpoint.
 
 ## Capabilities
 

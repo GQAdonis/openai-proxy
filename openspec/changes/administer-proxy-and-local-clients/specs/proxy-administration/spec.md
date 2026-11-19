@@ -28,6 +28,12 @@ The service SHALL preview, apply and undo project and user-level OpenCode V2 set
 - **WHEN** an owner selects global setup, verifies the preview, applies it twice and launches OpenCode from a directory outside the project
 - **THEN** the installed host discovers the intended provider and model, the second apply changes no bytes, unrelated settings survive and undo removes only the owned entries.
 
+#### Scenario: V1 configuration or an unsupported OpenCode host is discovered
+
+- **WHEN** setup CLI or the admin UI detects a V1/mixed config, unknown host version, or a host outside the supported stable V2 range
+- **THEN** it reports the affected layer and target version, preserves all existing file bytes and permission bits, and provides upgrade guidance or an explicitly V2-labelled export
+- **AND** an attempt to apply with a previous preview or a force flag produces no host write
+
 #### Scenario: Preview becomes stale
 
 - **WHEN** another process edits the target between preview and apply or undo, or when the file is malformed, outside scope or redirected to an unapproved destination
@@ -55,6 +61,12 @@ The service SHALL offer scoped registration for Codex CLI, Claude Code, OpenCode
 
 - **WHEN** a real configured client connects to its registered stdio command or protected HTTP endpoint and lists tools
 - **THEN** the client can invoke a benign tool, sees the effective model catalog, and distinguishes advisory model selection from global mutation. Redacted auth status is scoped to its owner.
+
+#### Scenario: OpenCode registration uses its native V2 schema
+
+- **WHEN** a supported OpenCode host receives an authorized stdio or HTTP MCP registration
+- **THEN** the scoped writer adds the owned entry under `mcp.servers`, and the client can list and call the proxy's tools
+- **AND** a legacy direct-entry MCP file blocks the registration before any write and retains its previous bytes
 
 #### Scenario: Client cannot complete the requested transport
 

@@ -4,7 +4,7 @@ Both a single local owner and a shared service need the same capability inventor
 
 ## Goals / Non-Goals
 
-Use a shared source of effective settings for the admin UI and setup CLI. Keep existing REST and CLI clients operable. Third-party registry publication, remote desktop discovery and arbitrary file or shell operations fall outside this change.
+Use a shared source of effective settings for the admin UI and setup CLI. Preserve public REST behavior, the documented setup commands and supported clients' own protocols. OpenCode integrations use the V2-only host and configuration contract defined below. Third-party registry publication, remote desktop discovery and arbitrary file or shell operations fall outside this change.
 
 ## Decisions
 
@@ -12,7 +12,15 @@ Use a shared source of effective settings for the admin UI and setup CLI. Keep e
 2. For local owner setup, pair an authenticated browser session through an operator-controlled local channel with a short-lived, single-use secret. Use authenticated, expiring sessions and same-origin request-forgery protection. In shared mode authenticate each subject against a configured identity provider or authenticated gateway and authorize its server-assigned roles. Strip untrusted incoming identity headers. A missing trusted identity configuration leaves management inaccessible. Subscription identity, roles and workspace access are independently scoped.
 3. A preview is bound to the actor, integration, service-host identity, approved project/user scope, base revision, exact redacted diff and expiry. On apply recheck the target, file identity, revision and authorization. Stage same-directory temporary files with preserved permissions, replace atomically and record only owned keys and bounded recovery metadata. For multi-target operations report committed targets and recover idempotently. Undo refuses to overwrite later user edits. Preserve JSONC comments with candidate 010 and use a formatting-preserving TOML editor where needed. Secrets are opaque references. An invalid file, unsafe path or version with unknown syntax produces a non-mutating blocked state.
 4. Keep `serve --acp-stdio`, `serve --mcp-stdio` and the optional MCP HTTP port as distinct process/transport choices. Retain the project's locked ACP adapter (candidate 011). Change MCP transport using candidate 012 only after establishing version-specific parity. Native CLI registration may be used behind a typed adapter when its scope and non-interactive behavior can be proven. A generic descriptor/export works without modifying a visitor's machine.
-5. Keep the documented CLI setup and admin UI on the same merge/precedence path. Write proposed OpenCode V2 plugin or static provider settings and verify the active global configuration from outside the checkout. Installation of the separate Codex marketplace plugin is presented separately from MCP registration and from REST driver selection.
+5. The CLI setup and admin UI share a V2-only compatibility decision and one writer. Detect the installed binary version, verify stable `>=2.3.0 <3.0.0`, check the required capabilities, and resolve global/project, ancestor and managed config precedence before offering apply. Certification starts with host 2.3.0. Expose later in-range releases as unverified until tested. A missing or unsupported binary can receive a clearly labelled V2 export for a separate target. It cannot cause a local write. A shared browser acts on the service host.
+6. Native V2 installation uses `plugins` and a pinned package or resolved local directory. A static provider uses `providers.<id>.package`, `settings.baseURL` and `models`. The root `model` setting remains valid. OpenCode MCP uses `mcp.servers.<name>` for local argv or a remote URL. Detect V1-specific structures such as `plugin`, `provider` or direct V1 MCP server entries alongside V2 registration; shared keys such as `model`, `$schema` or the `/v1` endpoint do not identify a legacy file. Block local preview/apply on legacy or mixed effective config, showing the reason, source and a separately exported V2 example. A prior preview or force flag cannot bypass the block. Verify global discovery from outside the checkout. [V2 providers](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/providers.mdx) · [Configuration precedence](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/config.mdx) · [MCP entries](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/mcp-servers.mdx)
+
+### Library evidence
+
+- `library: cand-004` — consume the OpenCode plugin registration contract owned by the SDK change. Use the same compatible host range and version/capability status for native install, static provider and MCP registration. [V2 plugin layout](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/build/plugins/index.mdx)
+- `library: cand-010` — adopt the JSONC concrete-syntax and formatting-preserving TOML editors behind scoped, revision-checked writes. Schema compatibility, file ownership, atomic apply and conflict-aware undo belong to the service. [JSONC parser](https://crates.io/crates/jsonc-parser/0.34.0) · [TOML editor](https://docs.rs/toml_edit/)
+- `library: cand-011` — adapt the existing Rust ACP endpoint and verify the client-specific stdio launch. [Zed external agents](https://zed.dev/docs/ai/external-agents)
+- `library: cand-012` — evaluate the pinned MCP SDK adapter against existing transport behavior; preserve tool contracts and prove client negotiation. [Rust MCP SDK](https://crates.io/crates/rmcp/3.11.0)
 
 ## Settings inventory
 
@@ -41,7 +49,7 @@ Clients use independent schemas. Zed's ACP `agent_servers` differs from MCP `con
 
 ## Migration Plan
 
-Keep existing flag names, public routes, four MCP tools and known legacy config. Discover existing entries, display the effective layer and migrate only after an authorized preview. Preserve user overrides and the advisory behavior of MCP `set_model`. For unsupported legacy negotiation retain compatible behavior or report the precise limitation before switching the configured client.
+Keep existing setup command names, public routes and four MCP tools. Preserve every V1 or mixed OpenCode configuration byte-for-byte. Offer an operator a separately exported clean V2 example and identify the active layers that need operator attention. Apply the scoped merge only after the operator supplies a valid V2 target and an authorized preview. Native Codex marketplace installation, Zed ACP/MCP and other client adapters use their own independent contracts. Preserve user overrides and the advisory behavior of MCP `set_model`. Report protocol negotiation failures accurately and preserve compatible existing MCP/ACP transport behavior. Protocol negotiation does not enable an OpenCode V1 writer.
 
 ## Verification boundary
 

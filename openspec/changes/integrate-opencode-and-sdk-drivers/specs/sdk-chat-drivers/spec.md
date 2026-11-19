@@ -8,13 +8,19 @@ Allow authorized users to use Codex from OpenCode and to run persistent chat con
 
 ### Requirement: OpenCode V2 submits subscription turns to the Codex provider
 
-On OpenCode 2.3.0 the plugin SHALL register a Codex provider from its local and packed distributions, preserve user overrides, reload the permitted catalog after a confirmed login and route subscription turns through the consenting principal's Codex runtime. It SHALL keep upstream credentials out of configuration, logs and shell environments and surface denials without implicit fallback.
+The plugin SHALL register a Codex provider through the V2 ABI on a supported stable OpenCode host (minimum 2.3.0, major 2), locally and from its packed distribution. It SHALL preserve overrides, reload the permitted catalog after a confirmed login, keep credentials out of configuration, logs and shell environments, and route subscription turns to the consenting principal’s Codex runtime. It SHALL surface denials without implicit fallback.
 
 #### Scenario: Local and packaged provider complete a normal OpenCode turn
 
 - **WHEN** an operator loads each distribution in an isolated 2.3.0 host and a subscriber submits a supported text prompt through the registered model
 - **THEN** the actual host discovers the provider, receives a streamed response through the Codex SDK route, and the recorded destination identifies the selected principal without exposing credentials
 - **AND** a global registration is discoverable when the host starts from outside the project and prior user settings survive installation
+
+#### Scenario: Host or plugin ABI is unsupported
+
+- **WHEN** the host identifies as 1.x, a release below 2.3.0, a prerelease, a different major or an unknown version, or it lacks a required V2 capability
+- **THEN** setup reports the incompatible host before registration or file writes, and the released plugin offers no V1 hooks, entry point or fallback
+- **AND** a later eligible 2.x host is marked verified only after real local/packed discovery and an observed turn on that version
 
 #### Scenario: Login refreshes only the intended inventory
 
@@ -43,6 +49,12 @@ The versioned REST API SHALL bind each conversation to its owner, approved works
 - **WHEN** an owner cancels an active turn on either driver, or a worker disappears while a turn may still be running
 - **THEN** cancellation reaches the native runtime, and the API records a cancelled terminal state only once completion of cancellation is established
 - **AND** ambiguous outcomes remain identifiable pending reconciliation, a retry of the same admitted turn cannot execute it twice, and missing workers cannot silently change the selected driver
+
+#### Scenario: Missing V2 SDK worker
+
+- **WHEN** an OpenCode driver is requested but its packaged V2 SDK or compatible execution runtime is unavailable
+- **THEN** admission returns driver-unavailable without selecting a V1 SDK, using API billing or switching to another driver
+- **AND** available Codex and direct REST routes retain their own capability status
 
 #### Scenario: Another user supplies a conversation or permission reference
 
