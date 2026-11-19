@@ -1,6 +1,6 @@
 # Codex live auth, OpenCode and embedded console specification
 
-**Analysis baseline:** `1141700` on `main`. This phase specifies four OpenSpec changes. Their normative requirements and task lists are linked below. The [working verification contract](adopted-contract.json) contains 13 scenarios. The owner adopted the earlier contract `7bce50fc` and KBD bound revision 1. The [immutable snapshot](adopted/7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc.json) preserves the approved criteria. The [scope amendment](amendments/opencode-v2-a2ui-1/amend-contract.json) names the replacement. Its operator signature and typed KBD binding govern the transition. Use `prometheus kbd phase disposition --id codex-live-auth-opencode-console --json` to check the authoritative state.
+The analysis baseline is `1141700` on `main`. Four OpenSpec changes cover the 13 scenarios in the [adopted verification contract](adopted-contract.json). KBD bound `68d8aad4` as revision 2 after verifying the operator signature. The manifest supersedes revision 1 (`7bce50fc`). [Manifest](amendments/opencode-v2-a2ui-1/amend-contract.json) · [Signature](amendments/opencode-v2-a2ui-1/amend-contract.json.sig) · [Revision 2 snapshot](adopted/68d8aad4ac3a015e56d6606d8fc4d0dfb945eecf78b3df63802f21101b33dd28.json) · [Revision 1 snapshot](adopted/7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc.json)
 
 | Change | Required outcome | Acceptance IDs |
 |---|---|---|
@@ -11,7 +11,7 @@
 
 ## Compatibility amendment
 
-Five acceptance scenarios change in proposal `68d8aad4`. The eight other scenarios, four change owners, credential pickup deadlines and verification budgets carry forward from revision one.
+Five acceptance scenarios changed in adopted contract `68d8aad4`. The eight other scenarios, four change owners, credential pickup deadlines and verification budgets carry forward from revision one.
 
 | Scenarios | Delivery and evidence |
 |---|---|

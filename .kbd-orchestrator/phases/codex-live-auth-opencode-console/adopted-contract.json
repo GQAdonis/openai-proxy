@@ -5,8 +5,8 @@
     "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
     "runId": "codex-live-auth-opencode-console-20261119T193635Z",
     "phaseId": "codex-live-auth-opencode-console",
-    "planRevision": null,
-    "contractDigest": null
+    "planRevision": 1,
+    "contractDigest": "68d8aad4ac3a015e56d6606d8fc4d0dfb945eecf78b3df63802f21101b33dd28"
   },
   "digestNormalization": {
     "algorithm": "sha256",
