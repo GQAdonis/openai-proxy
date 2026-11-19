@@ -36,6 +36,56 @@ memory.db-*
 
 # KBD / OpenSpec workflow files (not needed in distributed repo)
 .kbd-orchestrator/
-openspec/
+/openspec/*
+!/openspec/config.yaml
+!/openspec/specs/
+/openspec/specs/*
+!/openspec/specs/.gitkeep
 .refiner/
-.claude/
+/.claude/*
+!/.claude/skills/
+/.claude/skills/*
+!/.claude/skills/openspec-*
+
+# Per-machine design engine and team recovery snapshots
+/.agents/skills/impeccable/scripts/bin/
+/.agent-team/recovery/
+
+# Project-managed role definitions and skill links
+!/.claude/skills/proxy-*
+!/.claude/skills/impeccable
+!/.claude/agents/
+/.claude/agents/*
+!/.claude/agents/opencode-extensions.md
+!/.claude/agents/codex-identity.md
+!/.claude/agents/proxy-runtime.md
+!/.claude/agents/chat-experience.md
+!/.claude/agents/build-release.md
+!/.claude/agents/service-reviewer.md
+
+# A project-scoped MiniMax data directory can also contain private runtime state.
+/.minimax/*
+!/.minimax/agents/
+!/.minimax/skills/
+/.minimax/agents/*
+!/.minimax/agents/opencode-extensions/
+/.minimax/agents/opencode-extensions/*
+!/.minimax/agents/opencode-extensions/agent.md
+!/.minimax/agents/codex-identity/
+/.minimax/agents/codex-identity/*
+!/.minimax/agents/codex-identity/agent.md
+!/.minimax/agents/proxy-runtime/
+/.minimax/agents/proxy-runtime/*
+!/.minimax/agents/proxy-runtime/agent.md
+!/.minimax/agents/chat-experience/
+/.minimax/agents/chat-experience/*
+!/.minimax/agents/chat-experience/agent.md
+!/.minimax/agents/build-release/
+/.minimax/agents/build-release/*
+!/.minimax/agents/build-release/agent.md
+!/.minimax/agents/service-reviewer/
+/.minimax/agents/service-reviewer/*
+!/.minimax/agents/service-reviewer/agent.md
+/.minimax/skills/*
+!/.minimax/skills/proxy-*
+!/.minimax/skills/impeccable

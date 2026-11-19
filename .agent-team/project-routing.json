@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "activeTeam": "proxy-maintainers",
+  "manifest": ".agent-team/proxy-maintainers/team.json",
+  "target": "codex",
+  "nativeDefinitions": [
+    ".codex/agents/opencode_extensions.toml",
+    ".codex/agents/codex_identity.toml",
+    ".codex/agents/proxy_runtime.toml",
+    ".codex/agents/chat_experience.toml",
+    ".codex/agents/build_release.toml",
+    ".codex/agents/service_reviewer.toml"
+  ],
+  "instructionFiles": [
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "delegation": "native-definitions",
+  "limitations": [
+    "Native definition presence is not live invocation evidence. The active harness owns permissions, models, concurrency and delegation.",
+    "When delegation is unavailable, use selected role instructions sequentially and report it; builder-context review is not independent.",
+    "Zed external ACP agents use their native configuration; Zed parallel threads are not an automatic delegation API."
+  ]
+}

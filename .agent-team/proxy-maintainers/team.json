@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "id": "proxy-maintainers",
+  "outcome": "Develop and maintain the OpenCode integration, Codex credential lifecycle, streaming proxy and embedded operator console.",
+  "scope": "project",
+  "harness": "codex",
+  "roles": [
+    {
+      "id": "opencode-extensions",
+      "description": "Maintain the OpenCode 2.x plugin, extension APIs, provider registration and CLI setup.",
+      "owns": [
+        "plugin/**",
+        "opencode.json",
+        "src/cli/setup.rs",
+        "docs/opencode-setup.md"
+      ],
+      "skills": [
+        "proxy-opencode",
+        "typescript-base-patterns"
+      ],
+      "outputs": [
+        "Versioned extension and package compatibility",
+        "Plugin login notification and provider discovery"
+      ],
+      "inputs": [
+        "Tagged OpenCode docs and plugin lockfile",
+        "Credential reload and model catalogue contracts"
+      ],
+      "dependsOn": [],
+      "prompt": "Read .agents/skills/proxy-opencode/SKILL.md and .agent-team/proxy-maintainers/team.json before work. Maintain the OpenCode 2.x plugin, extension APIs, provider registration and CLI setup. Use the sources and acceptance cases in the skill. In the local mode a developer may administer their own connection. In shared mode use server-enforced access boundaries. Coordinate an interface change with its file owner before editing across ownership. Return changed paths, observed evidence and any unresolved contract."
+    },
+    {
+      "id": "codex-identity",
+      "description": "Own Codex SDK integration, OAuth refresh, hot reload and credential identity in memory.",
+      "owns": [
+        "src/auth/**",
+        "src/codex.rs",
+        "docs/codex-auth.md"
+      ],
+      "skills": [
+        "proxy-identity",
+        "async-patterns",
+        "error-handling"
+      ],
+      "outputs": [
+        "Shared credential-provider contract and fixtures",
+        "Managed refresh and login reconciliation strategy"
+      ],
+      "inputs": [
+        "Installed Codex App Server schema",
+        "Current file and keyring loader"
+      ],
+      "dependsOn": [],
+      "prompt": "Read .agents/skills/proxy-identity/SKILL.md and .agent-team/proxy-maintainers/team.json before work. Own Codex SDK integration, OAuth refresh, hot reload and credential identity in memory. Use the sources and acceptance cases in the skill. In the local mode a developer may administer their own connection. In shared mode use server-enforced access boundaries. Coordinate an interface change with its file owner before editing across ownership. Return changed paths, observed evidence and any unresolved contract."
+    },
+    {
+      "id": "proxy-runtime",
+      "description": "Integrate credential snapshots across Rust transports and serve chat, administration and embedded assets.",
+      "owns": [
+        "src/main.rs",
+        "src/lib.rs",
+        "src/proxy.rs",
+        "src/openai.rs",
+        "src/models.rs",
+        "src/model_catalog.rs",
+        "src/mcp.rs",
+        "src/mcp_client.rs",
+        "src/acp.rs",
+        "src/agui.rs",
+        "src/a2a.rs",
+        "src/admin/**",
+        "src/error.rs",
+        "src/config.rs",
+        "src/hooks.rs",
+        "src/memory.rs",
+        "src/skills.rs",
+        "src/cli/mod.rs",
+        "src/cli/config.rs",
+        "src/cli/skills.rs",
+        "docs/ag-ui.md",
+        "docs/acp.md",
+        "docs/a2a.md",
+        "docs/a2a-integration.md",
+        "docs/config.md",
+        "docs/hooks.md",
+        "docs/memory.md",
+        "docs/protocol-extensibility-assessment.md"
+      ],
+      "skills": [
+        "proxy-protocols",
+        "axum-patterns",
+        "mcp-server"
+      ],
+      "outputs": [
+        "Stable transport and administrative HTTP contracts",
+        "Server-side authorization and delivery semantics"
+      ],
+      "inputs": [
+        "Credential snapshot interface",
+        "Packager's asset lookup interface"
+      ],
+      "dependsOn": [],
+      "prompt": "Read .agents/skills/proxy-protocols/SKILL.md and .agent-team/proxy-maintainers/team.json before work. Integrate credential snapshots across Rust transports and serve chat, administration and embedded assets. Use the sources and acceptance cases in the skill. In the local mode a developer may administer their own connection. In shared mode use server-enforced access boundaries. Coordinate an interface change with its file owner before editing across ownership. Return changed paths, observed evidence and any unresolved contract."
+    },
+    {
+      "id": "chat-experience",
+      "description": "Design and implement the accessible React 19/Vite 8 chat and admin UI for local and shared deployments.",
+      "owns": [
+        "frontend/**",
+        "PRODUCT.md",
+        "DESIGN.md",
+        ".impeccable/**"
+      ],
+      "skills": [
+        "proxy-interface",
+        "impeccable",
+        "ui-ux-pro-max",
+        "shadcn",
+        "react-vite-stack",
+        "prometheus-ui-ux"
+      ],
+      "outputs": [
+        "Chat and administrative surfaces",
+        "Reviewed designs and accessibility behavior"
+      ],
+      "inputs": [
+        "PRODUCT.md",
+        "Streaming and authorized admin contracts"
+      ],
+      "dependsOn": [],
+      "prompt": "Read .agents/skills/proxy-interface/SKILL.md and .agent-team/proxy-maintainers/team.json before work. Design and implement the accessible React 19/Vite 8 chat and admin UI for local and shared deployments. Use the sources and acceptance cases in the skill. In the local mode a developer may administer their own connection. In shared mode use server-enforced access boundaries. Coordinate an interface change with its file owner before editing across ownership. Return changed paths, observed evidence and any unresolved contract."
+    },
+    {
+      "id": "build-release",
+      "description": "Own the Cargo build script, embedded assets, container build, packaging and release operations.",
+      "owns": [
+        "build.rs",
+        "Cargo.toml",
+        "Cargo.lock",
+        "src/web_assets.rs",
+        "Dockerfile",
+        ".dockerignore",
+        "docker-compose.yaml",
+        ".github/workflows/**",
+        "scripts/**",
+        "README.md"
+      ],
+      "skills": [
+        "proxy-packaging",
+        "rust-best-practices"
+      ],
+      "outputs": [
+        "Single-binary artifact and container build contract",
+        "Reproducible release and operations guidance"
+      ],
+      "inputs": [
+        "Frontend package manifest and lockfile",
+        "Static route and content-type contract"
+      ],
+      "dependsOn": [],
+      "prompt": "Read .agents/skills/proxy-packaging/SKILL.md and .agent-team/proxy-maintainers/team.json before work. Own the Cargo build script, embedded assets, container build, packaging and release operations. Use the sources and acceptance cases in the skill. In the local mode a developer may administer their own connection. In shared mode use server-enforced access boundaries. Coordinate an interface change with its file owner before editing across ownership. Return changed paths, observed evidence and any unresolved contract."
+    },
+    {
+      "id": "service-reviewer",
+      "description": "Review protocol correctness, auth isolation, accessibility and release regressions against observable behavior.",
+      "owns": [
+        "docs/reviews/**",
+        "tests/**"
+      ],
+      "skills": [
+        "proxy-verification",
+        "value-scenario-verify",
+        "prometheus-ui-review"
+      ],
+      "outputs": [
+        "Findings with reproducible scenarios",
+        "Independent acceptance evidence when a distinct reviewer is available"
+      ],
+      "inputs": [
+        "Candidate diff",
+        "Adopted scenarios and packaged release"
+      ],
+      "dependsOn": [],
+      "prompt": "Read .agents/skills/proxy-verification/SKILL.md and .agent-team/proxy-maintainers/team.json before work. Review protocol correctness, auth isolation, accessibility and release regressions against observable behavior. Use the sources and acceptance cases in the skill. In the local mode a developer may administer their own connection. In shared mode use server-enforced access boundaries. Coordinate an interface change with its file owner before editing across ownership. Review at the completed implementation boundary. Return findings in the active harness when its reviewer role is read-only."
+    }
+  ]
+}

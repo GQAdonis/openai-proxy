@@ -1,0 +1,210 @@
+{
+  "openSpecVersion": "2.1.0",
+  "aliases": {
+    "windsurf": "devin"
+  },
+  "universalFallback": [
+    "atomcode",
+    "dsh",
+    "costrict",
+    "easycode",
+    "gigacode",
+    "gsd",
+    "oh-my-pi",
+    "codeassistant",
+    "veai"
+  ],
+  "skillDirectories": {
+    ".adal/skills": [
+      "adal"
+    ],
+    ".agents/skills": [
+      "amp",
+      "antigravity",
+      "atomcode",
+      "cline",
+      "codex",
+      "dsh",
+      "costrict",
+      "cursor",
+      "easycode",
+      "factory",
+      "gemini",
+      "github-copilot",
+      "gigacode",
+      "gsd",
+      "kilocode",
+      "kimi",
+      "oh-my-pi",
+      "opencode",
+      "pi",
+      "codeassistant",
+      "veai",
+      "warp",
+      "zed",
+      "agents",
+      "antigravity-cli",
+      "deepagents",
+      "dexto",
+      "firebender",
+      "fx",
+      "loaf",
+      "replit",
+      "sarvam-code",
+      "promptscript"
+    ],
+    ".aider-desk/skills": [
+      "aider-desk"
+    ],
+    ".augment/skills": [
+      "auggie"
+    ],
+    ".autohand/skills": [
+      "autohand-code"
+    ],
+    ".bob/skills": [
+      "bob"
+    ],
+    ".claude/skills": [
+      "claude"
+    ],
+    ".codeartsdoer/skills": [
+      "codeartsagent"
+    ],
+    ".codebuddy/skills": [
+      "codebuddy"
+    ],
+    ".codemaker/skills": [
+      "codemaker"
+    ],
+    ".codestudio/skills": [
+      "codestudio"
+    ],
+    ".commandcode/skills": [
+      "command-code"
+    ],
+    ".continue/skills": [
+      "continue"
+    ],
+    ".cortex/skills": [
+      "cortex"
+    ],
+    ".crush/skills": [
+      "crush"
+    ],
+    ".devin/skills": [
+      "devin"
+    ],
+    ".forge/skills": [
+      "forgecode"
+    ],
+    ".goose/skills": [
+      "goose"
+    ],
+    ".grok/skills": [
+      "grok"
+    ],
+    ".hermes/skills": [
+      "hermes"
+    ],
+    ".iflow/skills": [
+      "iflow"
+    ],
+    ".inferencesh/skills": [
+      "inference-sh"
+    ],
+    ".jazz/skills": [
+      "jazz"
+    ],
+    ".junie/skills": [
+      "junie"
+    ],
+    ".kimchi/skills": [
+      "kimchi"
+    ],
+    ".kiro/skills": [
+      "kiro"
+    ],
+    ".kode/skills": [
+      "kode"
+    ],
+    ".lingma/skills": [
+      "lingma"
+    ],
+    ".mcpjam/skills": [
+      "mcpjam"
+    ],
+    ".minimax/skills": [
+      "minimax-code"
+    ],
+    ".moxby/skills": [
+      "moxby"
+    ],
+    ".mux/skills": [
+      "mux"
+    ],
+    ".neovate/skills": [
+      "neovate"
+    ],
+    ".ona/skills": [
+      "ona"
+    ],
+    ".openhands/skills": [
+      "openhands"
+    ],
+    ".pochi/skills": [
+      "pochi"
+    ],
+    ".posit/assistant/skills": [
+      "posit-assistant"
+    ],
+    ".qoder/skills": [
+      "qoder",
+      "qoder-cn"
+    ],
+    ".qwen/skills": [
+      "qwen"
+    ],
+    ".reasonix/skills": [
+      "reasonix"
+    ],
+    ".roo/skills": [
+      "roocode"
+    ],
+    ".rovodev/skills": [
+      "rovodev"
+    ],
+    ".tabnine/agent/skills": [
+      "tabnine-cli"
+    ],
+    ".terramind/skills": [
+      "terramind"
+    ],
+    ".tinycloud/skills": [
+      "tinycloud"
+    ],
+    ".trae/skills": [
+      "trae",
+      "trae-cn"
+    ],
+    ".vibe/skills": [
+      "vibe"
+    ],
+    ".zcode/skills": [
+      "zcode"
+    ],
+    ".zencoder/skills": [
+      "zencoder",
+      "zenflow"
+    ],
+    "agent/skills": [
+      "eve"
+    ],
+    "data/skills": [
+      "astrbot"
+    ],
+    "skills": [
+      "openclaw"
+    ]
+  }
+}

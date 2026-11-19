@@ -164,3 +164,10 @@ Responses API events use dot-notation: `response.output_text.delta`, `response.c
 - opencode provider config uses `{env:VAR}` (not `${VAR}`) for runtime interpolation; the MCP key is `"mcp"` with `"type": "local"` (not `"mcpServers"` / `"type": "stdio"`)
 - `codex-mini` and `gpt-4o-mini` are legacy aliases that resolve to `gpt-5.4-mini`, and `gpt-5.6` resolves to `gpt-5.6-sol`, in `resolve_model()`; the alias table lives in `src/model_catalog.rs` (`ALIASES`), not `src/codex.rs`, since the model catalogue was consolidated into a single source of truth
 - opencode plugin provider ID is `codex` (not `openai-proxy`) — any config or test referencing the old name needs updating
+
+<!-- prometheus-team-routing:start v1 -->
+For every code task, read `.agent-team/project-routing.json`, then its active team manifest and the relevant role instructions. Default to that team, selecting only roles whose responsibilities and ownership match the work. Preserve native permissions, models, concurrency limits and existing project instructions.
+For UI work, load the role-bound `prometheus-ui-ux` or `prometheus-ui-review` skill. Prefer `.agents/UI_UX_PROTOCOL.md` when present; otherwise use the installed `prometheus-ui-ux/references/UI_UX_PROTOCOL.md`. Backend work must not load UI guidance.
+Use native delegation when available. If unavailable, follow the selected role instructions sequentially and report that limitation. Review in the builder context is not independent review. Keep reviewers dormant until the complete implementation phase; allow one batched correction/confirmation cycle. Respect user-only skill invocation restrictions. Zed external ACP agents use their own native configuration; parallel UI threads are not an automatic delegation API.
+Cross-team requests: when work needs another team, run `team-discover` (capabilities, paths) and `team-request`; a same-repo team gets an intake task, any other team gets a `team:<id>` GitHub issue. If this team has a card, run `team-intake` to import open `team:<id>` issues as tasks for its intake role, and triage them before other work.
+<!-- prometheus-team-routing:end -->

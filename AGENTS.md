@@ -50,9 +50,13 @@ openai-proxy setup mcp [--opencode|--claude] [--port N]
 - `"model": "codex/gpt-5.5"` — default model
 - `"provider.codex"` — `@ai-sdk/openai-compatible` pointing at `http://localhost:8181/v1`; models block mirrors `src/model_catalog.rs` (see the "opencode plugin (native)" section above for the current list)
 
-`.opencode/` directory contains:
-- **10 opsx-* commands** — `/opsx-new`, `/opsx-apply`, `/opsx-archive`, `/opsx-continue`, `/opsx-explore`, `/opsx-ff`, `/opsx-sync`, `/opsx-verify`, `/opsx-onboard`, `/opsx-bulk-archive` — experimental OpenSpec artifact workflow
-- **10 openspec-* skills** — implement the OPSX workflow steps
+## OpenSpec workflows
+
+Codex, OpenCode, Kimi Code, and Zed use the shared OpenSpec skills in `.agents/skills/`. Claude Code reads the same skills through links in `.claude/skills/`. OpenSpec 2.1 supports project-scoped MiniMax skills in `.minimax/skills/` and machine-scoped skills in `~/.minimax/skills/`. The proxy maintenance team uses the project scope.
+
+```bash
+openspec init --tools codex,claude,opencode,kimi,minimax-code,zed
+```
 
 ## MCP server (opencode integration)
 
@@ -102,3 +106,10 @@ Integration tests require live `~/.codex/auth.json` or `OPENAI_API_KEY`. They hi
 - Memory RAG (feature-gated): SurrealDB HNSW, 500ms timeout on search
 - Webhook hooks: fire-and-forget AG-UI-compatible JSON, 5s timeout
 - `req.tools` in `ChatCompletionRequest` is `Option<serde_json::Value>` (raw JSON), not typed — MCP passthrough merges JSON arrays
+
+<!-- prometheus-team-routing:start v1 -->
+For every code task, read `.agent-team/project-routing.json`, then its active team manifest and the relevant role instructions. Default to that team, selecting only roles whose responsibilities and ownership match the work. Preserve native permissions, models, concurrency limits and existing project instructions.
+For UI work, load the role-bound `prometheus-ui-ux` or `prometheus-ui-review` skill. Prefer `.agents/UI_UX_PROTOCOL.md` when present; otherwise use the installed `prometheus-ui-ux/references/UI_UX_PROTOCOL.md`. Backend work must not load UI guidance.
+Use native delegation when available. If unavailable, follow the selected role instructions sequentially and report that limitation. Review in the builder context is not independent review. Keep reviewers dormant until the complete implementation phase; allow one batched correction/confirmation cycle. Respect user-only skill invocation restrictions. Zed external ACP agents use their own native configuration; parallel UI threads are not an automatic delegation API.
+Cross-team requests: when work needs another team, run `team-discover` (capabilities, paths) and `team-request`; a same-repo team gets an intake task, any other team gets a `team:<id>` GitHub issue. If this team has a card, run `team-intake` to import open `team:<id>` issues as tasks for its intake role, and triage them before other work.
+<!-- prometheus-team-routing:end -->
