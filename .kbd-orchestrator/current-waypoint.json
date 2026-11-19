@@ -2,10 +2,10 @@
   "schemaVersion": "5",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 10,
-  "derivedRevision": 10,
+  "sourceRevision": 19,
+  "derivedRevision": 19,
   "frontier": {
-    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 10
+    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 19
   },
   "conflictCount": 0,
   "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
@@ -21,7 +21,7 @@
   "phase": "codex-live-auth-opencode-console",
   "parentPhase": null,
   "childPointer": null,
-  "change": null,
+  "change": "reconcile-codex-login",
   "currentTask": null,
   "status": "ready",
   "lifecycle": "ready",
@@ -29,11 +29,11 @@
   "stageStatus": null,
   "completionMetric": "implementation",
   "implementationCompleted": 29,
-  "implementationTotal": 30,
+  "implementationTotal": 34,
   "planRevision": 1,
-  "revision": 10,
-  "exactNextCommand": "/kbd-spec codex-live-auth-opencode-console",
-  "nextChange": null,
+  "revision": 19,
+  "exactNextCommand": "/kbd-plan codex-live-auth-opencode-console",
+  "nextChange": "reconcile-codex-login",
   "nextTask": null,
-  "updatedAt": "2026-11-19T20:25:21.022768Z"
+  "updatedAt": "2026-11-19T21:25:27.025514Z"
 }

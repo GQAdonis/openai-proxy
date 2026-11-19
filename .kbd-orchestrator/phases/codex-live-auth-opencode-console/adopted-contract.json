@@ -1,0 +1,1135 @@
+{
+  "contractVersion": "2",
+  "kind": "kbd.adopted-contract",
+  "identity": {
+    "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
+    "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+    "phaseId": "codex-live-auth-opencode-console",
+    "planRevision": 1,
+    "contractDigest": "7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc"
+  },
+  "digestNormalization": {
+    "algorithm": "sha256",
+    "command": "jq -S -c 'del(.identity.contractDigest) | del(.identity.planRevision)'",
+    "stalenessRule": "Recompute normalized SHA-256 and compare with the latest non-superseded canonical decision, current spec-delta digest and calibration bytes."
+  },
+  "adoptionSource": "The project owner explicitly requested both deployment modes, highest-tier ChatGPT Pro, both SDK drivers and validated A2UI. The operative approval for the complete matrix and its thresholds is the separate project-owner decision linked by the canonical phase binding. Before that binding this artifact is proposed and behavioral acceptance is blocked.",
+  "decisionOwner": "Project owner of openai-proxy",
+  "amendmentPolicy": "Any later change to scope, evidence, fixture identity, limits or scenario uses an explicit owner-approved superseding decision. Preserve the consumed budget and original receipts.",
+  "releaseClaim": {
+    "userOperation": "Continue chatting after external Codex login or managed expiry; use a V2 OpenCode provider with the user's verified Pro allowance; select either native REST harness, use embedded chat and validated surfaces, and administer supported modes and local clients.",
+    "supportedEnvironments": [
+      "Native macOS service-host and Linux release container with an explicit host-owned or dedicated file-backed Codex store",
+      "Local-owner and authenticated shared deployments; configured native Codex 0.169.0 and OpenCode 2.3.0 runtimes",
+      "Embedded React 19/Vite 8 and A2UI v0.9 browser client; current-host editor/CLI versions captured for each supported registration"
+    ],
+    "currentCapabilities": "Existing Rust service provides direct REST, streaming text, basic MCP/ACP and optional A2A discovery and memory. Startup snapshots credentials, OpenCode uses V1 hooks and the embedded UI is absent at the analysis baseline.",
+    "explicitUnknowns": [
+      "Live Pro allowance attribution and availability of a dedicated account are unverified.",
+      "Native keyring/host broker and release worker support must be demonstrated for each claimed deployment.",
+      "Actual installed client versions, shared identity provider and entitled models are measured during verification."
+    ]
+  },
+  "statusVocabulary": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "NOT_EXERCISED"
+  ],
+  "scenarioMatrix": [
+    {
+      "id": "AUTH-1",
+      "name": "External login updates running requests without a restart.",
+      "actor": "Credential owner",
+      "usefulOutcome": "External login updates running requests without a restart.",
+      "sourceRequirement": "openspec:live-codex-identity#External login becomes effective in the running proxy",
+      "reasonNow": "Startup snapshots leave long-lived proxy transports using stale credentials.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "reconcile-codex-login/1.1",
+      "productionEntry": "openai-proxy serve, serve --mcp-stdio, serve --acp-stdio and setup opencode; complete codex login in the dedicated native or container host-owner profile.",
+      "realCollaborators": [
+        "Actual Codex CLI/store owner",
+        "running proxy",
+        "REST, AG-UI, ACP and MCP clients",
+        "scoped request recipient"
+      ],
+      "substitutedBoundaries": [
+        "An isolated reference recipient observes synthetic generations only. Actual login uses the documented provider path."
+      ],
+      "oracle": {
+        "observation": "New requests use the correct coherent profile after same-account replacement and account switch. Fresh setup agrees.",
+        "expectedTruthSource": "External login commit/completion time, OS process identity and an independent recipient's redacted identity generation.",
+        "comparator": "Unchanged PID. File event within 2 seconds and healthy missed-event/keyring reconciliation within 30 seconds. Verify native and container visibility, every negotiated transport, and one genuine authorized CLI login."
+      },
+      "negativeControl": {
+        "input": "Partially replace a synthetic file, edit an unrelated file and try an incompatible explicit store.",
+        "expectedRejection": "No partial credential or unrelated fallback is published. No subscription credential reaches an unapproved destination.",
+        "commandRef": "negative-AUTH-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local AUTH-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Fixture traces establish routing, not a subscriber entitlement."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "AUTH-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "External login updates running requests without a restart."
+      ]
+    },
+    {
+      "id": "AUTH-2",
+      "name": "Expired credentials recover once while preserving identity and billing.",
+      "actor": "Managed credential owner",
+      "usefulOutcome": "Expired credentials recover once while preserving identity and billing.",
+      "sourceRequirement": "openspec:live-codex-identity#Managed refresh proves renewal and preserves billing boundaries",
+      "reasonNow": "Startup snapshots leave long-lived proxy transports using stale credentials.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "reconcile-codex-login/1.2",
+      "productionEntry": "POST /v1/chat/completions from concurrent clients at expiry and request authorized refresh in settings.",
+      "realCollaborators": [
+        "Codex App Server",
+        "authoritative store",
+        "proxy",
+        "independent request and tool-effect observations"
+      ],
+      "substitutedBoundaries": [
+        "Clock and issuer for deterministic failure/count checks use a synthetic credential; the real renewal subcase remains required."
+      ],
+      "oracle": {
+        "observation": "A burst coalesces renewal, manual and proactive paths reconcile the same generation, external-token and API-key modes use their own owners.",
+        "expectedTruthSource": "Stored generation/freshness or upstream-authenticated use, plus independent exchange/effect counts.",
+        "comparator": "Require one in-flight service-managed exchange per identity/generation, authenticated freshness and zero duplicated effects. Include real managed-session recovery, ordinary keys, embeddings, quota and revocation."
+      },
+      "negativeControl": {
+        "input": "Return account metadata with the same expired credential; interrupt an exchange after it may have rotated; supply 429 or a revoked grant.",
+        "expectedRejection": "No false success, replay after visible output, blind re-exchange or automatic paid fallback. Show recovery, quota or sign-in state.",
+        "commandRef": "negative-AUTH-2"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local AUTH-2 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Controlled faults cannot independently establish a real managed provider renewal."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "AUTH-2 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Expired credentials recover once while preserving identity and billing."
+      ]
+    },
+    {
+      "id": "AUTH-3",
+      "name": "Late refresh cannot resurrect a signed-out or superseded account.",
+      "actor": "Shared service owner",
+      "usefulOutcome": "Late refresh cannot resurrect a signed-out or superseded account.",
+      "sourceRequirement": "openspec:live-codex-identity#Logout and account switches supersede stale work",
+      "reasonNow": "Startup snapshots leave long-lived proxy transports using stale credentials.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "reconcile-codex-login/1.3",
+      "productionEntry": "Keep openai-proxy serve running and finish login B or sign out while a refresh of A is outstanding; submit new HTTP and stdio turns.",
+      "realCollaborators": [
+        "Running proxy",
+        "two isolated principals and stores",
+        "controlled request/effect recorder"
+      ],
+      "substitutedBoundaries": [
+        "A delayed responder induces a repeatable race with synthetic credentials."
+      ],
+      "oracle": {
+        "observation": "New calls use B or report signed out, old work remains bound to A and signed-out startup permits authorized recovery.",
+        "expectedTruthSource": "Independent store commit and observed account labels in the receiver's ordered trace.",
+        "comparator": "For both logout and A→B require zero successful post-reconciliation calls as A and zero mid-turn principal switches."
+      },
+      "negativeControl": {
+        "input": "Release the old refresh after B commits, then submit an A-bound resume as B.",
+        "expectedRejection": "Obsolete result is discarded; mismatched session is denied and has no side effect.",
+        "commandRef": "negative-AUTH-3"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local AUTH-3 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Injected scheduling cannot establish provider guarantees."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "AUTH-3 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Late refresh cannot resurrect a signed-out or superseded account."
+      ]
+    },
+    {
+      "id": "PLUGIN-1",
+      "name": "An installed V2 provider completes an attributable subscription turn.",
+      "actor": "Consenting highest-tier ChatGPT Pro subscriber",
+      "usefulOutcome": "An installed V2 provider completes an attributable subscription turn.",
+      "sourceRequirement": "openspec:sdk-chat-drivers#OpenCode V2 submits subscription turns to the Codex provider",
+      "reasonNow": "The checked-in V1 provider and direct REST path lack these V2 and native SDK behaviors.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "integrate-opencode-and-sdk-drivers/1.1",
+      "productionEntry": "Launch opencode 2.3.0 with the local plugin, then the packed export; select the Codex provider and send an authorized turn.",
+      "realCollaborators": [
+        "Actual OpenCode host",
+        "packaged plugin",
+        "real Codex SDK and CLI",
+        "consenting Pro subscriber"
+      ],
+      "substitutedBoundaries": [
+        "Only denial/quota controls may be induced with synthetic data. The subscription case must use an authorized real account."
+      ],
+      "oracle": {
+        "observation": "Host discovers both packages, preserves existing overrides, and reaches the intended Codex session.",
+        "expectedTruthSource": "Redacted provider usage/entitlement evidence tied to the native turn and account, plus the client provider/model view.",
+        "comparator": "Correlate native turn, owner and account allowance. A plan label, generic response or zero cost estimate alone fails attribution. Keep native and custom authorization paths identifiable."
+      },
+      "negativeControl": {
+        "input": "Remove paid fallback, deny model access or exhaust the subscription allowance.",
+        "expectedRejection": "Account/model/quota denial surfaces without charging an API key or another user.",
+        "commandRef": "negative-PLUGIN-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local PLUGIN-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Missing consent or adequate provider attribution leaves Pro verification BLOCKED."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "PLUGIN-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "An installed V2 provider completes an attributable subscription turn."
+      ]
+    },
+    {
+      "id": "CHAT-1",
+      "name": "Both selectable REST drivers preserve session ownership and native cancellation.",
+      "actor": "Chat user",
+      "usefulOutcome": "Both selectable REST drivers preserve session ownership and native cancellation.",
+      "sourceRequirement": "openspec:sdk-chat-drivers#Authenticated conversations use the selected SDK driver",
+      "reasonNow": "The checked-in V1 provider and direct REST path lack these V2 and native SDK behaviors.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "integrate-opencode-and-sdk-drivers/1.2",
+      "productionEntry": "POST /api/v1/conversations and /api/v1/conversations/{id}/turns; GET the turn events and POST its cancel resource. Exercise direct POST /v1/chat/completions separately.",
+      "realCollaborators": [
+        "Axum",
+        "supervised runtime",
+        "actual Codex SDK and OpenCode SDK",
+        "durable conversation mapping",
+        "REST/browser client"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Stream, replay after reconnect, interrupt native work and resume after worker restart on each driver. Existing direct clients retain compatibility.",
+        "expectedTruthSource": "External SSE capture, client inputs and the respective native session/interrupt trace.",
+        "comparator": "Native identity bound to the same user/workspace and driver; exactly one terminal state and no duplicated snapshot text. Compare actual native interruption as well as visible UI state."
+      },
+      "negativeControl": {
+        "input": "Use a foreign native session, mismatched workspace or driver, expired replay cursor and repeated cancel after terminal.",
+        "expectedRejection": "No foreign data or turn starts; stale replay indicates resync, repeated cancellation causes no second effect.",
+        "commandRef": "negative-CHAT-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local CHAT-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Transport-only tests cannot certify tool control."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "CHAT-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Both selectable REST drivers preserve session ownership and native cancellation."
+      ]
+    },
+    {
+      "id": "TOOL-1",
+      "name": "Authorized native tool effects occur once and denied effects never occur.",
+      "actor": "Workspace owner",
+      "usefulOutcome": "Authorized native tool effects occur once and denied effects never occur.",
+      "sourceRequirement": "openspec:sdk-chat-drivers#One execution owner enforces tool policy per turn",
+      "reasonNow": "The checked-in V1 provider and direct REST path lack these V2 and native SDK behaviors.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "integrate-opencode-and-sdk-drivers/1.3",
+      "productionEntry": "Start a tool-bearing REST turn on both drivers and an explicit OpenCode delegation to the Codex worker.",
+      "realCollaborators": [
+        "Actual SDK runtimes",
+        "OpenCode V2 host",
+        "approved sandbox",
+        "independent workspace canary"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "One owner executes a permitted operation in its authorized workspace. Native item telemetry is inert under replay.",
+        "expectedTruthSource": "Independent counts of uniquely named workspace effects, bounded native operations and permission decisions.",
+        "comparator": "Compare canary state and native operation IDs before/after replay. Reject unsupported foreign tools before work and detect route cycles."
+      },
+      "negativeControl": {
+        "input": "Replay the native item, supply a foreign permission reply, require unsupported arbitrary functions or select a recursive route.",
+        "expectedRejection": "Zero duplicate, denied or unscoped effects, with a visible error for unsupported capabilities.",
+        "commandRef": "negative-TOOL-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local TOOL-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "The pinned Codex SDK does not establish generic host function-call passthrough."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "TOOL-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Authorized native tool effects occur once and denied effects never occur."
+      ]
+    },
+    {
+      "id": "UI-1",
+      "name": "Installed binary and image serve usable accessible chat and settings.",
+      "actor": "Local owner and shared chat user",
+      "usefulOutcome": "Installed binary and image serve usable accessible chat and settings.",
+      "sourceRequirement": "openspec:embedded-chat-console#Packaged chat and settings console",
+      "reasonNow": "The repository has no packaged chat frontend or validated interactive surface path.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "embed-chat-and-validated-surfaces/2.1",
+      "productionEntry": "Launch the release binary and container from an empty directory, open embedded chat, send and stop a turn, open settings and follow a deep link. Production URLs are /ui/ and /ui/settings.",
+      "realCollaborators": [
+        "Cargo build.rs",
+        "locked Vite/React build",
+        "release artifact",
+        "real browser",
+        "SDK-enabled deployment"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Edited frontend rebuilds, API/static errors have correct status, partial results remain usable and keyboard users can operate both deployment modes.",
+        "expectedTruthSource": "External browser network/accessibility traces, native stop and process observations, before/after asset digests.",
+        "comparator": "Require changed asset bytes after source edit, successful independent package launch without frontend dev server, keyboard access, correct index/asset cache semantics, working SDK-enabled turn and accurate degraded web-only state."
+      },
+      "negativeControl": {
+        "input": "Induce an isolated frontend build failure and request a nonexistent asset/API and admin operation as a chat user.",
+        "expectedRejection": "Cargo fails the build, routes preserve errors and rejected operations disclose no credentials or host state.",
+        "commandRef": "negative-UI-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local UI-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Serving embedded assets does not prove either SDK is installed."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "UI-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Installed binary and image serve usable accessible chat and settings."
+      ]
+    },
+    {
+      "id": "SURFACE-1",
+      "name": "Validated structured surfaces render, update and dispatch one authorized action.",
+      "actor": "Chat user",
+      "usefulOutcome": "Validated structured surfaces render, update and dispatch one authorized action.",
+      "sourceRequirement": "openspec:embedded-chat-console#Versioned AG-UI streaming and validated A2UI interactions",
+      "reasonNow": "The repository has no packaged chat frontend or validated interactive surface path.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "embed-chat-and-validated-surfaces/3.2",
+      "productionEntry": "Use the packaged browser and versioned AG-UI endpoint. Send a typed create/update/replayed snapshot, activate by keyboard, then delete the surface. POST /api/v1/ag-ui/stream carries structured runs; POST /ag-ui/stream keeps text compatibility.",
+      "realCollaborators": [
+        "Real AG-UI JS client and A2UI v0.9 React renderer",
+        "Rust stream and validator",
+        "two authenticated browsers",
+        "action receiver"
+      ],
+      "substitutedBoundaries": [
+        "A controlled stream producer supplies deterministic operations. The actual client, server transport, renderer and authorization boundary remain real."
+      ],
+      "oracle": {
+        "observation": "Visible/accessible surface follows the valid event sequence. Text stays readable and does not become executable UI.",
+        "expectedTruthSource": "Known catalog, independently declared expected component tree and action receiver's scoped counter.",
+        "comparator": "Compare actual component value and identity, event order, deletion and exactly one authorized action. Replay replaces state and two users with matching surface IDs remain isolated."
+      },
+      "negativeControl": {
+        "input": "Inject text containing surface-shaped JSON, unknown catalog, oversized/partial/invalid frame, replayed or foreign/deleted action.",
+        "expectedRejection": "No untrusted or duplicated action, privilege transition or corruption of unrelated text/surfaces.",
+        "commandRef": "negative-SURFACE-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local SURFACE-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "A screenshot or isolated component render alone cannot establish real wire/action interoperability."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "SURFACE-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Validated structured surfaces render, update and dispatch one authorized action."
+      ]
+    },
+    {
+      "id": "ADMIN-1",
+      "name": "All 16 settings areas report effective behavior and enforce privileges.",
+      "actor": "Paired owner, shared admin and ordinary chat user",
+      "usefulOutcome": "All 16 settings areas report effective behavior and enforce privileges.",
+      "sourceRequirement": "openspec:proxy-administration#Effective settings and privilege boundaries",
+      "reasonNow": "Existing setup and effective configuration diverge across clients and deployment modes.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "administer-proxy-and-local-clients/1.1",
+      "productionEntry": "Open installed settings, GET /api/v1/admin/settings and submit real admin API requests under all three roles. Read GET /api/v1/me/connection as two distinct chat users.",
+      "realCollaborators": [
+        "Browser",
+        "protected server",
+        "paired session or trusted identity issuer",
+        "actual CLI/file/env configuration"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Every assessed setting is visible to the proper role with correct effective value, source, masking, change timing and availability.",
+        "expectedTruthSource": "Independent source config and process capabilities, observed socket/feature state and modification counters.",
+        "comparator": "Check 16 areas against concrete enabled/disabled/degraded inputs across both modes. Bind to independent sources and compare effects of live, restart and build-time actions. For the chat-readable endpoint each user sees only their permitted drivers, recovery actions and redacted connection state. Compare to two different independent owner configurations."
+      },
+      "negativeControl": {
+        "input": "Attempt direct privileged requests with a chat session, an invalid origin or untrusted identity header, or target another user's credentials. Try selecting another subject on GET /api/v1/me/connection.",
+        "expectedRejection": "No unauthorized host write or refresh; redacted status and logs contain no foreign credential data.",
+        "commandRef": "negative-ADMIN-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local ADMIN-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "Hidden controls alone cannot establish server-side authorization."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "ADMIN-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "All 16 settings areas report effective behavior and enforce privileges."
+      ]
+    },
+    {
+      "id": "SETUP-1",
+      "name": "OpenCode config changes preserve user files in project and global scope.",
+      "actor": "Service-host owner",
+      "usefulOutcome": "OpenCode config changes preserve user files in project and global scope.",
+      "sourceRequirement": "openspec:proxy-administration#OpenCode setup preserves local configuration",
+      "reasonNow": "Existing setup and effective configuration diverge across clients and deployment modes.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "administer-proxy-and-local-clients/1.2",
+      "productionEntry": "Run the admin preview/apply/undo flow and the shipped setup CLI, then launch opencode from inside the test project and from an unrelated directory.",
+      "realCollaborators": [
+        "Installed Rust CLI and HTTP admin",
+        "real filesystem",
+        "OpenCode 2.3 host"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Resolved destination/override match the preview; second apply is byte-identical and undo removes only owned entries.",
+        "expectedTruthSource": "Before/after raw file snapshots, file metadata and actual host provider discovery outside the checkout.",
+        "comparator": "Compare file bytes and permission bits beyond the owned edit, then match real host model/provider resolution for each scope. Verify export for another machine."
+      },
+      "negativeControl": {
+        "input": "Change the file after preview, inject malformed JSONC, redirect destination to an unapproved path or undo after a conflicting edit.",
+        "expectedRejection": "A clear conflict or validation failure preserves all user content and never writes to the unapproved host/path.",
+        "commandRef": "negative-SETUP-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local SETUP-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "A global file found from within a project cannot prove standalone global discovery."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "SETUP-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "OpenCode config changes preserve user files in project and global scope."
+      ]
+    },
+    {
+      "id": "ACP-1",
+      "name": "Supported editors launch the installed ACP agent and display a prompt update.",
+      "actor": "Zed and JetBrains users",
+      "usefulOutcome": "Supported editors launch the installed ACP agent and display a prompt update.",
+      "sourceRequirement": "openspec:proxy-administration#Editors can launch the proxy over ACP",
+      "reasonNow": "Existing setup and effective configuration diverge across clients and deployment modes.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "administer-proxy-and-local-clients/1.3",
+      "productionEntry": "Apply the ACP registration and start Zed and JetBrains AI Assistant using their scratch profiles pointing to openai-proxy serve --acp-stdio.",
+      "realCollaborators": [
+        "Real Zed editor",
+        "real JetBrains AI Assistant",
+        "installed proxy",
+        "isolated stdio process"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Each client launches the correct binary, receives a streamed prompt update and reports genuine terminal failures.",
+        "expectedTruthSource": "Editor-observed initialization/session/update and independently inspected child argv and exit status.",
+        "comparator": "Record results for both editors and actual versions. Require a correlated session, prompt and update. Keep protocol stdout clean. Generic export identifies remote/unverified support."
+      },
+      "negativeControl": {
+        "input": "Configure an unavailable executable or request a capability the adapter does not support; request setup for a separate browser host.",
+        "expectedRejection": "Show an unverified or failed state without overwriting an unrelated local editor configuration.",
+        "commandRef": "negative-ACP-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local ACP-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "A generic export does not certify an unlisted editor."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "ACP-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Supported editors launch the installed ACP agent and display a prompt update."
+      ]
+    },
+    {
+      "id": "MCP-1",
+      "name": "Five named clients discover and call the configured MCP server.",
+      "actor": "Users of supported MCP clients",
+      "usefulOutcome": "Five named clients discover and call the configured MCP server.",
+      "sourceRequirement": "openspec:proxy-administration#Common clients can register the proxy as an MCP server",
+      "reasonNow": "Existing setup and effective configuration diverge across clients and deployment modes.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "administer-proxy-and-local-clients/1.4",
+      "productionEntry": "Register Codex CLI, Claude Code, OpenCode 2.3, Zed and VS Code/Copilot; use tools/list plus a benign call in each via its configured transport.",
+      "realCollaborators": [
+        "Five real client profiles",
+        "stdio server",
+        "protected Streamable HTTP listener",
+        "four existing MCP tools"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Clients see four public tools, meaningful results, scoped auth status and advisory set_model. Reapplying and removing preserves unrelated servers.",
+        "expectedTruthSource": "Actual client descriptor and call results, plus independently selected test owner/profile model catalog.",
+        "comparator": "Record every required client and its declared supported transport, with version and call/correlation receipt. Both stdio and Streamable HTTP must be represented. Configuration text or health alone is insufficient."
+      },
+      "negativeControl": {
+        "input": "Present an unsupported protocol/version, absent listener or denied shared user account scope.",
+        "expectedRejection": "Client shows unverified or unavailable, unrelated config survives and foreign account metadata is absent.",
+        "commandRef": "negative-MCP-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local MCP-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "No universal claim beyond the tested version/transport matrix."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "MCP-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Five named clients discover and call the configured MCP server."
+      ]
+    },
+    {
+      "id": "FEATURE-1",
+      "name": "Skills, tool schemas, hooks, memory and discovery agree with real runtime behavior.",
+      "actor": "Administrator and two isolated users",
+      "usefulOutcome": "Skills, tool schemas, hooks, memory and discovery agree with real runtime behavior.",
+      "sourceRequirement": "openspec:proxy-administration#Optional features reflect effective runtime behavior",
+      "reasonNow": "Existing setup and effective configuration diverge across clients and deployment modes.",
+      "likelihood": "UNKNOWN",
+      "mandatory": true,
+      "ownerTask": "administer-proxy-and-local-clients/1.5",
+      "productionEntry": "Use settings then exercise scoped /v1/memory operations and chat injection, skill selection, a synthetic hook and /.well-known/agent.json on feature-enabled and disabled builds.",
+      "realCollaborators": [
+        "Actual memory store",
+        "independent hook receiver",
+        "scoped documents and skill manifests",
+        "route/client observers"
+      ],
+      "substitutedBoundaries": [],
+      "oracle": {
+        "observation": "Skills cap, schema-vs-executor labels, emitted hooks, DB and embedding billing state, card availability and runtime topology match the effective settings.",
+        "expectedTruthSource": "Known document owner and markers, webhook capture, selected skill marker and independent reader of the A2A card.",
+        "comparator": "Compare independently observed delivery, retrieval and discovery against the source configuration. Check memory authorization for list, search, injection and deletion as both users."
+      },
+      "negativeControl": {
+        "input": "Use a foreign document ID or spoofed scope, disable or misconfigure the DB/hooks, and request a delivery to an unapproved destination.",
+        "expectedRejection": "No foreign document access, injection, deletion or unauthorized egress. Degraded, disabled or pending-restart state stays visible.",
+        "commandRef": "negative-FEATURE-1"
+      },
+      "fixtures": "Unique private run root, isolated HOME, CODEX_HOME, XDG config/data roots, two workspaces, loopback ports and client profiles. Non-secret seed manifest .kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json SHA-256 2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b. Record hashes of realized non-secret fixtures, installed executable, image and client versions. Keep bearer and grant values out of receipts.",
+      "evidence": "Run-local FEATURE-1 receipt with build/config digests, versions, actor, argv, exit status, monotonic timing, independent observation and negative-control evidence. Record each required client, transport and deployment subcase individually.",
+      "limitations": [
+        "A synthetic webhook proves local dispatch, not availability of arbitrary external destinations."
+      ],
+      "invalidationKeys": [
+        "production build, source and dependency versions",
+        "FEATURE-1 configuration, protocol and oracle",
+        "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+      ],
+      "restoration": "Stop only suite-owned processes, undo owned configuration where applicable, close sessions, remove private scratch stores and retain redacted evidence with a cleanup receipt.",
+      "scopeRefs": [
+        "Skills, tool schemas, hooks, memory and discovery agree with real runtime behavior."
+      ]
+    }
+  ],
+  "functionalScope": [
+    "External login updates running requests without a restart.",
+    "Expired credentials recover once while preserving identity and billing.",
+    "Late refresh cannot resurrect a signed-out or superseded account.",
+    "An installed V2 provider completes an attributable subscription turn.",
+    "Both selectable REST drivers preserve session ownership and native cancellation.",
+    "Authorized native tool effects occur once and denied effects never occur.",
+    "Installed binary and image serve usable accessible chat and settings.",
+    "Validated structured surfaces render, update and dispatch one authorized action.",
+    "All 16 settings areas report effective behavior and enforce privileges.",
+    "OpenCode config changes preserve user files in project and global scope.",
+    "Supported editors launch the installed ACP agent and display a prompt update.",
+    "Five named clients discover and call the configured MCP server.",
+    "Skills, tool schemas, hooks, memory and discovery agree with real runtime behavior."
+  ],
+  "resilienceScope": {
+    "policy": "Mandatory resilience includes logout/switch during refresh, unknown exchange outcome, partial store writes, mount replacement, session cancellation/replay, worker restart, tool duplication, foreign actions, stale configurations and degraded/unavailable features. These remain acceptance obligations if a prerequisite is missing or a budget is exhausted.",
+    "deferredOptional": [
+      "Additional unlisted ACP/MCP client adapters and unverified operating systems",
+      "A remote OpenCode SDK attach driver",
+      "Further A2UI wire versions or unregistered catalogs"
+    ]
+  },
+  "exclusions": [
+    "Using a shared operator subscription for chat users or automatically falling back to separate paid API billing",
+    "Silent arbitrary function passthrough over the pinned Codex SDK",
+    "Public registry publication, changing personal workstation configurations during Spec, and automatic deployment"
+  ],
+  "requiredSafetyChecks": [
+    {
+      "id": "principal-continuity",
+      "description": "Refresh, reload, recovery and native session resume preserve the authenticated owner, routing generation and authorized upstream with redacted credentials.",
+      "scenarioIds": [
+        "AUTH-1",
+        "AUTH-2",
+        "AUTH-3",
+        "CHAT-1"
+      ]
+    },
+    {
+      "id": "subscription-and-single-execution",
+      "description": "An unauthorized allowance cannot be charged and a tool effect cannot be duplicated, replayed or run outside an approved workspace.",
+      "scenarioIds": [
+        "PLUGIN-1",
+        "TOOL-1",
+        "AUTH-2"
+      ]
+    },
+    {
+      "id": "management-isolation",
+      "description": "Check direct API authorization and origin protection, owner-scoped files and memory, fail-closed concurrent writes, cleanup and redaction.",
+      "scenarioIds": [
+        "ADMIN-1",
+        "SETUP-1",
+        "ACP-1",
+        "MCP-1",
+        "FEATURE-1"
+      ]
+    },
+    {
+      "id": "safe-renderer",
+      "description": "Plain text never creates executable UI. Invalid catalogs, frames, cross-user actions and duplicate activation cannot trigger privileged behavior.",
+      "scenarioIds": [
+        "UI-1",
+        "SURFACE-1"
+      ]
+    }
+  ],
+  "budgets": {
+    "timeMinutes": 240,
+    "toolCalls": 240,
+    "repairAttempts": 2,
+    "noProgressLimit": 3,
+    "tokenBudget": "UNKNOWN",
+    "tokenFallback": "Time, tool-call, repair and no-progress ceilings bound the consolidated verification run; retain historical consumption.",
+    "exhaustion": "Checkpoint and mark BLOCKED; preserve unresolved effects and receipts and request a budget amendment before further attempts."
+  },
+  "evidenceInvalidation": "Record contract, spec, relevant source, package, config, method and non-secret fixture hashes. Invalidate only affected scenario evidence on change. Retain earlier receipts with their original identities.",
+  "workerRoutes": {
+    "agent": "proxy-maintainers project team",
+    "model": "Active Codex harness for production owners; isolated service reviewer for contract and acceptance review.",
+    "billing": "No provider charge is authorized by specifying or adopting this contract. Require separate consent for real subscription turns or paid embedding evidence.",
+    "subagents": "Identity, OpenCode extensions, chat experience, runtime, build/release and independent service reviewer work through scoped ownership.",
+    "reviewRoundsMax": 2
+  },
+  "boundaryPacket": {
+    "postImplementationOnly": true,
+    "singleRun": true,
+    "commands": [
+      {
+        "id": "build-release",
+        "cwd": ".",
+        "kind": "build",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "build"
+        ]
+      },
+      {
+        "id": "start-fixture-services",
+        "cwd": ".",
+        "kind": "run",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "run"
+        ]
+      },
+      {
+        "id": "scenario-AUTH-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "AUTH-1"
+        ],
+        "scenarioIds": [
+          "AUTH-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-AUTH-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "AUTH-1"
+        ],
+        "scenarioIds": [
+          "AUTH-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-AUTH-2",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "AUTH-2"
+        ],
+        "scenarioIds": [
+          "AUTH-2"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-AUTH-2",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "AUTH-2"
+        ],
+        "scenarioIds": [
+          "AUTH-2"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-AUTH-3",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "AUTH-3"
+        ],
+        "scenarioIds": [
+          "AUTH-3"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-AUTH-3",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "AUTH-3"
+        ],
+        "scenarioIds": [
+          "AUTH-3"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-PLUGIN-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "PLUGIN-1"
+        ],
+        "scenarioIds": [
+          "PLUGIN-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-PLUGIN-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "PLUGIN-1"
+        ],
+        "scenarioIds": [
+          "PLUGIN-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-CHAT-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "CHAT-1"
+        ],
+        "scenarioIds": [
+          "CHAT-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-CHAT-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "CHAT-1"
+        ],
+        "scenarioIds": [
+          "CHAT-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-TOOL-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "TOOL-1"
+        ],
+        "scenarioIds": [
+          "TOOL-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-TOOL-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "TOOL-1"
+        ],
+        "scenarioIds": [
+          "TOOL-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-UI-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "UI-1"
+        ],
+        "scenarioIds": [
+          "UI-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-UI-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "UI-1"
+        ],
+        "scenarioIds": [
+          "UI-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-SURFACE-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "SURFACE-1"
+        ],
+        "scenarioIds": [
+          "SURFACE-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-SURFACE-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "SURFACE-1"
+        ],
+        "scenarioIds": [
+          "SURFACE-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-ADMIN-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "ADMIN-1"
+        ],
+        "scenarioIds": [
+          "ADMIN-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-ADMIN-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "ADMIN-1"
+        ],
+        "scenarioIds": [
+          "ADMIN-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-SETUP-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "SETUP-1"
+        ],
+        "scenarioIds": [
+          "SETUP-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-SETUP-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "SETUP-1"
+        ],
+        "scenarioIds": [
+          "SETUP-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-ACP-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "ACP-1"
+        ],
+        "scenarioIds": [
+          "ACP-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-ACP-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "ACP-1"
+        ],
+        "scenarioIds": [
+          "ACP-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-MCP-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "MCP-1"
+        ],
+        "scenarioIds": [
+          "MCP-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-MCP-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "MCP-1"
+        ],
+        "scenarioIds": [
+          "MCP-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "scenario-FEATURE-1",
+        "kind": "scenario",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "scenario",
+          "FEATURE-1"
+        ],
+        "scenarioIds": [
+          "FEATURE-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "negative-FEATURE-1",
+        "kind": "negativeControl",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "negative",
+          "FEATURE-1"
+        ],
+        "scenarioIds": [
+          "FEATURE-1"
+        ],
+        "cwd": "."
+      },
+      {
+        "id": "restore-environment",
+        "kind": "run",
+        "argv": [
+          "bash",
+          "scripts/verify-codex-console.sh",
+          "cleanup"
+        ],
+        "cwd": "."
+      }
+    ],
+    "expectedEffects": [
+      "Build the actual native and image distributions with clean/default and optional memory configuration; capture zero-warning Cargo baseline, clippy, unit and plugin typecheck results separately.",
+      "Start only isolated native workers and disposable service/client profiles, exercise each positive and negative subcase with real collaborators, then restore resources.",
+      "Run checks through the installed package. Reading files or mocked success does not prove real login, subscription billing, native cancellation, editor registration, browser rendering, or deployed outcomes."
+    ],
+    "requiredApprovals": "Separate owner authorization before live subscriber/paid operations or a machine-level change. Only disposable client profiles and an explicitly consented account may be used. Spec and contract adoption do not authorize running the boundary.",
+    "receipts": [
+      "Per-run private manifest including exact executable/versions and subcase digests",
+      "Local redacted per-scenario evidence with independent expected/observed values, effects and controls",
+      "Restoration and cleanup record, failed/missing prerequisites, no account secrets"
+    ],
+    "cleanup": [
+      "Use trap/finally to stop suite children and restore files even if an earlier command fails.",
+      "Dispose of scratch credentials and owned client entries, preserve only redacted output. Reconcile any indeterminate effect before retrying."
+    ],
+    "stopConditions": [
+      "Any boundary without prerequisites, consent, identity or isolation is BLOCKED; a case not attempted is NOT_EXERCISED.",
+      "Unintended external charge/write, credential disclosure, or foreign account action stops subsequent affected work and requires reconciliation.",
+      "Exit zero alone is insufficient. Record each required subcase, a real failed oracle as FAIL, and any unresolved effects or exhausted budget."
+    ]
+  },
+  "status": {
+    "implementationComplete": false
+  },
+  "calibration": {
+    "examplesPath": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/calibration-examples.md",
+    "sha256": "2c8f6ee69896758e8e2b7a2a4b74f47d883af11fdd1dacd6c993c43acc3cdd0e"
+  },
+  "method": {
+    "name": "VLBV",
+    "packVersion": "1.15.0",
+    "referenceSha256": "2377a56733c735e8bf92b3d6fe931da2c1c72ce930fdebd35a87b129065c3c67",
+    "openspecVersion": "2.1.0",
+    "specDeltaDigest": "ac20c0b88a6b0e4658a492472c8c4c8c31bd688402b914b66ecf00803e176505"
+  },
+  "closure": {
+    "implementationComplete": false,
+    "behaviorAccepted": false,
+    "releaseEligible": false,
+    "releaseAuthorized": false
+  }
+}

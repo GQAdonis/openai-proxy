@@ -1,0 +1,66 @@
+# Design
+
+## Context
+
+`src/lib.rs` mounts `POST /ag-ui/stream`. `src/agui.rs` emits five text events, serializes some identifiers in snake case, and can finish after an upstream stream failure. `Dockerfile` builds a Rust binary with no frontend stage. `PRODUCT.md` covers a developer who manages their own proxy and shared users who have distinct chat, credential-owner and service-admin permissions.
+
+## Goals / Non-Goals
+
+**Goals:** Make the shipped service usable for streaming chats and settings in both deployment modes. Give typed AG-UI clients and the real React renderer a versioned, testable contract. An authorized user's keyboard activation must have a verifiable effect in the originating conversation.
+
+**Non-Goals:** The SDK and identity changes own native session execution and credential refresh. The admin change owns host detection, schema, writers, authorization and apply/undo. This change consumes those contracts. Remote component registries and unrestricted generated callbacks are outside the selected surface catalog.
+
+## Decisions
+
+### Build and route the shipped application (UI-1)
+
+Create `frontend/` with React 19, React DOM 19, TypeScript and Vite 8. Pin Node, the package manager and exact dependency resolutions in the build manifest/lock. Prepare dependencies explicitly in developer and CI setup and the Docker builder. Use a locked install (for npm, `npm ci`). Cargo `build.rs` invokes the local production build, e.g. `npm run build -- --outDir <OUT_DIR>/console --emptyOutDir` from `frontend/`, checks its exit status, checks that index and referenced assets exist, and generates a stable path, content-type and `include_bytes!` asset table under `OUT_DIR`. Rust includes the generated table. Cargo rerun inputs cover source and public directories, HTML, package manifest, lockfile, tsconfig, Vite config and build-relevant environment. Output and dependency directories are outside that input set. Fail the current build if the frontend fails, even when an older build emitted an index. The final Docker stage copies the binary. SDK-enabled deployments separately provision compatible driver runtimes. Use `cargo build --release --locked` and preserve the optional `memory` build and protocol-only stdio entry points. [Cargo build scripts](https://doc.rust-lang.org/cargo/reference/build-scripts.html) · [Vite build](https://vite.dev/guide/build.html)
+
+Set Vite `base` to `/ui/`. Redirect `/ui` to `/ui/`. Serve same-origin index and deep links such as `/ui/settings` only for GET/HEAD HTML navigations. Serve only actual assets with correct MIME, length and immutable caching for fingerprinted names. Revalidate HTML. Keep absent assets, unknown API/protocol paths, bad methods and missing non-navigation requests as genuine errors. The standard HTTP executable serves these routes from an empty working directory with no JS runtime or dev server.
+
+### Chat from the service API (UI-1)
+
+Use the Impeccable product brief, UI UX Pro Max keyboard/accessibility guidance and locally composed shadcn/ui components. Give the transcript, labelled composer, model and driver choices, Stop, settings link, status and focus order distinct roles. Preserve scroll position for readers reviewing older messages, offer jump-to-latest, and group completion/error announcements. Keep controls usable in a narrow viewport and with reduced motion. Model choice, system instructions, advanced sampling, tools and usage depend on effective driver/profile capabilities.
+
+Start with `POST /api/v1/conversations`, create a turn at `POST /api/v1/conversations/{id}/turns`, consume `GET /api/v1/conversations/{id}/turns/{turnId}/events` and cancel at `POST /api/v1/conversations/{id}/turns/{turnId}/cancel`. The service binds actor, workspace, driver, native session and turn. Use the last accepted monotonic event ID on reconnect. If the replay window is gone, show an explicit recovery state. Never create a turn merely to reconnect. Present cancel requested, acknowledged stop, complete, failure before text, partial failure and unavailable driver distinctly. Retain the transcript and return keyboard focus to a predictable place. Retry is an explicit user decision subject to the driver's replay/side-effect policy. Protocol projections and tool observations reuse the driver owner's run.
+
+### Settings from effective service state (UI-1)
+
+Fetch `GET /api/v1/admin/settings` only for an authorized actor. Each visible option uses the management contract for its supported/enabled/degraded state, effective/redacted value and source/precedence, scope/target, allowed actor, and apply timing or reason for being unavailable. For chat-only viewers fetch `GET /api/v1/me/connection`. Render its redacted connection state and permitted drivers, available controls and allowed recovery actions. Derive identity from the session and never query the admin endpoint to populate this screen. Authenticated local ownership, personal credential ownership, and shared service administration are distinct scopes. Resolved paths and commands refer to the service host. Offer export for visitor-owned or read-only targets. For durable writes show the actual redacted preview, target, effective impact and conflict from `POST /api/v1/admin/config/preview`, `/apply` and `/undo` under the same prefix. Mutations require an authorized session and request-forgery protection. Browser storage, rendered values, diagnostics and request payloads exclude upstream credentials.
+
+Each row below describes what to display when supplied by the service. The sibling admin spec owns the option schemas, permission enforcement and persistence. The source/effect column describes how to label actual capability data, including masked or degraded settings. See the [phase inventory](../../../.kbd-orchestrator/phases/codex-live-auth-opencode-console/settings-inventory.md).
+
+| Settings area | Sources and effect to present | Scope and actor |
+| --- | --- | --- |
+| Deployment and access | Host, deployment mode, session role and current access policy | Own chat status, service policy to admin |
+| Service, logs and config | CLI, env, TOML, defaults, append/OR precedence, log level, health and restart needs | Admin on the service host |
+| Identity and routing | Managed store, keyring, external login or API key, generation, pickup, retry/sign-in status, active profile and trusted destination | Credential owner sees own actions, admin sees permitted redacted service status |
+| Chat and models | Runtime catalog/alias, instructions, advanced output/sampling/tool support and effects per turn | Conversation owner |
+| SDK harnesses | Selected driver, runtime/version, availability, workspace, effective sandbox and approvals | Conversation owner sees own session, admin sees runtime setup |
+| OpenCode on this host | Native plugin/static provider, project/global JSON/JSONC sources, host version, override, resolved model and client reload | Admin configures allowed target, remote user can export entitled setup |
+| Safe machine configuration | Resolved target, writable scope, redacted merge/revision, masked setting, preview/apply/undo result | Authorized host writer, export for an unreachable target |
+| ACP clients | Client launch manifest, executable, arguments, environment names, supported capabilities and restart | Host writer for approved client/profile, export for a visitor's editor |
+| Proxy as MCP server | Client registration source, stdio/HTTP endpoint, actual exposed tools and reload/verification | Host writer for registration, tool access follows caller |
+| Tool imports | TOML config path, declared schemas, collisions and active driver/executor | Admin manages imports, caller sees permitted effective tools |
+| AG-UI and A2UI | Legacy/versioned route, wire profile, local catalog, limits and rendering status | Caller sees own surfaces, admin inspects service policy |
+| A2A | Flag/TOML discovery, effective card/address, advertised skills and activation timing | Public discovery as enabled, admin configures service |
+| Skills | Env/TOML directories and injection cap, effective source, startup loading and request-time selection | Admin manages approved sources, caller sees permitted use |
+| Webhooks | Config source, redacted destinations, actually emitted events, delivery status and activation timing | Admin only for outbound setup/test |
+| Memory and retrieval | Build feature, runtime state, store/model, embedding credential presence and cost, degraded state | Admin configures storage, owners access authorized documents/search |
+| Packaging and process topology | Native/container build ID, optional features, listener or stdio modes, mounts, shutdown/restart ownership and separate SDK dependencies | Admin sees service host, disabled actions explain external ownership |
+
+### Versioned AG-UI and A2UI (SURFACE-1)
+
+Keep the existing `/ag-ui/stream` text contract. Add `POST /api/v1/ag-ui/stream` with validated `RunAgentInput`, `Content-Type: text/event-stream` output and typed camelCase event fields (`threadId`, `runId`, `messageId`). Pin `@ag-ui/client` and `@ag-ui/core` 1.0.5. Use the upstream `HttpAgent`/subscriber for the versioned exchange and the core event validators for complete events. Map begin, message start/content/end, and either run finished or run error. A lost transport without a terminal event is interrupted. A versioned projection and a REST replay must refer to the same logical turn when attached to it. Never dispatch a second SDK run to re-render an event. [AG-UI activity convention](https://github.com/ag-ui-protocol/ag-ui/blob/3416b86da4b3288e87f827c7f2759a7fa18b5231/middlewares/a2ui-middleware/src/activity-snapshots.ts)
+
+Represent a surface as `ACTIVITY_SNAPSHOT` with stable `messageId`, `activityType: "a2ui-surface"`, `replace: true` and complete `content.a2ui_operations`. Accept only complete, schema-validated v0.9 `createSurface`, `updateComponents`, `updateDataModel` and `deleteSurface` operations consistent with the surface lifecycle. Key client and server state by authenticated actor, thread, originating run and surface. The first operation creates the surface in its approved catalog. Apply each bounded replacement snapshot atomically to a fresh candidate state. Duplicate snapshots converge. Invalid or truncated inputs retain the last valid state and produce accessible text. Plain transcript JSON stays inert.
+
+Pin `@a2ui/web_core` and `@a2ui/react` to 0.15.0. Import `MessageProcessor` from `@a2ui/web_core/v0_9` and `A2uiSurface` from `@a2ui/react/v0_9`. Wire version is `v0.9`. Bundle the matching schema and approved local component catalog, independently validate envelopes and operations, restrict component and function names, asset URLs and action names, and enforce finite byte/depth/count limits before committing or rendering a snapshot. Ensure labeled controls, stable focus on updates, and a focus destination after deletion. Never interpret arbitrary HTML, script, URLs, callback names or model text as executable controls. [Published React export](https://unpkg.com/@a2ui/react@0.15.0/v0_9/index.d.ts)
+
+For a genuine activation validate the client message `{version:"v0.9", action:{name,surfaceId,sourceComponentId,timestamp,context}}`. Pass its validated action body through `RunAgentInput.forwardedProps.a2uiAction.userAction` on a new correlated run. Bind it to the previous surface and real session on the server and verify the live component, permitted action, allowed context schema, origin/CSRF and an idempotency key before dispatch. The client timestamp is informational. A replay returns the prior decision for the same authorized action without invoking the handler twice. Invalid, deleted, expired, foreign or forged targets have zero effects. Generated actions cannot invoke credential refresh, settings mutation, host execution or an administrator operation. [Action schema](https://github.com/a2ui-project/a2ui/blob/28e3d6bd4fb21a38be5abb0959bf73fd9708ffe0/specification/v0_9/json/client_to_server.json) · [Upstream adapter](https://github.com/ag-ui-protocol/ag-ui/blob/3416b86da4b3288e87f827c7f2759a7fa18b5231/middlewares/a2ui-middleware/src/index.ts#L443-L479)
+
+## Risks / Trade-offs
+
+Node and frontend package acquisition add build prerequisites. Pin and provision the builder separately from the shipped web runtime. A native SDK turn can require a sidecar or CLI even if serving the embedded files succeeds. Exercise each boundary independently. The A2UI libraries are pre-1.0. Keep the wire profile and package exports locked and make unsupported profiles visibly degrade to text. An event replay can arrive after an account switch or a deletion. Check current ownership and lifecycle before sending, replacing or acting.
+
+The [phase's prior context](../../../.kbd-orchestrator/phases/codex-live-auth-opencode-console/prior-context.md) records the lesson “Boundary gates must launch the packaged artifact” (`learning:391671bab251836b`). At B4 run the shipped binary through `openai-proxy serve` outside the checkout and launch the final release image. Observe the browser, wire and independent effect counter. Record artifact identity, browser results, negative controls and sanitized evidence for UI-1 and SURFACE-1.

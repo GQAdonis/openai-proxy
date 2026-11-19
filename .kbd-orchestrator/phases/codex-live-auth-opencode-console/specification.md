@@ -1,0 +1,21 @@
+# Codex live auth, OpenCode and embedded console specification
+
+**Analysis baseline:** `1141700` on `main`. This phase specifies four OpenSpec changes. Their normative requirements and task lists are linked below. The [verification contract](adopted-contract.json) contains 13 scenarios. The owner adopted contract `7bce50fc` and KBD bound revision 1. The [immutable snapshot](adopted/7bce50fc154b5d36e8090cd100f2a5fb9fb5dfa775b3a312c6e987a6b04c91cc.json) preserves the approved criteria. Use `prometheus kbd phase disposition --id codex-live-auth-opencode-console --json` to check the authoritative state.
+
+| Change | Required outcome | Acceptance IDs |
+|---|---|---|
+| [Live Codex identity](../../../openspec/changes/reconcile-codex-login/specs/live-codex-identity/spec.md) · [tasks](../../../openspec/changes/reconcile-codex-login/tasks.md) | Adopt an external login without restarting, verify managed refresh, and handle logout, races, independent credentials and billing across transports. | AUTH-1, AUTH-2, AUTH-3 |
+| [OpenCode plugin and SDK chat drivers](../../../openspec/changes/integrate-opencode-and-sdk-drivers/specs/sdk-chat-drivers/spec.md) · [tasks](../../../openspec/changes/integrate-opencode-and-sdk-drivers/tasks.md) | Load a native V2 provider with an explicitly attributable Pro turn. Run both REST drivers, preserve native session/cancellation and enforce one tool executor. | PLUGIN-1, CHAT-1, TOOL-1 |
+| [Embedded console and validated surfaces](../../../openspec/changes/embed-chat-and-validated-surfaces/specs/embedded-chat-console/spec.md) · [tasks](../../../openspec/changes/embed-chat-and-validated-surfaces/tasks.md) | Build React 19/Vite 8 through Cargo, serve packaged UI at `/ui/`, and support typed AG-UI/A2UI v0.9 rendering, replay and authorized actions. | UI-1, SURFACE-1 |
+| [Proxy administration and local clients](../../../openspec/changes/administer-proxy-and-local-clients/specs/proxy-administration/spec.md) · [tasks](../../../openspec/changes/administer-proxy-and-local-clients/tasks.md) | Expose all 16 [settings areas](settings-inventory.md), preserve files during host setup, launch ACP in Zed and JetBrains and register five MCP clients. | ADMIN-1, SETUP-1, ACP-1, MCP-1, FEATURE-1 |
+
+## Integration order and ownership
+
+1. Establish the identity resolver, store ownership, session principals and workspace boundaries first. The identity owner changes credential use in existing HTTP/stdio paths. The admin owner supplies browser pairing or shared authentication, chat-readable `GET /api/v1/me/connection` and the restricted admin routes.
+2. The SDK owner implements native conversation execution and a Codex-targeted provider connection. OpenCode provisioning uses that provider contract. Keep the direct REST route available. Only an authorized actual account observation can establish custom plugin Pro attribution.
+3. The console owner owns `/ui/`, React controls, the Cargo asset pipeline, structured AG-UI projection and A2UI rendering. The admin owner supplies setting semantics, privilege policy, config writers and client adapters. Implement the shell against those interfaces, then wire in the owner-specific connection response, native drivers and protected settings.
+4. For shared files such as the Axum route table, CLI setup dispatcher, Cargo manifests and Dockerfile, order integration through the runtime or build/release owner. Implement the full production surface before authoring the consolidated boundary runner. The verifier owns the single `scripts/verify-codex-console.sh` entry point and its build/run/scenario/negative/cleanup operations at B4. Every task which cites that runner contributes to the same artifact.
+
+## Evidence and decisions
+
+The [calibration examples](calibration-examples.md) distinguish owner-supplied outcomes from timing, compatibility and verification-budget proposals. The [fixture manifest](fixture-manifest.json) supplies reproducible non-secret inputs. Record the installed branch/release artifacts, actual client/OS versions, real versus fixture-assisted results and cleanup independently. Missing live account consent or usable attribution blocks the Pro claim. A passed document check does not certify runtime behavior. Contract adoption, implementation, behavioral acceptance, release eligibility and publication are distinct events.

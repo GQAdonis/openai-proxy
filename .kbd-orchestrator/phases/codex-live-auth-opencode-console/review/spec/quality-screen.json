@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "score": 0.0,
+  "network_access": false,
+  "strictness": "strict",
+  "reject_cap": 2,
+  "cap_overridden": false,
+  "cap_default": 2
+}

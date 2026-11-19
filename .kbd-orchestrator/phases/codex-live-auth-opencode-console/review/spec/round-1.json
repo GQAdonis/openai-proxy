@@ -1,0 +1,24 @@
+{
+  "mode": "artifact",
+  "judge_model": "gpt-6.1-terra",
+  "producer_model": "gpt-6",
+  "cross_model_check": "verified-distinct",
+  "isolation_mode": "harness-native",
+  "verdict": "BLOCK",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/adopted-contract.json",
+      "claim": "The contract's required filename and kind could be mistaken for an actual adoption.",
+      "evidence": "adoptionSource described a proposal and the two binding fields were null. No canonical owner decision had been recorded.",
+      "suggested_fix": "Label the contract proposed, block behavioral acceptance, and record the owner's actual decision before treating it as binding."
+    },
+    {
+      "severity": "WARNING",
+      "file": "openspec/changes/embed-chat-and-validated-surfaces/design.md",
+      "claim": "A chat-only viewer had no defined authorized data source for connection status.",
+      "evidence": "The UI design described a limited connection view while the only named settings endpoint required administrative authorization.",
+      "suggested_fix": "Define a redacted owner-scoped read endpoint and assign a real cross-user negative control."
+    }
+  ]
+}

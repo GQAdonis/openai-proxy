@@ -1,0 +1,19 @@
+{
+  "stage": "spec",
+  "completedAt": "2026-11-19T20:54:09Z",
+  "outputs": [
+    "openspec/changes/reconcile-codex-login/specs/live-codex-identity/spec.md",
+    "openspec/changes/integrate-opencode-and-sdk-drivers/specs/sdk-chat-drivers/spec.md",
+    "openspec/changes/embed-chat-and-validated-surfaces/specs/embedded-chat-console/spec.md",
+    "openspec/changes/administer-proxy-and-local-clients/specs/proxy-administration/spec.md",
+    "specification.md",
+    "adopted-contract.json",
+    "calibration-examples.md",
+    "fixture-manifest.json",
+    "review/contract/findings.json"
+  ],
+  "nextStage": "plan",
+  "summaryForNext": "Four strictly validated OpenSpec changes specify live credential ownership, the V2 Pro plugin, both SDKs, the embedded UI, all 16 settings areas and validated A2UI; 13 traced scenarios passed contract lint. Independent re-review passed after defining the chat-readable status API and distinguishing the proposed verification contract from its canonical owner binding. Plan must preserve the per-scenario ownership, conditional live entitlement evidence and separate authorization to execute.",
+  "skipped": false,
+  "skipReason": null
+}

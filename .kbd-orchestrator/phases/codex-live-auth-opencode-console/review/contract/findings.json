@@ -1,0 +1,17 @@
+{
+  "mode": "artifact",
+  "judge_model": "gpt-6.1-terra",
+  "producer_model": "gpt-6",
+  "cross_model_check": "verified-distinct",
+  "isolation_mode": "harness-native",
+  "verdict": "PASS",
+  "findings": [],
+  "checked_classes": [
+    "Adoption and binding: the specification explicitly marks the artifact proposed before canonical owner approval and blocks behavioral acceptance; null revision and digest are appropriate prior to typed adoption.",
+    "Cross-change API ownership: GET /api/v1/me/connection provides chat-readable status with positive and negative coverage in ADMIN-1.",
+    "Coverage and ownership: all 13 scenarios map to the four changes, production tasks and consolidated verification.",
+    "False passes: independent expected truth, observable results and controls are required; exit status cannot establish acceptance.",
+    "Boundaries: synthetic controls, genuine provider attribution, environment, consent, cleanup and unavailable prerequisites have distinct outcomes.",
+    "Cross-sibling sequencing: identity, authentication, driver, console and administration ownership and integration order are explicit."
+  ]
+}

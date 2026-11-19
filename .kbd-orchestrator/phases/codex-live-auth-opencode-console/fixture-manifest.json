@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "description": "Public declarative seed inputs for future isolated boundary verification. No account credentials are embedded.",
+  "seeds": {
+    "accounts": {
+      "owners": [
+        "owner-a",
+        "owner-b"
+      ],
+      "roles": [
+        "chat",
+        "admin"
+      ],
+      "workspaces": [
+        "sandbox-a",
+        "sandbox-b"
+      ],
+      "marker": "kbd-console-marker"
+    },
+    "configDocuments": {
+      "openCode": "{\n  // keep operator comment\n  \"providers\": {\"operator-provider\": {}},\n  \"plugins\": []\n}\n",
+      "codexToml": "# keep operator comment\n[mcp_servers.existing]\ncommand = \"existing-fixture\"\n",
+      "unparseable": "{\"preserve-me\": ",
+      "foreignEntry": "operator-owned-entry"
+    },
+    "surface": {
+      "thread": "thread-a",
+      "otherThread": "thread-b",
+      "surfaceId": "settings-example",
+      "componentId": "example-choice",
+      "action": "choose",
+      "catalog": "urn:openai-proxy:test:local-catalog",
+      "sentinel": "surface-from-owner-a"
+    },
+    "features": {
+      "documentId": "owner-b-document",
+      "documentMarker": "kbd-owner-b-only",
+      "hookMarker": "kbd-synthetic-hook",
+      "skillMarker": "kbd-skill-selection"
+    },
+    "nativePaths": [
+      "positive-workspace",
+      "other-owner-workspace",
+      "empty-cwd",
+      "profiles",
+      "packaged-service",
+      "recordings"
+    ],
+    "mutations": [
+      "atomic file replacement",
+      "malformed partial write",
+      "delayed refresh after account change",
+      "stale preview digest",
+      "duplicate surface snapshot",
+      "foreign action or native permission reply"
+    ]
+  }
+}
