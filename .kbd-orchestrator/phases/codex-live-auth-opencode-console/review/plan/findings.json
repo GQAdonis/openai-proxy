@@ -1,0 +1,41 @@
+{
+  "mode": "artifact",
+  "judge_model": "gpt-6.2-astra",
+  "producer_model": "gpt-6",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "unverified-producer-unknown",
+  "verdict": "PASS",
+  "findings": [
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/plan.md",
+      "line": 122,
+      "claim": "D1.2 listed packaged workers as an input without a preceding deliverable.",
+      "evidence": "D1.1 delivered the V2 plugin while D1.2 delivered both native drivers.",
+      "suggested_fix": "Assign worker module, entry point, package, lockfile and image handoffs to existing tasks."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/plan.md",
+      "line": 150,
+      "claim": "AUTH-3 could miss a stale helper rewriting the underlying credential store.",
+      "evidence": "The recipient and A-bound resume rejection can use cached memory.",
+      "suggested_fix": "After the old helper settles, independently reopen the fixture store and verify only B or signed-out."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/plan.md",
+      "line": 164,
+      "claim": "Build controls could mutate the frozen candidate.",
+      "evidence": "UI-1 requests incremental and failed builds although later scenarios require original artifact hashes.",
+      "suggested_fix": "Use separate copies and target directories for both build controls and verify original digests."
+    }
+  ],
+  "checked_classes": [
+    "All 18 production tasks precede independent runner authoring and freeze. Four UI verification rows use the same runner.",
+    "Release sources distinguish the stable 1.0 wire and adapter from package versions. OpenCode 2.3.0 certification does not generalize automatically.",
+    "Scope signature and boundary, account, host and release authority are distinct.",
+    "Thirteen positive commands and 13 negative controls share the original evidence budget and cleanup.",
+    "Acyclic role and task graph, with the SDK packaging handoff warning."
+  ]
+}

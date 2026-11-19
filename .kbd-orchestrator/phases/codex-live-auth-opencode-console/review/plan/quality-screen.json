@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "score": 0.0,
+  "network_access": false,
+  "strictness": "strict",
+  "reject_cap": 2,
+  "cap_overridden": false,
+  "cap_default": 2,
+  "reviewed_plan_sha256": "357d8846c8f1bad6afc6f2577e9379551bf57f83ab2d3c901d4ba6080bdfdd8c",
+  "plan_after_warning_fixes_sha256": "e46b2dee50f0b84d4f5adc90d332c4d9d17fe42f1d6f4eba9d545b99b520df0f",
+  "packet_field_bytes": {
+    "packet_version": 1,
+    "mode": 8,
+    "phase": 32,
+    "target": 4,
+    "producer_model": 5,
+    "constraints": 773,
+    "file_tree": 3311,
+    "artifact": 47780,
+    "goals": 6229,
+    "cited_paths": 247,
+    "prior_handoffs": 2685
+  },
+  "packet_any_truncated": false,
+  "review_route": "Fresh-context native Codex agent. Explicit second-round model selection, no independent serving-model attestation.",
+  "resolutions": [
+    "Runner and coverage files are authored after production and included in the frozen input revision before B4 execution.",
+    "D1.2 now owns server-worker packaging and names adapter, manifest, lockfile, launcher and release owners.",
+    "AUTH-3 now independently rereads the fixture store after the old helper settles.",
+    "UI-1 now isolates both derivative builds and rechecks original artifact digests."
+  ],
+  "handoff_plan_sha256": "0056a3be5bcf2989a60b70b8351831ecd856c0274a44bfcb716bc7f17af55ae7",
+  "post_review_update": "Recorded the verified signature, revision 2 binding and READY result in the plan header and dispatch instructions."
+}

@@ -1,0 +1,23 @@
+{
+  "stage": "plan",
+  "completedAt": "2026-11-19T23:44:21Z",
+  "outputs": [
+    "plan.md",
+    "adopted-contract.json",
+    "review/plan/findings.json",
+    "review/plan/quality-screen.json",
+    "amendments/opencode-v2-a2ui-1/amend-contract.json",
+    "amendments/opencode-v2-a2ui-1/amend-contract.json.sig"
+  ],
+  "nextStage": "execute",
+  "summaryForNext": "The signed compatibility amendment binds 13 acceptance scenarios across four changes and 23 registered tasks. Start with reconcile-codex-login/1.1. The plan records task owners, worker routes and the consolidated verification boundary, including the resolved review findings on SDK packaging, delayed refresh and isolated build controls.",
+  "skipped": false,
+  "skipReason": null,
+  "identity": {
+    "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
+    "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+    "phaseId": "codex-live-auth-opencode-console",
+    "planRevision": 1,
+    "contractDigest": "68d8aad4ac3a015e56d6606d8fc4d0dfb945eecf78b3df63802f21101b33dd28"
+  }
+}

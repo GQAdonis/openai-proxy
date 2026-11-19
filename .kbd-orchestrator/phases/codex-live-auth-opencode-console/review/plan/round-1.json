@@ -1,0 +1,33 @@
+{
+  "mode": "artifact",
+  "judge_model": "gpt-6",
+  "producer_model": "gpt-6",
+  "cross_model_check": "same-model-collision",
+  "isolation_mode": "harness-native",
+  "verdict": "BLOCK",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/plan.md",
+      "line": 164,
+      "claim": "The verification runner is integrated after the source revision and candidate are frozen.",
+      "evidence": "The execution paragraph put runner integration after freezing the candidate while the freshness rules invalidate evidence when source changes.",
+      "suggested_fix": "Integrate the independently authored runner after production completion and before freezing all inputs for B4."
+    },
+    {
+      "severity": "WARNING",
+      "file": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/review/plan/packet.json",
+      "line": 1,
+      "claim": "The artifact packet lacks explicit size accounting.",
+      "evidence": "The packet has no truncation field.",
+      "suggested_fix": "Compare packet artifact and source, and record field sizes and truncation status."
+    }
+  ],
+  "checked_classes": [
+    "OpenCode 2.x exclusivity and host refusal",
+    "A2UI 1.0 wire, adapter and access",
+    "Scoped ownership, highest-tier Pro and drivers",
+    "Sixteen settings, task coverage, scenario evidence",
+    "Freeze and execution authority"
+  ]
+}
