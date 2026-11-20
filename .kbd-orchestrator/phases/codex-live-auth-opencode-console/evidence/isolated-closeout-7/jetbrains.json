@@ -1,0 +1,208 @@
+{
+  "scenario": "ACP-1",
+  "subcase": "JetBrains AI Assistant",
+  "status": "PASS",
+  "observedAt": "2026-11-20T16:43:23+00:00",
+  "contract": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "imageConfig": "sha256:b0558c5097cfd633eb1f25f1e35dc80dfc853262dadd0fbf44a0e8d089223886",
+  "client": {
+    "ide": "IntelliJ IDEA 2026.2.3, build 262.10968.63",
+    "applicationOrigin": "https://download.jetbrains.com/idea/idea-2026.2.3-aarch64.dmg",
+    "distributionSha256": "aac3cdc6d8441b94052473fee37a9679242a36f49f60fdce6cceaa3e7ad46e33",
+    "plugin": "JetBrains AI Assistant 262.10968.238",
+    "pluginMarketplace": "https://plugins.jetbrains.com/plugin/22282-jetbrains-ai-assistant",
+    "pluginArchiveSha256": "f7f032c594f13c7df378919572fd88d90ecc5229d3e38b3661e5a60235268fc6",
+    "providerDocumentation": "https://www.jetbrains.com/help/ai-assistant/acp.html",
+    "loadedFromPrivatePluginDirectory": true,
+    "paidAccountsUsed": 0,
+    "userAccountsSignedIn": 0
+  },
+  "desktop": {
+    "project": "private ephemeral workspace",
+    "uiPath": [
+      "Trust this scratch project",
+      "AI Chat",
+      "Continue to Chat",
+      "New Chat / select openai-proxy",
+      "submit success prompt",
+      "submit error prompt"
+    ],
+    "registration": "$HOME/.jetbrains/acp.json, agent_servers.openai-proxy.command=<scratch stdio launcher>, args=[\"serve\",\"--acp-stdio\"]",
+    "registrationSource": "Fixture supplied the production registration shape to the actual IDE; the matching setup export is covered separately.",
+    "observedMode": "openai-proxy, checked",
+    "observedSuccess": "kbd-editor-chunk",
+    "observedFailure": "Internal error: upstream prompt failed",
+    "oracles": [
+      "actual AI Chat accessibility text",
+      "OCR of that IDE window",
+      "independent protocol relay",
+      "separate recipient markers"
+    ],
+    "images": {
+      "ok.jpg": "d53a01d43d49e02d98723d72268ac7018b207b75c556b8cc4d75485e07b3f925",
+      "fail.jpg": "0fc4d6f9df743b702f8c2f47f682ac190063e64d8793f91351d15eb1ed923dae"
+    }
+  },
+  "service": {
+    "argv": [
+      "/usr/local/bin/openai-proxy",
+      "serve",
+      "--acp-stdio"
+    ],
+    "recipient": "isolated loopback /v1/responses",
+    "testModes": [
+      "success SSE",
+      "HTTP 403"
+    ],
+    "deliveryReceipt": {
+      "success": true,
+      "denial": true
+    },
+    "launchBoundary": "IDE launches the host stdio relay, which uses docker exec to run the unchanged proxy in the candidate container. The scratch project is mounted read-only at the same absolute path. The relay copies original JSON lines unchanged.",
+    "observedEditorLauncherExit": "143 after IDE termination request following session use. This is the editor-side process status. Independent docker top observed candidate argv. The protocol error is the response to the refused turn.",
+    "protocol": [
+      {
+        "proc": "893283ee",
+        "argv": [
+          "/usr/local/bin/openai-proxy",
+          "serve",
+          "--acp-stdio"
+        ]
+      },
+      {
+        "proc": "893283ee",
+        "dir": "in",
+        "id": 1,
+        "method": "initialize",
+        "session": null,
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "out",
+        "id": 1,
+        "method": null,
+        "session": null,
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "in",
+        "id": 2,
+        "method": "session/new",
+        "session": null,
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "out",
+        "id": 2,
+        "method": null,
+        "session": "d9f7c5638104",
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "in",
+        "id": 3,
+        "method": "session/prompt",
+        "session": "d9f7c5638104",
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": true,
+        "promptFail": false,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "out",
+        "id": null,
+        "method": "session/update",
+        "session": "d9f7c5638104",
+        "error": false,
+        "expectedChunk": true,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "out",
+        "id": 3,
+        "method": null,
+        "session": null,
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": "end_turn"
+      },
+      {
+        "proc": "893283ee",
+        "dir": "in",
+        "id": 4,
+        "method": "session/prompt",
+        "session": "d9f7c5638104",
+        "error": false,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": true,
+        "stopReason": null
+      },
+      {
+        "proc": "893283ee",
+        "dir": "out",
+        "id": 4,
+        "method": null,
+        "session": null,
+        "error": true,
+        "expectedChunk": false,
+        "promptOK": false,
+        "promptFail": false,
+        "stopReason": null
+      }
+    ]
+  },
+  "reproduction": {
+    "sourceFiles": {
+      "agent-helper.py": "453384a4d8c187097d312f43eea2ec653f37edd3a569cb3d3c043cfcf414c254",
+      "fake.js": "82c56c294b18e61be8b0b61310f533c2fcac606110b515500d23abda4868a358"
+    },
+    "environment": {
+      "CODEX_HOME": "private synthetic file in container",
+      "CODEX_WIRE_API": "responses",
+      "CODEX_BACKEND_URL": "http://127.0.0.1:8988/v1/responses",
+      "PROXY_BACKEND_CREDENTIAL_CLASS": "api_key",
+      "network": "Candidate Docker --network none, unprivileged, private loopback only; IDE public registry lookup failed, local ACP registration continued."
+    },
+    "procedure": "Launch the matching IDE with dedicated user.home, plugin, config, system and log roots. Install AI Assistant in the private plugin path. Register the relay in the private ACP file. Apply trust only to the project. In AI Chat select Continue to Chat and the local agent explicitly. Use a synthetic Responses peer returning response.output_text.delta on success and 403 on failure."
+  },
+  "diagnostics": [
+    "Android Studio AI-262.10968.63.2622.16840690 could not load the AI plugin because a Full Line module was unavailable even with matched Marketplace and Full Line packages.",
+    "IntelliJ registered the local agent. A generic chat previously displayed No compatible model. Selecting the actual ACP agent opened session/new.",
+    "The Linux child requires the editor workspace to exist at the same path. The ACP adapter requires a Responses route. The final run provided both."
+  ],
+  "cleanup": {
+    "disposableProfilesRemoved": true,
+    "verifiedReadOnlyVolumeDetached": true,
+    "candidateVerificationContainerRemoved": true,
+    "publicMetadataProxyStopped": true,
+    "machineInstalls": 0
+  }
+}

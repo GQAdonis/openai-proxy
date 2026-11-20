@@ -1,228 +1,379 @@
 {
   "phase": "codex-live-auth-opencode-console",
-  "boundary": "B5",
-  "affectedScenarios": [
-    "PLUGIN-1",
-    "UI-1",
-    "SURFACE-1",
-    "ADMIN-1",
-    "FEATURE-1"
-  ],
   "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
   "runId": "codex-live-auth-opencode-console-20261119T193635Z",
-  "planRevision": 1,
-  "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8",
+  "contractDigest": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
   "candidateDigest": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "sourceCommit": "885a17ac07712ffefada88c6f37fa770ac4b1eb7",
+  "planRevision": 1,
+  "boundary": "B5",
+  "verifiedAt": "2026-11-20T16:44:36.886222+00:00",
   "scenarios": [
     {
       "id": "AUTH-1",
-      "status": "BLOCKED",
-      "attempted": "scenario AUTH-1, negative AUTH-1",
-      "observed": [
-        "BLOCKED",
-        "PASS"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "99620b0c1ddc78ca44e34f2ae4da695fb810aa401d56a5ed3510eda066d32b1f",
+      "attempted": "scenario AUTH-1, negative AUTH-1 and scoped closeout probes",
+      "observed": "The live file login and two native keyring replacements reached the running service. Linux broker replacements reached the authenticated recipient in 542 and 444 ms. Fresh setup matched all eight models and limits.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-AUTH-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-AUTH-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-151920-live-pro/receipt.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/identity.json"
+      ]
     },
     {
       "id": "AUTH-2",
-      "status": "BLOCKED",
-      "attempted": "scenario AUTH-2, negative AUTH-2",
-      "observed": [
-        "BLOCKED",
-        "PASS"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "d0bb277b6bb9ab1b565836dbc497ff41e19361b3b0861930c96cf5443e5f0d3e",
+      "attempted": "scenario AUTH-2, negative AUTH-2 and scoped closeout probes",
+      "observed": "Managed renewal advanced the live generation to 2. The isolated embedding recipient counted zero requests with only the chat credential and one with the explicitly configured embedding credential.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-AUTH-2.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-AUTH-2.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-151920-live-pro/receipt.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory-production-source.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory-build.json"
+      ]
     },
     {
       "id": "AUTH-3",
       "status": "PASS",
+      "scenarioDigest": "2b21b55ef395c4bc02fbdf107e3bdc668378fd4ff20a3bf0e7a47576db49ce5f",
       "attempted": "scenario AUTH-3, negative AUTH-3",
-      "observed": [
-        "PASS",
-        "PASS"
+      "observed": "Previously passing positive scenario and negative control on unchanged inputs.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-AUTH-3.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-AUTH-3.json"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
+      "carriedFrom": {
+        "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8"
       }
     },
     {
       "id": "PLUGIN-1",
-      "status": "BLOCKED",
-      "attempted": "scenario PLUGIN-1, negative PLUGIN-1",
-      "observed": [
-        "BLOCKED",
-        "PASS"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "9943675270aca3a9c2c4d0770e47d0a1a192967c17b4aa9d2dff67633097d59d",
+      "attempted": "scenario PLUGIN-1, negative PLUGIN-1 and scoped closeout probes",
+      "observed": "Native OpenCode 2.3.0 completed the one genuine turn with matching Codex session, provider-originated promax entitlement and five output tokens. Per-turn monetary debit was unavailable.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-PLUGIN-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-PLUGIN-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-151920-live-pro/receipt.json"
+      ]
     },
     {
       "id": "CHAT-1",
-      "status": "BLOCKED",
-      "attempted": "scenario CHAT-1, negative CHAT-1",
-      "observed": [
-        "BLOCKED",
-        "PASS"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "ec474a7cb584b135eb40f5cbeec2fbd66be46f2ff6df2e36c5284d97873c190a",
+      "attempted": "scenario CHAT-1, negative CHAT-1 and scoped closeout probes",
+      "observed": "Both REST drivers preserved native identity over restart, replayed events, and interrupted the active recipient socket. The genuine Codex binary ran in the isolated verification container.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-CHAT-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-CHAT-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/chat-tool.json"
+      ]
     },
     {
       "id": "TOOL-1",
-      "status": "BLOCKED",
-      "attempted": "scenario TOOL-1, negative TOOL-1",
-      "observed": [
-        "BLOCKED",
-        "BLOCKED"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "86536201c07016b7d85297e706071e736ba4e168c045e8086f35654a0261614e",
+      "attempted": "scenario TOOL-1, negative TOOL-1 and scoped closeout probes",
+      "observed": "An independently observed allowed read opened the Linux canary once. Denial and replay added zero opens.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-TOOL-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-TOOL-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/chat-tool.json"
+      ]
     },
     {
       "id": "UI-1",
       "status": "PASS",
+      "scenarioDigest": "45fb33d9b997d1e716e70dbbd16e396c8e80b63f5fd5ff768b615866e86f90d3",
       "attempted": "scenario UI-1, negative UI-1",
-      "observed": [
-        "PASS",
-        "PASS"
+      "observed": "Previously passing positive scenario and negative control on unchanged inputs.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-UI-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-UI-1.json"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
+      "carriedFrom": {
+        "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8"
       }
     },
     {
       "id": "SURFACE-1",
       "status": "PASS",
+      "scenarioDigest": "2eb57992d914cac948fd7d57ab788eb411407c0ee67717a0d61efc4cdfce7817",
       "attempted": "scenario SURFACE-1, negative SURFACE-1",
-      "observed": [
-        "PASS",
-        "PASS"
+      "observed": "Previously passing positive scenario and negative control on unchanged inputs.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-SURFACE-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-SURFACE-1.json"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
+      "carriedFrom": {
+        "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8"
       }
     },
     {
       "id": "ADMIN-1",
       "status": "PASS",
+      "scenarioDigest": "3806c61c78dea720aad8531f384cadea7464e30955e5735e21af1db301e6967c",
       "attempted": "scenario ADMIN-1, negative ADMIN-1",
-      "observed": [
-        "PASS",
-        "PASS"
+      "observed": "Previously passing positive scenario and negative control on unchanged inputs.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-ADMIN-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-ADMIN-1.json"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
+      "carriedFrom": {
+        "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8"
       }
     },
     {
       "id": "SETUP-1",
       "status": "PASS",
+      "scenarioDigest": "6243b05f66bb906bc446f605068f1715cff539438a301509a781ac837d3c340f",
       "attempted": "scenario SETUP-1, negative SETUP-1",
-      "observed": [
-        "PASS",
-        "PASS"
+      "observed": "Previously passing positive scenario and negative control on unchanged inputs.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-SETUP-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-SETUP-1.json"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
+      "carriedFrom": {
+        "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8"
       }
     },
     {
       "id": "ACP-1",
-      "status": "BLOCKED",
-      "attempted": "scenario ACP-1, negative ACP-1",
-      "observed": [
-        "BLOCKED",
-        "PASS"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "ec428ec5ba993af6767705b72902b3c84b701d677898b1f2cf19fe0a6e14e59b",
+      "attempted": "scenario ACP-1, negative ACP-1 and scoped closeout probes",
+      "observed": "The actual Zed and IntelliJ AI Assistant clients issued correlated ACP prompts. Both displayed streamed text and a terminal error with the failing fixture.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-ACP-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-ACP-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/editors.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/jetbrains.json"
+      ]
     },
     {
       "id": "MCP-1",
-      "status": "BLOCKED",
-      "attempted": "scenario MCP-1, negative MCP-1",
-      "observed": [
-        "BLOCKED",
-        "PASS"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "478a0be0cc0566fc93067a670d344ad78c3828b5a1a762d6e91839edadf322a9",
+      "attempted": "scenario MCP-1, negative MCP-1 and scoped closeout probes",
+      "observed": "Zed discovered four tools and completed set_model over stdio. VS Code observed the four tools and completed its correlated HTTP tool call.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-MCP-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-MCP-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/editors.json"
+      ]
     },
     {
       "id": "FEATURE-1",
-      "status": "BLOCKED",
-      "attempted": "scenario FEATURE-1, negative FEATURE-1",
-      "observed": [
-        "BLOCKED",
-        "BLOCKED"
-      ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6",
-      "executedBy": {
-        "harness": "Bash/Python KBD boundary runner",
-        "model": "none (scripted observations)",
-        "python": "3.11.3"
-      }
+      "status": "PASS",
+      "scenarioDigest": "c7df583ffff6fb85a87548ecfdd5ce9b7f4d8b24cc6fb7cf800d068bbede3090",
+      "attempted": "scenario FEATURE-1, negative FEATURE-1 and scoped closeout probes",
+      "observed": "Two authenticated model calls each carried only their owner\u2019s stored marker despite the spoofed scope. An unauthorized request returned 401 and no shared embedding calls reached the recipient.",
+      "evidence": [
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-FEATURE-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-FEATURE-1.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory-production-source.json",
+        ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory-build.json"
+      ]
     }
   ],
+  "previousResultsSha256": "678a16419d839be879bd3e424784026f23ddb5bab8a6c1b4f37e35a9c04d01db",
+  "sourceDigests": {
+    ".agents/skills/proxy-team/SKILL.md": "772e63c52422dde15a3a28b1e58f40ef615184ab21209da5302ec54fa72cb6f0",
+    ".dockerignore": "c16160b6bba639b0b9ed07dab5b197c8bd588a7e5f588bb556a856e150c7441f",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/implementation-complete/proposed-contract.json": "8e248c7d8062206b18cda089d4795ab6625e856e80a339106ea708e9ccd5619b",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/opencode-v2-a2ui-1/calibration-examples.md": "52106be130a0802fc3a78e6f27e6fa3b5fb3e8d7e5f34964eff3596b74b7e5f4",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json": "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/plan.md": "0056a3be5bcf2989a60b70b8351831ecd856c0274a44bfcb716bc7f17af55ae7",
+    "Cargo.lock": "b2406464cf7718dfe2d22d2ac3fb01008b2b3cd7861fa048c592114e56bbcd1a",
+    "Cargo.toml": "fca118edcb0e820a4c99a1f805f27b18982e6bb63911c7e032f325be1c55a80f",
+    "Dockerfile": "31a67bfcc9e548d8a61ba523790be1900c2c43e93656e976ab3658186a843209",
+    "README.md": "8173c07a8c5cea0da3d2209432b5f46c3b79241a448e66bf4b6c32fa03771beb",
+    "build.rs": "0c2581f2515e98ba65771d6a1feafa316825c444038d0b371285110b265a9fd1",
+    "docker-compose.yaml": "b9bc67933499c9810204cc1a206ef45bcda1a96a40891723dc4257ce2fa05885",
+    "docs/codex-auth.md": "a76b9cb2608a0dce2f84bc2d880710a9f613d3f307ce2851142bd64714b6218c",
+    "docs/console.md": "50c496a3af22d0350be7587b51f0db714733faa61a9006ab2218cd355a29877b",
+    "docs/opencode-setup.md": "40bc5576478e334830470c838403dd50ed7bad0c480bbda6592a03ddb85b18e8",
+    "frontend/.gitignore": "790e3169bc19b046fe55ba1da6d13b976c28363c8c00462a2195fe5faf260910",
+    "frontend/.node-version": "904636927bbfe077d1a82001e3c09a336737410831611fa294eeeb27babf2c81",
+    "frontend/README.md": "e1b44c6c66d8c5dd272e140513b28837c5024e3b0d08d4cd4a37b3f40841110c",
+    "frontend/components.json": "d751b43876aae069f38dc389ec21ff02bde38dbb7ceb508dfb8bc7e570428293",
+    "frontend/index.html": "607747acc7da8b4852dcc45d80df1547e1684cb2a0816e015c7a8b910b153e40",
+    "frontend/package-lock.json": "b4ec0205096a47f3dac71ccfa9e5a58b41f30e0568dc195b2c41d8da5d86a8ff",
+    "frontend/package.json": "8a2c72a7058e273d6424411fd079df413fc933166f547df287a9fee71f89af6b",
+    "frontend/public/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+    "frontend/schema-plugin.mjs": "fbae3deca8f222f4cf833275e862f51787407164d6ba76852f30dfc5cca82e4a",
+    "frontend/src/Chat.tsx": "98f0f1cc5df4fbc6f2021bad91b3f6257d0a8dbbace6dc4b1154004f1131a901",
+    "frontend/src/ConfigEditor.tsx": "8d6e6c83ee752336216c6dc058c71f670548b06cd7ac0b0a6143fe31ec9e4b99",
+    "frontend/src/Settings.tsx": "7982baa5a71ee3c152d7d28aaee116f408f78ce1627bc28c9a5fdb7608805c24",
+    "frontend/src/Surface.tsx": "c1d1fa7f7f5c6cf6c6a86868a6564b5601c71ce78b2960d52010ef27bc37465b",
+    "frontend/src/api.ts": "31b6375d3f724679a400c92c2c371570bd0b173c7005999ae7e63b3a3a70020e",
+    "frontend/src/components/ui/button.tsx": "9a4a086aafc480f409d2b38a75ce0e61b2697ce3d02248f5c2ca80ff88ad573f",
+    "frontend/src/main.tsx": "757774adcb2446ace5802e58a657a0db09f4124f7bf2e1984b4013d00734c425",
+    "frontend/src/projection.ts": "39efad2c6230c0a6c0a28a40410c38958a5296e51b950b2f0c479308b8758b18",
+    "frontend/src/schemas/LICENSE": "8c8b5b632d56c4c1658296963c693db5396772a33caaddb9a22593c4155c437a",
+    "frontend/src/schemas/README.md": "a453a5a6bbc8a3c20bae66d473833c79de6afc1abcf584d77bb40603a258f907",
+    "frontend/src/schemas/agent_to_renderer.json": "2f575f783fdda0e4d175fe5d331661655e4a4901613262322792dae7e823761d",
+    "frontend/src/schemas/catalog.json": "41aa26957f75ccd9fb9940519b2d7e5548cc9c962d968c35400fc7eefbf8ac79",
+    "frontend/src/schemas/common_types.json": "c4e78305be1de73eecb37f8179ba169730250611703683af291b18135a6430dc",
+    "frontend/src/schemas/renderer_to_agent.json": "58ecde02101f0f37566b5e238dc6ef6af628c3ff312fce0e17ab7670b7215465",
+    "frontend/src/styles.css": "4af8923e21485be3b6110b7f6c65a76181cb222b7d22d6620443805f3867ccbe",
+    "frontend/src/validators.d.ts": "df6c7916cce07b075533ee41b498f8259ac31d378f7bb5857e1d9d53b7ffd10e",
+    "frontend/tsconfig.json": "ac35a58c31819d9e9062ee1ee88feac18e1bd304e4124e5ec3d5e3964f6218db",
+    "frontend/vite.config.ts": "eee367d2c8005fd1cb7b72b6035ee5875a9272fa49796cd099eb8179a814d239",
+    "opencode.json": "1b4ae2e1253be9d2bce17d214d8122f9e94ef93544e8de3fffcaa441142449b3",
+    "openspec/changes/administer-proxy-and-local-clients/specs/proxy-administration/spec.md": "f34cf15d5143a0ee2c8bfdf66dc51be8a1232ac513359918338c78cee9306f3f",
+    "openspec/changes/embed-chat-and-validated-surfaces/specs/embedded-chat-console/spec.md": "79c9eeed8b6ff8a78482c794e5b0db08d7d08daf6407e4cf3f59344c9af66ee4",
+    "openspec/changes/integrate-opencode-and-sdk-drivers/specs/sdk-chat-drivers/spec.md": "c26c3ef84c34618a1860989dbca0d910cfa416be9e61c3fb387526e61365b5d3",
+    "openspec/changes/reconcile-codex-login/specs/live-codex-identity/spec.md": "21e1dac9bdc9de51ea802784e4b7be630e84841a6c3af8ef3a5e941b9046f19d",
+    "plugin/.npmignore": "6bcb662b38345a867f91c88a9a3228d091f02cdedb2876a335e0bd2f423c3e44",
+    "plugin/LICENSE": "c80a50b8f2630936009ad9cd516ff1ac603a92f78386906afbac044452c5d2a7",
+    "plugin/bun.lock": "7965b4ca9d1678560d156e91ad865d8ce8787d3a764b581462fe9f59fa6ccfe5",
+    "plugin/package.json": "a7ebf0476ff3d5d2c5f685d2e65c9b9864c9306bfd494eba975873eca965f4c9",
+    "plugin/src/config.ts": "e9a71afe05d02395f57e2a886879a248cfd25ceb2e0fac28e93024326ead52f2",
+    "plugin/src/delegation.ts": "06cbd9278bff22354907b566a8418841c2b838ef732695735c7287d429af09f6",
+    "plugin/src/index.ts": "c653b20dd75a9e0797cacd08051a27609ecef48b33107147b8350d1d948bec52",
+    "plugin/src/login.mjs": "5ed460a71cdaa9ac328435fa59a5b1446d01e36683a9b82992e586096010347d",
+    "plugin/tsconfig.json": "03eae7b7635639ee06fdac26ddd83d3120ea2c4715a4571d58f1abadfb5043c0",
+    "scripts/verify-codex-console.sh": "9e462b4a30c83b619837edfd0315399e0ba5729445e3bf32956c8474d2a7bde9",
+    "src/a2a.rs": "e2bfbe92981f5bb5b3541498d7cc5c5319949bd0efb4abb251c96d1cc087c0c2",
+    "src/acp.rs": "241521cc7a63a76727fac541b287768a6e3f3ac7f5142bea7a7c9f623aded873",
+    "src/agui.rs": "8792522cd03d654deb8a5c401b255c7f9f53e899712f29ef407549f711079aef",
+    "src/auth/binding.rs": "8cae5fc61c82957cf30f1e6ff7740f0c414f63939986f1044eb64a5d6409c7df",
+    "src/auth/mod.rs": "31fb054c0cdd370d4503b3bd8b7b8cdfd322de3a5b2adce968a30d65e3ed1658",
+    "src/auth/owner.rs": "97c4852988b67c814a4ad84092d2ce671d34b1872098806d140b3f206784fcee",
+    "src/auth/store.rs": "3c92dacdfa2b0a91311b745c5be6358a8011ab5521d68caeef9fbc95a30c0619",
+    "src/cli/config.rs": "2151742f11913d42c63bf9f359c4051edb625922a1bb7fbc40b96e1813390d14",
+    "src/cli/mod.rs": "5518092f388d9ad1b53b5ab7c29f2fb90cf983e58c92004488bdcf037b08a40b",
+    "src/cli/setup.rs": "da82ae4006f37a6de44ea32f92ed2cdb3fa8c34b937e279bd88ef902c4c04b67",
+    "src/cli/setup/provision/editor.rs": "4729db946d50a7cc8bc9b4a047ca5082583bba8d81d9b99d16317801c66330df",
+    "src/cli/setup/provision/mod.rs": "271dee754e9728bc34e50eeabd0e268559d4bd50f69e4b955154e2bea7604f8f",
+    "src/cli/setup/provision/target.rs": "f632ced8e6e0572f3f8149f5d58cef1631f3341002b43f29f51cfea67eaebb57",
+    "src/cli/skills.rs": "d07b0a7fa4eafc3f41d5667be801716bed225a47996dc4eaa903a4be567caa82",
+    "src/codex.rs": "124af857b0539748a9cc84eb63a797efaf801c5e6ee896f3f0b6daf0b3e6f183",
+    "src/config.rs": "7509416ea981e5b427ade602be9f5e6190e82eb983f6a842573b7da5d4b6cce8",
+    "src/console/access.rs": "2a8915e01bf51118ed521f4c0acb4370e20cafcb2c7859043bd164c2c3d5ad45",
+    "src/console/admin.rs": "26a0cc44ee0b58b8ba5f301b5fe02ccac0ce228944e61921d6ff4e5e84e6afe2",
+    "src/console/admin/configure.rs": "890333aee3f0463c574927de96e329c4880b532e9116c8790cc4ea3facb4d88e",
+    "src/console/conversations.rs": "b84ea6d5158def616deac5c81e0846626a690b02f685c6417f83bad547e7e294",
+    "src/console/mod.rs": "e8397f4206d85d8b593b256b0fbdffd0b85532f2e55dc6f5f75cdfd458eeb869",
+    "src/console/projection.rs": "44adb670743e2044d0d3ed93589a74953e495c5cb0532cbd6240a90dda9686fc",
+    "src/console/surfaces.rs": "685286db628bcd571364eab400247e0d1635807eec91bf480790c9fa685b86bf",
+    "src/console/worker.rs": "a7462c2be751115c8a3078727f01cbc515621f7c2518727f853e0a6e2c2165fb",
+    "src/error.rs": "6cc30497066c8772072d25dfef88a10713c061b68ee33decc9a885e36df01dd0",
+    "src/hooks.rs": "a39e20deb2e4efc10ec8f6a2616cb40e2ce6f2d1d4656c83ebdf2c835488f7b1",
+    "src/lib.rs": "a424d9f20764f142422d7bdfe4489489547bca2777a0de3c34be4f162d3b6692",
+    "src/main.rs": "963f19006227ef03fa6d95c407a790ab545bdaa0e5441aaa941f27a1edb2f8ea",
+    "src/mcp.rs": "26a4e5e001649796a85b415eb888f6c327ffce2d42ad54d0ba7060c41e782adf",
+    "src/mcp_client.rs": "1a800da663babdcb267fdcbe08276aeba042127abefe6e2a53244224a6a2ca38",
+    "src/memory.rs": "81485016223c671407b36c8158807ea69490aaf42fa52118bd86897537886036",
+    "src/model_catalog.rs": "1637a5bc0ee88b9eeab58fdd566e671bdfb36bc4004df3be39b5a1bc47839cba",
+    "src/models.rs": "1fd4f68ecd8736a162e733bcd9f166eaa2fadd03999bbe48b238d7bcaac94e9f",
+    "src/openai.rs": "03ccdc77f3a1fa86fd4d39e5f2c980f1c576b087bcc9b5174baca89b38c99c8c",
+    "src/proxy.rs": "af952b68e03d622f5aa495f75e4acf21e28d767a6db4f1ebf45e699073a39230",
+    "src/skills.rs": "60c74f937632d6576fb4e26e4b409de037e59ddd6f4e2706171f9501743d79c5",
+    "src/web_assets.rs": "de07a86a7731522563019928fbef34f9e3d72b438844a2782cf4ec494e50acfe",
+    "tests/console_boundary/admin.py": "b204830c8f025ed10730aa2a5757dd628aad6847fb8b02019e9daa3f7d8f968b",
+    "tests/console_boundary/admin_clients.py": "f5de2faf33cd22aa5ce9d91ee60f9f0eea4faed58634750c9d74efc593127942",
+    "tests/console_boundary/admin_common.py": "ff940a469b94cd09e91c562bd11c495e15e0d3d0a59017db076908dbc78bafb2",
+    "tests/console_boundary/admin_features.py": "a946de99d7447f9232528f9e541a148bc08e4f325c11cd36856abcab1f505232",
+    "tests/console_boundary/admin_model_peer.py": "b35f67386fc5ec9fc7fc59276a058a53d2b40c0ef4b99829f2cfacdfed3f348e",
+    "tests/console_boundary/admin_rpc.py": "3f26762b3abd11a1440192dacbfe78847fbd392abffaed2eeedd3369296ede0f",
+    "tests/console_boundary/admin_setup.py": "3bb26f543d9baa22256c3336d3cd9e1a7ad67547691de2b665a777f497a7f011",
+    "tests/console_boundary/admin_vscode.cjs": "8583831208e35b521cb2213cdc9fe389c4550a58a88001b2c7944954dc15028f",
+    "tests/console_boundary/auth_file_observer.py": "90caae0db614f4aa017c935c00ddf32c3d2d421db161c65ada235fed575e9295",
+    "tests/console_boundary/auth_fixture.py": "6d9e4f902e8416d9124b97b08807b2ad107bbada7c9a881069293129f7913293",
+    "tests/console_boundary/auth_legacy_host.py": "b9687074e04883e312aba0ffd7ce7409a7cc7ffa64d6f041279cad3981b2ac7d",
+    "tests/console_boundary/auth_mount.py": "12ece7765cb786bb1ac0a02ed22e09f804c29ce071f380e32250a072860dbd1c",
+    "tests/console_boundary/auth_native.py": "a80fb44f94ae2bf0f4eb722e6a0d951563f69ac2dbcc2c72692afcb687ad5533",
+    "tests/console_boundary/auth_owner.py": "d49d5986a7340b26457265b6e17ca3e4ab077b0152058eda0cf5196f15db5672",
+    "tests/console_boundary/auth_plugin.py": "9697b7c652264e05403506dd9183037fbf1c80fed4b4518230faff947a54fe22",
+    "tests/console_boundary/auth_plugin_host.mjs": "5925c01bccb9295b35374d790a48986ffeb783782dea10eb194cebc326ecfa34",
+    "tests/console_boundary/auth_stdio.py": "e219a8dc58ee8d11acfe967cd43713c0313d2881c6649b5ab625bbce43759341",
+    "tests/console_boundary/auth_upstream.py": "f120396eece7ae275bf253a5a269e649b6fbc2cac7ca41862942686adb792236",
+    "tests/console_boundary/identity.py": "982ff3ebe848036a5e4b92d06e850eb42f40a52c889fb0ba062f8fa42340b6ed",
+    "tests/console_boundary/image_model_fixture.py": "10c871b651487d269c7c7bf00614e6638de6334a34a643a4720f6466a3510580",
+    "tests/console_boundary/interface.py": "fd7244befa79375ddb493135ea82ae64cdde5f1d5d926d070d3fe267d12a59eb",
+    "tests/console_boundary/recipient.py": "41e375dc80a1ba0dcc3c7cc791c8d19fcb371b6cfb38141aa635d6b5d42adf23",
+    "tests/console_boundary/runner.py": "25f93de4f5fdf0ffcadd8794864838463762c1ef41840ab9a89ffd6c1089efc0",
+    "tests/console_boundary/runtime.py": "37597f483b5106f4ddf88e305b5df394b457946271627c974150a618023cd27c",
+    "tests/console_boundary/ui_browser.py": "53013f6b537104b1ead243d4a5e2ee6bc51df1ce27c8ecb1372943b27d74486a",
+    "tests/console_boundary/ui_build.py": "1c0ce1704b2f2f46c399360caaf6089a13aec54fd0a65df8551f5471a704b5a3",
+    "tests/console_boundary/ui_upstream.py": "181cbaf67edd13ba2f8ee8e6c5a8e0e672a284ca52cce3a9f591f1c197318ad1",
+    "tests/integration.rs": "0c03e6f1871fd0a7de9c4e3261c84b7408fc2fdf174f2868aba34721b258cee3",
+    "workers/bun.lock": "023cf69105b57675db6475e53aa5c484c356c406fc702c933c0aaec8ef626d08",
+    "workers/codex-exec": "46b19302533ae44addfd9ecdb89ebb058024458eaa918080eea366d8dc5006a2",
+    "workers/codex.mjs": "68a955762675cdc222dc2fbb599d43b65e03d5acbfcb35401444b0b05dc00d09",
+    "workers/main.mjs": "fece5aa9428afe31cffbd382389818b99c2ddee51cba1605a7bfd3ddbe4d8200",
+    "workers/opencode.mjs": "1a4c34edb3b9162f745cef70b17bf97873a764d58ff019b0867e97a59421f964",
+    "workers/package.json": "414a8b1ac0580102df770a727d56d5d2c29e99bec1f1eddd446c3aa0eb7ccf1a",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/repairs/b5-6/boundary-results.json": "678a16419d839be879bd3e424784026f23ddb5bab8a6c1b4f37e35a9c04d01db",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/repairs/b5-6/verification-candidate.json": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-151920-live-pro/receipt.json": "81f7a4a3f478accf96b48716765bb24b16dcee17a6f30dfadef0a9652adfc296",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/jetbrains.json": "206f0d30371418de6003ab485a28ee701e47b75764f5984ffcb482101d14d708",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory-build.json": "1b934b6d3adb8dca42b30a40f3a42def07cdb6eeb9c5b77063307a16033bc2c5",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory-production-source.json": "a679ca599f93f46e21a575098af78a7391dabb96f7bd65a1b6071a6c5b3e7c7b",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/chat-tool.json": "83089e95623a29dadd805d1f537edd5a41b6c4f899835ac728b9b8ed43e92edb",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/identity.json": "b7133f657cd5c22d32db05bf08fe62b9edee671839cfb03ba0d03ace6263fccc",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/command-accounting.json": "2db9635bb377d5992c447618f2d88a741fcefd1c3c68c77151009ce32d65970f",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/memory_probe.py": "c9542ed0dce6509cc7950200f475b0c8d30fdf77a3602566de0ca3abf58ba409",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/editors.json": "11e09fd5e35fe4ba103bb16ce9d06d4a535bb64d782929ab2149e1d9ac9f1d2b",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/jetbrains/ok.jpg": "d53a01d43d49e02d98723d72268ac7018b207b75c556b8cc4d75485e07b3f925",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/jetbrains/fail.jpg": "0fc4d6f9df743b702f8c2f47f682ac190063e64d8793f91351d15eb1ed923dae",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/chat-tool-fixture/run.py": "834207074296094d12fee06e54c141f61ff9b89ac61a0a2edc312764de7ba433",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/chat-tool-fixture/real.py": "6058fc35b42c516fef3adad669a6c1914a92a1deeb50acb9bf9373da97f64ed6",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/chat-tool-fixture/config.toml": "7d25001ea60703d88642bf0bfdda67411339d5a63e43e4d4b7dd14440b2040e5",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/fixtures/keyring/Dockerfile": "8c877eec808b9a9720d6e3d6c023b8afa405abeaebf2639e2b21a21f1ab9637d",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7/fixtures/keyring/broker.py": "1a882c0dd3a9284d2447ec3952b1edaa9d6c915ba6b9ba45741f2b1ad50783c0",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-AUTH-1.json": "2f9522da43ccd187fbb3411d1201cccae0c860ecfbbcbd89085e75aaa2cfea0f",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-AUTH-1.json": "296e65b92746681469449b61a7a8434243830cfc925ce7bfb9912e484808f6e2",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-AUTH-2.json": "4a12e303137a7d3355bdb3d1a9218a2f336cf10306284cdc351837ab01681d6a",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-AUTH-2.json": "0b743b34f18c2d03c4599b77f672674a13d48675e698d53db26a8635c29bca1a",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-AUTH-3.json": "636a8c1868fac1baf9c0d59125b87bdfb47558447f6a580dbfb48467ceea9156",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-AUTH-3.json": "df810d1204966193a20ece9b082abb129afc0097f4b27504cf70e0d797830335",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-PLUGIN-1.json": "15613d66eab0e50777c41f445e45bb3a26aae4da10e441bd57d4a8284240b50b",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-PLUGIN-1.json": "014c3e7915cbdb86ad8ed5bed368460e2c2fdb9dd3a2a91c297eb66c7bef283e",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-CHAT-1.json": "991755a80b78b3cbbcfa51c5cd11a6acd38aba69f484a2c924c6259501668d8e",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-CHAT-1.json": "48e258b848e1c988db9b7a8fab60d67cb9e39e999402a696c751f5b0f4d71792",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-TOOL-1.json": "6a3ace1cda4909392ab72aa76f389c7abe1973cf0f8430b443586729828bbd0b",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-TOOL-1.json": "34b5edcafddf5e464862079264e89c50d089cd3065d94c2bd2ab492bfd070ebf",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-UI-1.json": "05daf0f3907a7a16c18f3851b8e73f935cf04119f1135bc6247fcb939d6fbbf7",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-UI-1.json": "37b8f6d2cb651c49ea7ab1b4e1d9bb513e1946fff2e817eac24384c6d7f31ee2",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-SURFACE-1.json": "c104895b85efa6e12dfb011d2573e2e3bfb098a4f2651c56f839c6b547a7eeae",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-SURFACE-1.json": "ffff3fad4186a5689396d38390b81bfb456ab09f6b432907c4c174f7df7abe45",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-ADMIN-1.json": "a54a0e4f25eb358f36681267d03b8c6fb5348ae3d5c4daca5bdfae5230d7da39",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-ADMIN-1.json": "54011746a0768bef4dbf11efe2a3cecde1fdca6bc6d3a417be56fdec443c3c05",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-SETUP-1.json": "793722c3ce82c0f3edeac1bcd1cef07ce0282efb795a781b661f940710332b4a",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-SETUP-1.json": "7aea0a07dbd0dc419650637fd4a108895c0670f1c4b4f22e82b5aa79b8c496d2",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-ACP-1.json": "f4d2c057dd54b8fcac36ab79950c28f3521699507184042bb97fff523ffd7e95",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-ACP-1.json": "7fb05523065d906fd4f01fa2125b6f096f3298b502788a9f1acb4e7fad0a48e0",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/scenario-MCP-1.json": "28503499bad2bf1a65c37b2ae0d0dfbd812a3578069cd9700592cfe2a35c9843",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-133440-37a73290/negative-MCP-1.json": "b87d9f937f9cd7571da50e65815c55daf302d29bb546144e398dcbb2e2a7c6fd",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/scenario-FEATURE-1.json": "5961faf672645b2c6a25d3aa21cb97e8c34e03cf492714fa96b649a9ae3008b5",
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6/negative-FEATURE-1.json": "8b3b4c70fdad5acadc657fbe514c38d3c0ed3534dce8dab890524dbd072bd3ef"
+  },
+  "verifiedSymlinks": {
+    "data/skills/proxy-team": "../../.agents/skills/proxy-team"
+  },
+  "cleanup": "PASS",
+  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/isolated-closeout-7",
   "budgetConsumption": {
-    "source": "clock and packet command/probe counter",
+    "source": "Previous fixture meter plus native desktop commandExecution records through the end of the isolated verification. Time is the earlier elapsed fixture time plus this packet rounded up. Attempt 8 confirms the corrected HTTP framing on the memory recipient.",
     "values": {
       "timeMinutes": {
-        "value": 142.57,
+        "value": 173,
         "class": "measured"
       },
       "toolCalls": {
-        "value": 698,
+        "value": 1047,
         "class": "measured"
       },
       "repairAttempts": {
-        "value": 6,
+        "value": 8,
         "class": "measured"
       },
       "noProgress": {
@@ -230,13 +381,5 @@
         "class": "measured"
       }
     }
-  },
-  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-141135-33c200e6",
-  "cleanup": "PASS",
-  "executedBy": {
-    "harness": "Bash/Python KBD boundary runner",
-    "model": "none (scripted observations)",
-    "python": "3.11.3"
-  },
-  "previousResultsSha256": "c502e223067e0e50c4d09781a9fb89b9940f486ec0401330f76cea1dfb9327d0"
+  }
 }

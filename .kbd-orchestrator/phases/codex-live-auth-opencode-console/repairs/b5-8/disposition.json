@@ -1,0 +1,15 @@
+{
+  "phaseId": "codex-live-auth-opencode-console",
+  "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+  "disposition": "CLOSED",
+  "phaseStatus": "complete",
+  "contractDigest": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "closureKey": "ebaba33fd8dd3fdd63f3e3f2c25e2eee413496b67f61339e6a8849174678f112",
+  "evidenceDigest": "48fe9afe0024264f9d7430e93c08a56f9be7a4d93ba60b801db05b9730566f90",
+  "budget": {
+    "noProgress": 0,
+    "repairAttempts": 8,
+    "timeMinutes": 173,
+    "toolCalls": 1047
+  }
+}

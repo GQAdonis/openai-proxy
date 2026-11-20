@@ -1,0 +1,86 @@
+{
+  "priorCount": 698,
+  "approvedCloseoutCommands": 349,
+  "source": "Codex desktop commandExecution items in all parent and delegated task turns at the end of verification, including interrupted work, setup, read-only status and staging handoff preparation. Earlier bounded genuine account activity was separately authorized. Closure bookkeeping follows this snapshot.",
+  "counts": [
+    {
+      "role": "/root/identity_closeout",
+      "turns": [
+        {
+          "id": "01a1f9c8-2fc5-7071-9777-9604aa6546f6",
+          "commands": 68
+        },
+        {
+          "id": "01a1f9c2-4c25-7e51-9db2-552e633fa67f",
+          "commands": 31
+        }
+      ]
+    },
+    {
+      "role": "/root/drivers_closeout",
+      "turns": [
+        {
+          "id": "01a1f9c9-77f6-7493-b887-5887d49bd79c",
+          "commands": 11
+        },
+        {
+          "id": "01a1f9c8-d7bf-7f60-bb0a-f31a5070596a",
+          "commands": 3
+        },
+        {
+          "id": "01a1f9c2-6ed2-7722-9c27-65adf10132c1",
+          "commands": 30
+        }
+      ]
+    },
+    {
+      "role": "/root/editors_closeout",
+      "turns": [
+        {
+          "id": "01a1f9c2-9ba2-7922-b974-cffcdfb05530",
+          "commands": 71
+        }
+      ]
+    },
+    {
+      "role": "/root/account_evidence",
+      "turns": [
+        {
+          "id": "01a1f9bf-2e3c-7393-bd8c-15c1f0868299",
+          "commands": 20
+        }
+      ]
+    },
+    {
+      "role": "/root/live_plugin",
+      "turns": [
+        {
+          "id": "01a1f9bf-46ca-7b00-b63b-1388fa1f954b",
+          "commands": 11
+        }
+      ]
+    },
+    {
+      "role": "/root/legacy_refusal",
+      "turns": [
+        {
+          "id": "01a1f9bf-629b-7291-9f2a-8ecb5a16989a",
+          "commands": 11
+        }
+      ]
+    },
+    {
+      "role": "/root",
+      "turns": [
+        {
+          "id": "01a1f9c1-d61d-73d1-8f4b-d56e33f32bd6",
+          "commands": 68
+        },
+        {
+          "id": "01a1f9bd-61de-73c3-b7f6-cac1903a78da",
+          "commands": 25
+        }
+      ]
+    }
+  ]
+}
