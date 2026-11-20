@@ -139,10 +139,10 @@ fn service_token(root: &Path) -> anyhow::Result<String> {
     let mut file = tempfile::NamedTempFile::new_in(root)?;
     writeln!(file, "{}", secret())?;
     file.as_file().sync_all()?;
-    if let Err(err) = file.persist_noclobber(&path) {
-        if err.error.kind() != std::io::ErrorKind::AlreadyExists {
-            return Err(err.error.into());
-        }
+    if let Err(err) = file.persist_noclobber(&path)
+        && err.error.kind() != std::io::ErrorKind::AlreadyExists
+    {
+        return Err(err.error.into());
     }
     let meta = fs::symlink_metadata(&path)?;
     anyhow::ensure!(meta.is_file() && meta.len() <= 514, "invalid pairing file");
@@ -250,13 +250,13 @@ impl Access {
                 !source.starts_with(&ws),
                 "choose PROXY_CONSOLE_WORKSPACE outside the selected credential store"
             );
-            if source.file_name().is_some_and(|name| name == "auth.json") {
-                if let Some(home) = source.parent() {
-                    anyhow::ensure!(
-                        !ws.starts_with(home),
-                        "choose PROXY_CONSOLE_WORKSPACE outside the credential home"
-                    );
-                }
+            if source.file_name().is_some_and(|name| name == "auth.json")
+                && let Some(home) = source.parent()
+            {
+                anyhow::ensure!(
+                    !ws.starts_with(home),
+                    "choose PROXY_CONSOLE_WORKSPACE outside the credential home"
+                );
             }
             let provider = std::env::var("PROXY_OPENCODE_PROVIDER")
                 .ok()
@@ -409,12 +409,11 @@ impl Access {
         Ok((self.actors[s.actor].1.clone(), Some(s.csrf.clone())))
     }
     pub fn refresh_pairing(&self) {
-        if let Some(state) = &self.pairing {
-            if let Ok(mut p) = state.lock() {
-                if p.expires <= Instant::now() {
-                    let _ = p.rotate();
-                }
-            }
+        if let Some(state) = &self.pairing
+            && let Ok(mut p) = state.lock()
+            && p.expires <= Instant::now()
+        {
+            let _ = p.rotate();
         }
     }
     pub fn logout(&self, h: &HeaderMap) -> Result<()> {

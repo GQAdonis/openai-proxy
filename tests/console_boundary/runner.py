@@ -85,6 +85,10 @@ class Harness:
         runtime.write(self.root/'private-state.json', self.state)
 
     @property
+    def browser_peer(self):
+        return read(FROZEN).get('browserPeer')
+
+    @property
     def image_pairing(self):
         if not self.state.get('container'):
             return None
@@ -249,7 +253,7 @@ def build(h):
     tag='kbd-console-'+h.state['label']
     h.state['tag']=tag
     h.save()
-    h.command('image-build',['docker','build','--target','sdk-runtime','--iidfile',str(h.root/'image.id'),
+    h.command('image-build',['docker','build','--force-rm','--target','sdk-runtime','--iidfile',str(h.root/'image.id'),
                               '-t',tag,'.'],engine,h.source)
     h.state['image']=(h.root/'image.id').read_text().strip()
     h.note('imageId',h.state['image'])

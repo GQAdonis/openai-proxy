@@ -61,18 +61,39 @@ def call_host(h, f, mode):
                BUN_INSTALL_CACHE_DIR=str(f.root / "bun-cache"))
     script = Path(__file__).with_name("auth_plugin_host.mjs")
     exe = h.env["PROXY_SDK_BUN"]
-    args = [exe, str(script), str(workers), str(project), mode, str(bundle)]
-    result = subprocess.run(args, env=env, cwd=project, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                            stderr=subprocess.DEVNULL, timeout=40, check=False)
-    assert result.returncode == 0, f"installed plugin/host oracle failed in {mode} (exit {result.returncode})"
+    expected_source = (project / spec).resolve()
+    args = [exe, str(script), str(workers), str(project), mode, str(bundle), str(expected_source)]
+    stages = {b"version-guard", b"host-import", b"host-create", b"activation-barrier", b"plugin-source",
+              b"plugin-activation", b"provider-lookup", b"initial-inventory", b"generation-change",
+              b"refreshed-inventory", b"host-close"}
+    categories = {b"version-guard", b"egress-policy", b"dependency", b"activation-timeout", b"provider-missing",
+                  b"model-mismatch", b"plugin-mismatch", b"provider-mismatch", b"host-error"}
+
+    def last_label(output, prefix, allowed, default):
+        return next((line[len(prefix):].decode() for line in reversed(output.splitlines())
+                     if line.startswith(prefix) and line[len(prefix):] in allowed), default)
+
+    try:
+        result = subprocess.run(args, env=env, cwd=project, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                stderr=subprocess.DEVNULL, timeout=40, check=False)
+    except subprocess.TimeoutExpired as exc:
+        stage = last_label(exc.stdout or b"", b"KBD_PLUGIN_STAGE ", stages, "startup")
+        raise TimeoutError(f"installed plugin {mode} timed out at {stage}") from None
+    if result.returncode:
+        stage = last_label(result.stdout, b"KBD_PLUGIN_STAGE ", stages, "startup")
+        reason = last_label(result.stdout, b"KBD_PLUGIN_FAILURE ", categories, "process-exit")
+        raise AssertionError(f"installed plugin {mode} failed at {stage} ({reason}, exit {result.returncode})")
     assert result.stdout.strip(), "no host observation"
     report = json.loads(result.stdout.strip().splitlines()[-1])
     if mode == "version-guard":
         assert report == {"controlledVersionsRejected": 4}
-    elif mode == "override":
-        assert report == {"preservedOverride": True}
     else:
-        assert report == {"hostVersion": "2.3.0", "provider": "codex", "changedModel": "gpt-5.4"}
+        expected = {"hostVersion": "2.3.0", "activePlugin": "openai-proxy.codex", "configuredSourceMatched": True}
+        if mode == "override":
+            expected["preservedOverride"] = True
+        else:
+            expected.update(provider="codex", changedModel="gpt-5.4")
+        assert report == expected, "unexpected host observation"
     return report
 
 

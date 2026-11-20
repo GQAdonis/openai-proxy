@@ -18,7 +18,7 @@ COPY plugin ./plugin
 COPY workers ./workers
 RUN cargo build --release --locked
 
-FROM oven/bun:1.3.10 AS sdk_deps
+FROM oven/bun:1.4.4 AS sdk_deps
 WORKDIR /opt/proxy/workers
 COPY workers/package.json workers/bun.lock ./
 RUN bun install --frozen-lockfile --production

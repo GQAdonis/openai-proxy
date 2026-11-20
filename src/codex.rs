@@ -174,25 +174,25 @@ pub fn convert_tools_to_responses_format(tools: &Value) -> Value {
     let converted: Vec<Value> = arr
         .iter()
         .map(|tool| {
-            if tool.get("type").and_then(Value::as_str) == Some("function") {
-                if let Some(func) = tool.get("function") {
-                    // Already in Responses API format if there's no nested "function" key.
-                    // Re-flatten: move name/description/parameters up.
-                    let mut out = serde_json::json!({ "type": "function" });
-                    if let Some(name) = func.get("name") {
-                        out["name"] = name.clone();
-                    }
-                    if let Some(desc) = func.get("description") {
-                        out["description"] = desc.clone();
-                    }
-                    if let Some(params) = func.get("parameters") {
-                        out["parameters"] = params.clone();
-                    }
-                    if let Some(strict) = func.get("strict") {
-                        out["strict"] = strict.clone();
-                    }
-                    return out;
+            if tool.get("type").and_then(Value::as_str) == Some("function")
+                && let Some(func) = tool.get("function")
+            {
+                // Already in Responses API format if there's no nested "function" key.
+                // Re-flatten: move name/description/parameters up.
+                let mut out = serde_json::json!({ "type": "function" });
+                if let Some(name) = func.get("name") {
+                    out["name"] = name.clone();
                 }
+                if let Some(desc) = func.get("description") {
+                    out["description"] = desc.clone();
+                }
+                if let Some(params) = func.get("parameters") {
+                    out["parameters"] = params.clone();
+                }
+                if let Some(strict) = func.get("strict") {
+                    out["strict"] = strict.clone();
+                }
+                return out;
             }
             tool.clone()
         })
@@ -204,14 +204,10 @@ pub fn convert_tools_to_responses_format(tools: &Value) -> Value {
 /// Chat Completions: "auto" | "none" | "required" | {"type":"function","function":{"name":"..."}}
 /// Responses API:    "auto" | "none" | "required" | {"type":"function","name":"..."}
 pub fn convert_tool_choice_to_responses_format(tool_choice: &Value) -> Value {
-    if let Some(obj) = tool_choice.as_object() {
-        if obj.get("type").and_then(Value::as_str) == Some("function") {
-            if let Some(func) = obj.get("function") {
-                if let Some(name) = func.get("name") {
-                    return serde_json::json!({ "type": "function", "name": name });
-                }
-            }
-        }
+    if tool_choice.get("type").and_then(Value::as_str) == Some("function")
+        && let Some(name) = tool_choice.pointer("/function/name")
+    {
+        return serde_json::json!({ "type": "function", "name": name });
     }
     tool_choice.clone()
 }

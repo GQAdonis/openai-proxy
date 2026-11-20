@@ -1,13 +1,14 @@
 """Browser journeys through the frozen release and its native, loopback-backed worker."""
 import contextlib
 from datetime import datetime
-from importlib.metadata import version
+import hashlib
+from importlib import metadata, util
 import json
 import os
 import sys
 from pathlib import Path
 import re
-import shutil
+import tempfile
 import time
 from uuid import uuid4
 
@@ -39,53 +40,130 @@ def tab_to(page, target):
     raise AssertionError("control unreachable in sequential keyboard navigation")
 
 
+def browser_tree_digest(root):
+    """Digest the source or executable bundle using the candidate freeze format."""
+    digest = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda p: p.relative_to(root).as_posix()):
+        relative = path.relative_to(root)
+        if "__pycache__" in relative.parts or path.suffix in (".pyc", ".pyo"):
+            continue
+        if path.is_symlink():
+            raise MissingPeer("frozen browser peer contains a symbolic link")
+        if path.is_file():
+            digest.update(relative.as_posix().encode() + b"\x00")
+            with path.open("rb") as source:
+                digest.update(hashlib.file_digest(source, "sha256").digest())
+            digest.update(b"\x00")
+    return digest.hexdigest()
+
+
+def load_peer_package(name, directory):
+    # Select only the two frozen pure-Python packages. Native dependencies keep
+    # using the packet interpreter's ABI and its normal import path.
+    init = directory / "__init__.py"
+    previous = sys.modules.get(name)
+    if previous is not None:
+        if Path(previous.__file__).resolve() != init:
+            raise MissingPeer(f"a different {name} package is already loaded")
+        return
+    spec = util.spec_from_file_location(name, init, submodule_search_locations=[str(directory)])
+    if spec is None or spec.loader is None:
+        raise MissingPeer(f"unable to load the frozen {name} package")
+    module = util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(name, None)
+        raise
+
+
+def browser_inputs(h):
+    peer = getattr(h, "browser_peer", None)
+    if not peer:
+        raise MissingPeer("the candidate has no frozen browser peer")
+    shell = Path(peer["executable"])
+    packages = {"playwrightPackage": Path(peer["playwrightPackage"]), "pyeePackage": Path(peer["pyeePackage"])}
+    if not shell.is_absolute() or not shell.is_file() or not os.access(shell, os.X_OK):
+        raise MissingPeer("frozen Chromium executable unavailable")
+    for key, path in {**packages, "browserBundle": shell.parent}.items():
+        if not path.is_absolute() or not path.is_dir() or browser_tree_digest(path) != peer["sha256"][key]:
+            raise MissingPeer(f"frozen {key} identity changed or is unavailable")
+    for name, field in (("pyee", "pyeePackage"), ("playwright", "playwrightPackage")):
+        directory = packages[field]
+        releases = [d.version for d in metadata.distributions(path=[str(directory.parent)])
+                    if d.metadata["Name"] == name]
+        if releases != [peer[name + "Version"]]:
+            raise MissingPeer(f"installed {name} release differs from its frozen version")
+    if metadata.version("greenlet") != peer["greenletVersion"]:
+        raise MissingPeer("interpreter greenlet release differs from the frozen browser peer")
+    driver = packages["playwrightPackage"] / "driver"
+    registry = json.loads((driver / "package/browsers.json").read_text())
+    expected = next((entry for entry in registry["browsers"] if entry["name"] == "chromium-headless-shell"), None)
+    if (expected is None or expected["revision"] != peer["revision"]
+            or expected["browserVersion"] != peer["browserVersion"]):
+        raise MissingPeer("Chromium release differs from the frozen Playwright driver's browser registry")
+    return peer, packages, shell
+
+
 @contextlib.contextmanager
-def playwright_driver(h, start):
-    # The Playwright Node helper also needs a credential-free process environment.
-    cache = Path.home() / ("Library/Caches" if sys.platform == "darwin" else ".cache") / "ms-playwright"
-    private = {k: h.env[k] for k in ("HOME", "PATH", "LANG", "TMPDIR", "XDG_CACHE_HOME",
-                                      "XDG_CONFIG_HOME", "XDG_DATA_HOME") if k in h.env}
-    private["PLAYWRIGHT_BROWSERS_PATH"] = os.environ.get("PLAYWRIGHT_BROWSERS_PATH", str(cache))
-    previous = dict(os.environ)
+def playwright_driver(h, packages, private):
+    # A private Python cache also prevents loading unpinned bytecode from the
+    # selected package directories. The Node helper inherits only the fixture env.
+    previous_cache = sys.pycache_prefix
+    previous_env = dict(os.environ)
+    sys.pycache_prefix = str(Path(private["HOME"]) / "python-cache")
     try:
-        os.environ.clear()
-        os.environ.update(private)
-        pw = start().start()
+        try:
+            os.environ.clear()
+            os.environ.update(private)
+            load_peer_package("pyee", packages["pyeePackage"])
+            load_peer_package("playwright", packages["playwrightPackage"])
+            from playwright.sync_api import Error, sync_playwright
+            pw = sync_playwright().start()
+        except (ImportError, OSError) as exc:
+            raise MissingPeer(f"frozen Playwright driver unavailable ({type(exc).__name__})") from exc
+        finally:
+            os.environ.clear()
+            os.environ.update(previous_env)
+        try:
+            yield pw, Error
+        finally:
+            pw.stop()
     finally:
-        os.environ.clear()
-        os.environ.update(previous)
-    try:
-        yield pw, private
-    finally:
-        pw.stop()
+        sys.pycache_prefix = previous_cache
 
 
 @contextlib.contextmanager
 def browser(h, base, actor, pairing_path=None):
-    try:
-        from playwright.sync_api import sync_playwright, Error
-    except ImportError as exc:
-        raise MissingPeer("Python Playwright driver unavailable") from exc
-    with playwright_driver(h, sync_playwright) as (pw, private):
-        try:
-            cached = Path(private["PLAYWRIGHT_BROWSERS_PATH"])
-            alternatives = [Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
-                            Path("/Applications/Chromium.app/Contents/MacOS/Chromium")]
-            system = shutil.which("chromium", path=private["PATH"]) or shutil.which("google-chrome", path=private["PATH"])
-            if system:
-                alternatives.append(Path(system))
-            executable = None
-            if not any(cached.glob("chromium_headless_shell-*")):
-                executable = next((str(p) for p in alternatives if p.is_file()), None)
-            chrome = pw.chromium.launch(env=private, executable_path=executable, headless=True,
-                                        args=["--disable-background-networking", "--disable-component-update"])
-        except Error as exc:
-            raise MissingPeer("installed Chromium unavailable to the isolated Playwright driver") from exc
-        try:
-            with logged_in(h, chrome, base, actor, pairing_path) as page:
-                yield page
-        finally:
-            chrome.close()
+    peer, packages, executable = browser_inputs(h)
+    with tempfile.TemporaryDirectory(prefix="ui-browser-", dir=h.root) as folder:
+        profile = Path(folder)
+        tmp = profile / "tmp"
+        tmp.mkdir(mode=0o700)
+        private = {"HOME": folder, "TMPDIR": str(tmp), "TMP": str(tmp), "TEMP": str(tmp),
+                   "PATH": h.env["PATH"], "LANG": "C", "XDG_CACHE_HOME": str(profile / "cache"),
+                   "XDG_CONFIG_HOME": str(profile / "config"), "XDG_DATA_HOME": str(profile / "data"),
+                   "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"}
+        with playwright_driver(h, packages, private) as (pw, launch_error):
+            try:
+                chrome = pw.chromium.launch(
+                    env=private, executable_path=str(executable), headless=True,
+                    args=["--disable-background-networking", "--disable-component-update", "--disable-sync",
+                          "--proxy-server=http://127.0.0.1:1", "--proxy-bypass-list=127.0.0.1;localhost;[::1]",
+                          "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
+                          "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"])
+            except launch_error as exc:
+                raise MissingPeer(f"frozen Chromium could not launch (revision {peer['revision']})") from exc
+            try:
+                if chrome.version != peer["browserVersion"]:
+                    raise MissingPeer("launched browser reported a different version from the frozen peer")
+                h.note("browser runtime " + actor, {"chromium": chrome.version, "revision": peer["revision"],
+                       "playwright": peer["playwrightVersion"], "digests": peer["sha256"]})
+                with logged_in(h, chrome, base, actor, pairing_path) as page:
+                    yield page
+            finally:
+                chrome.close()
 
 
 @contextlib.contextmanager
@@ -114,7 +192,6 @@ def logged_in(h, chrome, base, actor, pairing_path=None):
         access.fill(token)
         page.keyboard.press("Enter")
         page.get_by_role("heading", name="Conversation", exact=True).wait_for()
-        h.note("browser runtime " + actor, {"chromium": chrome.version, "playwright": version("playwright")})
         yield page
     finally:
         ctx.close()

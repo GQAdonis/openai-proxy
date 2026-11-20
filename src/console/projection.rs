@@ -258,8 +258,8 @@ pub(super) async fn completion(
                 }else if v["type"]=="terminal"{
                     if v["state"]=="completed"{yield evt(json!({"id":tid,"object":"chat.completion.chunk","model":model,"created":created,"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}));}
                     else{yield evt(json!({"error":{"code":subscription_error(&v).1,"message":"The subscription turn did not complete."}}));}
-                    if include_usage && v["state"]=="completed" {
-                        if let Some(counts)=usage.take(){yield evt(json!({"id":tid,"object":"chat.completion.chunk","model":model,"created":created,"choices":[],"usage":counts}));}
+                    if include_usage && v["state"] == "completed" && let Some(counts) = usage.take() {
+                        yield evt(json!({"id":tid,"object":"chat.completion.chunk","model":model,"created":created,"choices":[],"usage":counts}));
                     }
                     ended=true;break;
                 }

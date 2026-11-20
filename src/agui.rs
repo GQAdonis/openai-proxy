@@ -197,10 +197,7 @@ async fn build_agui_stream(
             };
             remainder.push_str(&String::from_utf8_lossy(&chunk));
             let mut events = Vec::new();
-            loop {
-                let Some(nl) = remainder.find('\n') else {
-                    break;
-                };
+            while let Some(nl) = remainder.find('\n') {
                 let line: String = remainder.drain(..=nl).collect();
                 let line = line.trim_end_matches(['\n', '\r']);
                 let Some(data) = line.strip_prefix("data: ") else {
@@ -212,16 +209,16 @@ async fn build_agui_stream(
                 let Ok(event) = serde_json::from_str::<ResponseStreamEvent>(data) else {
                     continue;
                 };
-                if let ResponseStreamEvent::ResponseOutputTextDelta { delta, .. } = event {
-                    if !delta.is_empty() {
-                        let ev = AguiEvent::TextMessageContent {
-                            message_id: message_id.clone(),
-                            delta,
-                        }
-                        .to_sse_event()
-                        .unwrap_or_else(|_| Event::default());
-                        events.push(Ok(ev));
+                if let ResponseStreamEvent::ResponseOutputTextDelta { delta, .. } = event
+                    && !delta.is_empty()
+                {
+                    let ev = AguiEvent::TextMessageContent {
+                        message_id: message_id.clone(),
+                        delta,
                     }
+                    .to_sse_event()
+                    .unwrap_or_else(|_| Event::default());
+                    events.push(Ok(ev));
                 }
             }
             std::future::ready(Some(events))

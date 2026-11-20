@@ -232,10 +232,7 @@ async fn handle_prompt(
         remainder.push_str(&String::from_utf8_lossy(&bytes));
 
         // Process all complete lines in the accumulated buffer.
-        loop {
-            let Some(nl) = remainder.find('\n') else {
-                break;
-            };
+        while let Some(nl) = remainder.find('\n') {
             let line: String = remainder.drain(..=nl).collect();
             let line = line.trim_end_matches(['\n', '\r']);
 

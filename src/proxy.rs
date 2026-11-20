@@ -208,18 +208,18 @@ async fn non_stream_responses(
                 }
             }
             codex::ResponseStreamEvent::ResponseOutputItemDone { output_index, item } => {
-                if item.item_type.as_deref() == Some("function_call") {
-                    if let Some(call) = pending_calls.get_mut(&output_index) {
-                        // Prefer the final authoritative fields from the done event.
-                        if let Some(cid) = item.call_id {
-                            call.call_id = cid;
-                        }
-                        if let Some(n) = item.name {
-                            call.name = n;
-                        }
-                        if let Some(args) = item.arguments {
-                            call.arguments = args;
-                        }
+                if item.item_type.as_deref() == Some("function_call")
+                    && let Some(call) = pending_calls.get_mut(&output_index)
+                {
+                    // Prefer the final authoritative fields from the done event.
+                    if let Some(cid) = item.call_id {
+                        call.call_id = cid;
+                    }
+                    if let Some(n) = item.name {
+                        call.name = n;
+                    }
+                    if let Some(args) = item.arguments {
+                        call.arguments = args;
                     }
                 }
             }
@@ -672,7 +672,7 @@ async fn stream_chat_completions(
     // tool_calls deltas are already in the correct format and do not need translation.
     let byte_stream = resp.bytes_stream();
     let stream = byte_stream.map(|r| {
-        r.map(|b| Event::default().data(String::from_utf8_lossy(&b).into_owned()))
+        r.map(|b| Event::default().data(String::from_utf8_lossy(&b)))
             .map_err(|e| std::io::Error::other(e.to_string()))
     });
 

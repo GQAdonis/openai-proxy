@@ -11,7 +11,7 @@ function failure(event) {
   let code = "native_failure"
   if (/\b429\b|usage.limit|quota|rate.limit/i.test(message)) code = "subscription_quota"
   else if (/\b401\b|token.*(?:expired|revoked)|unauthorized/i.test(message)) code = "sign_in_required"
-  else if (/\b403\b|not entitled|permission denied|forbidden/i.test(message)) code = "subscription_denied"
+  else if (/\b403\b|\binsufficient_entitlement\b|not entitled|permission denied|forbidden/i.test(message)) code = "subscription_denied"
   else if (/model.*(?:unavailable|not found|not supported)|model_not_found/i.test(message)) code = "model_unavailable"
   return { status: "failed", code }
 }

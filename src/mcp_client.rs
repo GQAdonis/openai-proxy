@@ -86,21 +86,17 @@ pub fn load_mcp_tools(config_path: &Path) -> Vec<McpToolSchema> {
         })
         .collect();
 
-    // Import tool names from claude_code sources (schema must be declared inline).
-    if let Some(sources) = cfg.sources {
-        if let Some(path_raw) = sources.claude_code {
-            let path = crate::config::expand_tilde(&path_raw);
-            if let Ok(raw) = std::fs::read_to_string(&path) {
-                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&raw) {
-                    if let Some(servers) = json.get("mcpServers").and_then(|v| v.as_object()) {
-                        for (name, _) in servers {
-                            // Only add if not already declared inline.
-                            if !tools.iter().any(|t| &t.function.name == name) {
-                                tracing::debug!(name = %name, "imported mcp server name from claude_code config (no schema)");
-                            }
-                        }
-                    }
-                }
+    // Configured server names alone do not provide callable tool schemas.
+    if let Some(path) = cfg.sources.and_then(|sources| sources.claude_code)
+        && let Ok(raw) = std::fs::read_to_string(crate::config::expand_tilde(&path))
+        && let Ok(json) = serde_json::from_str::<serde_json::Value>(&raw)
+        && let Some(servers) = json
+            .get("mcpServers")
+            .and_then(serde_json::Value::as_object)
+    {
+        for name in servers.keys() {
+            if !tools.iter().any(|tool| &tool.function.name == name) {
+                tracing::debug!(name = %name, "imported mcp server name from claude_code config (no schema)");
             }
         }
     }

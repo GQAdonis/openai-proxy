@@ -175,10 +175,10 @@ impl ProxyConfig {
         if let Some(h) = var("HOST") {
             self.server.host = h;
         }
-        if let Some(p) = var("PORT") {
-            if let Ok(n) = p.parse() {
-                self.server.port = n;
-            }
+        if let Some(p) = var("PORT")
+            && let Ok(n) = p.parse()
+        {
+            self.server.port = n;
         }
         if let Some(w) = var("CODEX_WIRE_API") {
             self.backend.wire_api = w;
@@ -191,10 +191,10 @@ impl ProxyConfig {
                 .collect();
             self.skills.dirs.extend(extra);
         }
-        if let Some(m) = var("PROXY_SKILLS_MAX") {
-            if let Ok(n) = m.parse() {
-                self.skills.max_injected = n;
-            }
+        if let Some(m) = var("PROXY_SKILLS_MAX")
+            && let Ok(n) = m.parse()
+        {
+            self.skills.max_injected = n;
         }
         if let Some(p) = var("PROXY_HOOKS_CONFIG") {
             self.hooks.config_path = Some(p);
@@ -253,10 +253,10 @@ pub fn setting_sources(path: Option<&Path>) -> std::collections::HashMap<String,
 
 /// Expand a leading `~` to the user's home directory.
 pub fn expand_tilde(path: &str) -> PathBuf {
-    if let Some(rest) = path.strip_prefix("~/") {
-        if let Some(home) = dirs::home_dir() {
-            return home.join(rest);
-        }
+    if let Some(rest) = path.strip_prefix("~/")
+        && let Some(home) = dirs::home_dir()
+    {
+        return home.join(rest);
     }
     PathBuf::from(path)
 }

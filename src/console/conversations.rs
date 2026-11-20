@@ -101,15 +101,15 @@ impl Registry {
                     && path.file_stem().and_then(|s| s.to_str()) == Some(&c.id),
                 "incorrect record identity"
             );
-            if let Some(id) = &c.active {
-                if let Some(t) = c.turns.get_mut(id).filter(|t| !terminal(&t.state)) {
-                    t.state = "indeterminate".into();
-                    t.permissions.clear();
-                    t.delegations.clear();
-                    t.append(json!({"type":"terminal","state":"indeterminate","code":"supervisor_restarted"}));
-                    access::atomic_json(&path, &c)
-                        .map_err(|_| anyhow::anyhow!("could not recover admitted turn"))?;
-                }
+            if let Some(id) = &c.active
+                && let Some(t) = c.turns.get_mut(id).filter(|t| !terminal(&t.state))
+            {
+                t.state = "indeterminate".into();
+                t.permissions.clear();
+                t.delegations.clear();
+                t.append(json!({"type":"terminal","state":"indeterminate","code":"supervisor_restarted"}));
+                access::atomic_json(&path, &c)
+                    .map_err(|_| anyhow::anyhow!("could not recover admitted turn"))?;
             }
             data.insert(c.id.clone(), c);
         }

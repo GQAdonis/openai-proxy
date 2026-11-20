@@ -459,10 +459,10 @@ fn create_parents(root: &Path, dir: &Path) -> Result<()> {
                 use std::os::unix::fs::DirBuilderExt;
                 builder.mode(0o700);
             }
-            if let Err(error) = builder.create(&path) {
-                if error.kind() != std::io::ErrorKind::AlreadyExists {
-                    return Err(error.into());
-                }
+            if let Err(error) = builder.create(&path)
+                && error.kind() != std::io::ErrorKind::AlreadyExists
+            {
+                return Err(error.into());
             }
         }
         safe_path(root, &path)?;

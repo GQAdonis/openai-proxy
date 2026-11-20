@@ -112,12 +112,12 @@ impl SkillIndex {
             for token in tokenize(&manifest.description) {
                 seen.insert(token);
             }
-            if let Some(triggers) = &manifest.triggers {
-                if let Some(kws) = &triggers.keywords {
-                    for kw in kws {
-                        for token in tokenize(kw) {
-                            seen.insert(token);
-                        }
+            if let Some(triggers) = &manifest.triggers
+                && let Some(kws) = &triggers.keywords
+            {
+                for kw in kws {
+                    for token in tokenize(kw) {
+                        seen.insert(token);
                     }
                 }
             }

@@ -54,10 +54,7 @@ pub fn skills_list(args: &SkillsListArgs, cfg_dirs: &[String]) {
         );
         return;
     }
-    println!(
-        "{:<30} {:<10} {:<12} {}",
-        "NAME", "VERSION", "DOMAIN", "KEYWORDS"
-    );
+    println!("{:<30} {:<10} {:<12} KEYWORDS", "NAME", "VERSION", "DOMAIN");
     println!("{}", "-".repeat(65));
     for s in &skills.manifests {
         let version = s.version.as_deref().unwrap_or("-");
@@ -77,7 +74,7 @@ pub fn skills_list(args: &SkillsListArgs, cfg_dirs: &[String]) {
 pub fn skills_validate(args: &SkillsValidateArgs) {
     let skill_mds = find_skill_mds(&args.dir);
     let total = skill_mds.len();
-    let skills = crate::skills::load_skills(&[args.dir.clone()]);
+    let skills = crate::skills::load_skills(std::slice::from_ref(&args.dir));
     let valid = skills.len();
     let invalid = total.saturating_sub(valid);
 
@@ -159,7 +156,7 @@ fn resolve_dirs(flag: Option<&str>, cfg_dirs: &[String]) -> Vec<PathBuf> {
     if let Some(raw) = flag {
         raw.split(':')
             .filter(|s| !s.is_empty())
-            .map(|d| expand_tilde(d))
+            .map(expand_tilde)
             .collect()
     } else {
         cfg_dirs.iter().map(|d| expand_tilde(d)).collect()
