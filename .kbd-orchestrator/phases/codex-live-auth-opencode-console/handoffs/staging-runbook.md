@@ -2,6 +2,12 @@
 
 Use this procedure after KBD accepts the SDK image and the owner authorizes staging deployment. The deployment host, Docker context, registry, Compose project, expected browser origin and rollback baseline must identify the actual staging environment. Fill in the deployment record from observed values and retain it with the release evidence.
 
+## Preserve the tested image
+
+On the build host, keep a local candidate tag pointing to the image ID recorded in the verification build receipt before fixture cleanup removes its temporary tag. Record its OS and architecture. The local image ID identifies the image configuration. The registry manifest has its own digest.
+
+After acceptance and authorization to publish to the designated staging registry, push the retained image. Resolve the registry manifest for the staging platform and verify its configuration digest equals the image ID in the build receipt. Use that manifest digest for the deployment. If staging needs another platform, that platform's image needs its own verification.
+
 ## Record before the change
 
 - Accepted source commit, KBD candidate digest and registry image reference in the form `registry/repository@sha256:…`

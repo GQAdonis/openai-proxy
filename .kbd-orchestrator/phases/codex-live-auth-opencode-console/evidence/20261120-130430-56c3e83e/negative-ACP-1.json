@@ -1,0 +1,104 @@
+{
+  "command": "negative ACP-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "ACP packaged stdio unsupported capability",
+      "status": "PASS",
+      "observed": {
+        "capability": "loadSession",
+        "errorCode": -32601
+      },
+      "seconds": 2.016
+    },
+    {
+      "name": "missing editor executable",
+      "status": "PASS",
+      "observed": {
+        "writes": 0
+      },
+      "seconds": 0.021
+    },
+    {
+      "name": "separate browser host ACP export",
+      "status": "PASS",
+      "observed": {
+        "writes": 0
+      },
+      "seconds": 0.004
+    }
+  ],
+  "notes": {
+    "isolated protocol child 27a761a76e05": {
+      "pid": 3026,
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--acp-stdio"
+      ]
+    },
+    "protocol reply d6388e1bd80a": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "ba56c9ac53283ca8d28396b03d0afa7af4838c2f0ab2cfbe97b720bd6603a899",
+      "error": false
+    },
+    "protocol reply 641f742406dd": {
+      "method": "session/new",
+      "id": 2,
+      "sha256": "a2be4e7647e43cb75114b08a3fd57cac2eaf96520778b5127098aa252dd6a48c",
+      "error": false
+    },
+    "protocol reply 50ce6540f6cc": {
+      "method": "session/load",
+      "id": 3,
+      "sha256": "92b567cab88969397691627919a6ed17627511db253920895803e1196062de81",
+      "error": true
+    },
+    "protocol child exit abced2f729a1": {
+      "pid": 3026,
+      "code": -15
+    },
+    "editor before absent executable 370f27dd9fb5": {
+      "exists": true,
+      "sha256": "601bca1186845d0505120d9a7afe987ce635ac44af57d1336247312f66fc61d6",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/bfcc3a4183f141f0a018373dc42b47bb.bin"
+    },
+    "client process 62b06598e77e": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "acp",
+        "--zed",
+        "--project"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "5e1d81e44349a1ba649f1de1666ea7851aae06c272ee7a96aa8e36b462b5dce9",
+        "output": "admin-originals/cdb60731aa7e4b049b73b2e3514ed9f2.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/83b610e2e1eb4c4491d20af6fea9b726.stderr",
+        "redacted": false
+      }
+    },
+    "editor after absent executable 10bf5567946f": {
+      "exists": true,
+      "sha256": "601bca1186845d0505120d9a7afe987ce635ac44af57d1336247312f66fc61d6",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/64367e264a41441aac6f9159b794e84b.bin"
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181210.6330829
+}

@@ -1,0 +1,369 @@
+{
+  "command": "negative ADMIN-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "chat admin inventory",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "rejectionMatched": true,
+        "stateUnchanged": true,
+        "configWrites": 0,
+        "generationChanges": 0,
+        "configAndDefaultsUnchanged": true,
+        "changedFiles": 0,
+        "responseAndLogRedacted": true,
+        "logBytesChecked": 0
+      },
+      "seconds": 0.01
+    },
+    {
+      "name": "chat admin defaults",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "rejectionMatched": true,
+        "stateUnchanged": true,
+        "configWrites": 0,
+        "generationChanges": 0,
+        "configAndDefaultsUnchanged": true,
+        "changedFiles": 0,
+        "responseAndLogRedacted": true,
+        "logBytesChecked": 0
+      },
+      "seconds": 0.007
+    },
+    {
+      "name": "invalid browser origin",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "rejectionMatched": true,
+        "stateUnchanged": true,
+        "configWrites": 0,
+        "generationChanges": 0,
+        "configAndDefaultsUnchanged": true,
+        "changedFiles": 0,
+        "responseAndLogRedacted": true,
+        "logBytesChecked": 0
+      },
+      "seconds": 0.006
+    },
+    {
+      "name": "untrusted role header",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "rejectionMatched": true,
+        "stateUnchanged": true,
+        "configWrites": 0,
+        "generationChanges": 0,
+        "configAndDefaultsUnchanged": true,
+        "changedFiles": 0,
+        "responseAndLogRedacted": true,
+        "logBytesChecked": 0
+      },
+      "seconds": 0.006
+    },
+    {
+      "name": "personal subject query",
+      "status": "PASS",
+      "observed": {
+        "http": 422,
+        "rejectionMatched": true,
+        "stateUnchanged": true,
+        "configWrites": 0,
+        "generationChanges": 0,
+        "configAndDefaultsUnchanged": true,
+        "changedFiles": 0,
+        "responseAndLogRedacted": true,
+        "logBytesChecked": 0
+      },
+      "seconds": 0.006
+    },
+    {
+      "name": "foreign refresh subject",
+      "status": "PASS",
+      "observed": {
+        "http": 422,
+        "rejectionMatched": true,
+        "stateUnchanged": true,
+        "configWrites": 0,
+        "generationChanges": 0,
+        "configAndDefaultsUnchanged": true,
+        "changedFiles": 0,
+        "responseAndLogRedacted": true,
+        "logBytesChecked": 0
+      },
+      "seconds": 0.006
+    }
+  ],
+  "notes": {
+    "chat admin inventory before config.toml 709f17aa64c9": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/2420cf5033ce4e438e04293982ece994.bin"
+    },
+    "chat admin inventory before defaults.json d97dc661fc8b": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/59536f72730a43f8bd62406e6e540e48.bin"
+    },
+    "chat admin inventory HTTP response": {
+      "status": 403,
+      "bytes": 52
+    },
+    "chat admin inventory after config.toml b0630b19dbb5": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/f0bba6f134d049f6bd4a3d7a9a721313.bin"
+    },
+    "chat admin inventory after defaults.json 05beecef7ab8": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/4c7ec75e9ba94ef081b8550623ab8d1e.bin"
+    },
+    "chat admin inventory rejection observations": {
+      "http": 403,
+      "rejectionMatched": true,
+      "stateUnchanged": true,
+      "configWrites": 0,
+      "generationChanges": 0,
+      "configAndDefaultsUnchanged": true,
+      "changedFiles": 0,
+      "responseAndLogRedacted": true,
+      "logBytesChecked": 0
+    },
+    "chat admin defaults before config.toml 3546d9f85bf6": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/a0210f99690a48288bc6daef53a452f4.bin"
+    },
+    "chat admin defaults before defaults.json d1c333d51a3c": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/10cce4da3fbf443abaf87c1cb9daaaa6.bin"
+    },
+    "chat admin defaults HTTP response": {
+      "status": 403,
+      "bytes": 52
+    },
+    "chat admin defaults after config.toml 12546b45cabb": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/8db04ef0e2d04afd9ee0cdba49bf5e41.bin"
+    },
+    "chat admin defaults after defaults.json 09449fe0be92": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/bc808ff334ab403099facca5ffb13b8e.bin"
+    },
+    "chat admin defaults rejection observations": {
+      "http": 403,
+      "rejectionMatched": true,
+      "stateUnchanged": true,
+      "configWrites": 0,
+      "generationChanges": 0,
+      "configAndDefaultsUnchanged": true,
+      "changedFiles": 0,
+      "responseAndLogRedacted": true,
+      "logBytesChecked": 0
+    },
+    "invalid browser origin before config.toml e8e64e3473b8": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/654e32b78b5f420899e2c4117e20784b.bin"
+    },
+    "invalid browser origin before defaults.json f765e6596730": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/f305fb97d4f04935a55d467fd6ef9b62.bin"
+    },
+    "invalid browser origin HTTP response": {
+      "status": 403,
+      "bytes": 52
+    },
+    "invalid browser origin after config.toml 58b0a2f3f0cc": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/dd410ef07a0e4299a01a7208ce6d91f0.bin"
+    },
+    "invalid browser origin after defaults.json 252ee9cb0ce4": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/b14150584cbd468cb639b683bb5c8ad9.bin"
+    },
+    "invalid browser origin rejection observations": {
+      "http": 403,
+      "rejectionMatched": true,
+      "stateUnchanged": true,
+      "configWrites": 0,
+      "generationChanges": 0,
+      "configAndDefaultsUnchanged": true,
+      "changedFiles": 0,
+      "responseAndLogRedacted": true,
+      "logBytesChecked": 0
+    },
+    "untrusted role header before config.toml 6db96a68d400": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/0ba873e00f3b4c608ab0b66bd02ff000.bin"
+    },
+    "untrusted role header before defaults.json 5581dd6c9366": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/d286278fe87a41a0859c39f0756e7178.bin"
+    },
+    "untrusted role header HTTP response": {
+      "status": 403,
+      "bytes": 52
+    },
+    "untrusted role header after config.toml 3aacc7e59c02": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/4776d258602e46c38f58d5256a04c1a2.bin"
+    },
+    "untrusted role header after defaults.json b73796254fc8": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/0760944d6c9647398d140d4449ccf100.bin"
+    },
+    "untrusted role header rejection observations": {
+      "http": 403,
+      "rejectionMatched": true,
+      "stateUnchanged": true,
+      "configWrites": 0,
+      "generationChanges": 0,
+      "configAndDefaultsUnchanged": true,
+      "changedFiles": 0,
+      "responseAndLogRedacted": true,
+      "logBytesChecked": 0
+    },
+    "personal subject query before config.toml 3ca6b64b857c": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/ad68ac3601fc4954907232b49c602a1d.bin"
+    },
+    "personal subject query before defaults.json 68a3c27fd8e1": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/48c3219e67a3471d96b5458826097014.bin"
+    },
+    "personal subject query HTTP response": {
+      "status": 422,
+      "bytes": 90
+    },
+    "personal subject query after config.toml a1dea0f9a1ab": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/abc80597b3cb4d5a95640d25afdfeae8.bin"
+    },
+    "personal subject query after defaults.json fe7b52eb820e": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/2c388541019f4b5abba1d12a631776c4.bin"
+    },
+    "personal subject query rejection observations": {
+      "http": 422,
+      "rejectionMatched": true,
+      "stateUnchanged": true,
+      "configWrites": 0,
+      "generationChanges": 0,
+      "configAndDefaultsUnchanged": true,
+      "changedFiles": 0,
+      "responseAndLogRedacted": true,
+      "logBytesChecked": 0
+    },
+    "foreign refresh subject before config.toml 58dca4bc8859": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/aa580d8101e741f0927ba6c7769556b6.bin"
+    },
+    "foreign refresh subject before defaults.json 9704929d7e96": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/1ffb0e1c34e142e983586d00dee924c7.bin"
+    },
+    "foreign refresh subject HTTP response": {
+      "status": 422,
+      "bytes": 90
+    },
+    "foreign refresh subject after config.toml cab5fd2e2db3": {
+      "exists": true,
+      "sha256": "b9d333a453c05cfb8c19618d1cb88a329fe19b70d4640b13c5b74ec70438a0c7",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/10c6c09387a84853974d8442490e95c9.bin"
+    },
+    "foreign refresh subject after defaults.json 703f6d3a786f": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/875fc911bb3b41fcb483e0e06e928382.bin"
+    },
+    "foreign refresh subject rejection observations": {
+      "http": 422,
+      "rejectionMatched": true,
+      "stateUnchanged": true,
+      "configWrites": 0,
+      "generationChanges": 0,
+      "configAndDefaultsUnchanged": true,
+      "changedFiles": 0,
+      "responseAndLogRedacted": true,
+      "logBytesChecked": 0
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181194.041589
+}

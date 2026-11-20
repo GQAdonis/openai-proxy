@@ -1,0 +1,83 @@
+{
+  "command": "negative MCP-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "unsupported protocol negotiation",
+      "status": "PASS",
+      "observed": {
+        "offered": "1900-01-01",
+        "negotiated": null,
+        "callsAfterMismatch": 0
+      },
+      "seconds": 0.003
+    },
+    {
+      "name": "protected HTTP rejects unauthenticated account discovery",
+      "status": "PASS",
+      "observed": {
+        "http": 401,
+        "disclosures": 0
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "unavailable shared HTTP listener",
+      "status": "PASS",
+      "observed": {
+        "verified": false
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "mixed OpenCode MCP file survives refused setup",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "project"
+      },
+      "seconds": 0.325
+    }
+  ],
+  "notes": {
+    "client process 4f01838c48d4": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/e38cff95cd92494b8765ea80692f7eb5.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/57f8a5ade1ac477885734b842c2516e6.stderr",
+        "redacted": false
+      }
+    },
+    "opencode version": "2.3.0",
+    "project invalid source 2b9913ef03f4": {
+      "exists": true,
+      "sha256": "ebe18a9307902dbb0a1e8ebb0ac8a6531351bdaedbb6b26c2454c2fb611f8345",
+      "bytes": 35,
+      "mode": 416,
+      "original": "admin-originals/9d566abddc6942ecbe88624257a3f2e1.bin"
+    },
+    "after refused setup 3a65054459c5": {
+      "exists": true,
+      "sha256": "ebe18a9307902dbb0a1e8ebb0ac8a6531351bdaedbb6b26c2454c2fb611f8345",
+      "bytes": 35,
+      "mode": 416,
+      "original": "admin-originals/bd559747284c46578638448a48cbdc73.bin"
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181216.788012
+}

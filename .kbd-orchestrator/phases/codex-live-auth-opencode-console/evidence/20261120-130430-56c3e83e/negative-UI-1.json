@@ -1,0 +1,137 @@
+{
+  "command": "negative UI-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "local asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.004
+    },
+    {
+      "name": "chat asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.002
+    },
+    {
+      "name": "final image asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.189
+    },
+    {
+      "name": "failed native stream preserves usable text",
+      "status": "FAIL",
+      "observed": "exercise authenticated browser journey: timeout"
+    },
+    {
+      "name": "chat user cannot write host settings",
+      "status": "PASS",
+      "observed": {
+        "status": 403,
+        "changed": false
+      },
+      "seconds": 0.002
+    },
+    {
+      "name": "controlled failed frontend build",
+      "status": "PASS",
+      "observed": {
+        "originalSource": "32f149e2bf2c34f29f2c61d241f27a924f0e77a34d115d26547ed77909641a17",
+        "derivativeSource": "e28553994560ad73e4681ccd3e8044c201379013e22938bd662f74b607e56b10",
+        "originalHtml": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "baselineBinary": "c26472f6c90f19278a1c989748949e325d943152f10b1ca8c0350d9a613243e4",
+        "resultBinary": "c26472f6c90f19278a1c989748949e325d943152f10b1ca8c0350d9a613243e4",
+        "resultHtml": null,
+        "resultExit": 101,
+        "log": "ui-derivative-failed-mutated.log"
+      },
+      "seconds": 163.704
+    }
+  ],
+  "notes": {
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser failure chat 20c82d717565": {
+      "stage": "exercise authenticated browser journey",
+      "category": "timeout",
+      "recentTransport": [
+        [
+          "index",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "session",
+          401
+        ],
+        [
+          "session",
+          200
+        ],
+        [
+          "connection",
+          200
+        ],
+        [
+          "conversation",
+          201
+        ],
+        [
+          "conversation",
+          202
+        ],
+        [
+          "conversation",
+          200
+        ],
+        [
+          "AG-UI",
+          200
+        ]
+      ]
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181140.225919
+}

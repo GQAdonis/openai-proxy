@@ -1,0 +1,9 @@
+{
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "buildReceiptSHA256": "abffe188184daac0ff85b4fde085ff463b7895448b05fc80107e86ca33af2e76",
+  "imageId": "sha256:844f7ea3edfc8f29e27885837ece25f7b4335ecb37a1ddb8ec46e6e0f3f9f7b7",
+  "localTag": "openai-proxy:kbd-03c7c31fb74b",
+  "platform": "linux/arm64",
+  "registryManifest": null,
+  "status": "local candidate retained"
+}

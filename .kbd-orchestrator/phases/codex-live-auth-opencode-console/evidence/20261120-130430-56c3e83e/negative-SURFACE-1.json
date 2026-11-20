@@ -1,0 +1,168 @@
+{
+  "command": "negative SURFACE-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "invalid surface text",
+      "status": "PASS",
+      "observed": {
+        "input": "text",
+        "oldTurn": "2f9d91c4-ba11-46e6-b86f-059841f5c9d2",
+        "recoveredTurn": "68bbc33c-bc4a-49c3-9423-d5d8ffa25c4d",
+        "effects": 0
+      },
+      "seconds": 5.023
+    },
+    {
+      "name": "invalid surface old",
+      "status": "PASS",
+      "observed": {
+        "input": "old",
+        "oldTurn": "7ad04019-9cfc-4aa6-b607-8c80f922d7e8",
+        "recoveredTurn": "b50df59d-0927-4acb-a66b-786dbafa5028",
+        "effects": 0
+      },
+      "seconds": 4.929
+    },
+    {
+      "name": "invalid surface wrong",
+      "status": "PASS",
+      "observed": {
+        "input": "wrong",
+        "oldTurn": "b485fbad-45fb-48d2-aecb-1e9443450c5c",
+        "recoveredTurn": "5f9a4d0f-a390-46ec-b48c-e34385587cd8",
+        "effects": 0
+      },
+      "seconds": 4.858
+    },
+    {
+      "name": "invalid surface catalog",
+      "status": "PASS",
+      "observed": {
+        "input": "catalog",
+        "oldTurn": "d407272b-4996-4608-a02a-0e73879309af",
+        "recoveredTurn": "c3498741-59dd-491d-adfe-ca377358c977",
+        "effects": 0
+      },
+      "seconds": 4.856
+    },
+    {
+      "name": "invalid surface reserved",
+      "status": "PASS",
+      "observed": {
+        "input": "reserved",
+        "oldTurn": "02d3d952-3759-4d8e-aa55-1ce21695f7e6",
+        "recoveredTurn": "afb309f7-17a5-4477-9aed-d8d19334716a",
+        "effects": 0
+      },
+      "seconds": 4.948
+    },
+    {
+      "name": "invalid surface rpc",
+      "status": "PASS",
+      "observed": {
+        "input": "rpc",
+        "oldTurn": "ebe1eedb-13de-4b07-bb4a-cef5e4343a7e",
+        "recoveredTurn": "e3ee7bce-5bc7-4a3b-aec3-6a125db71154",
+        "effects": 0
+      },
+      "seconds": 4.918
+    },
+    {
+      "name": "invalid surface oversized",
+      "status": "PASS",
+      "observed": {
+        "input": "oversized",
+        "oldTurn": "ce67fe27-2d09-494b-bb64-41db733f3b03",
+        "recoveredTurn": "18ae0b2c-c9c1-4285-a6ca-e34db8caa1a4",
+        "effects": 0
+      },
+      "seconds": 5.171
+    },
+    {
+      "name": "invalid surface partial",
+      "status": "PASS",
+      "observed": {
+        "input": "partial",
+        "oldTurn": "c242fb5d-9107-4a62-aa0d-7a086a11b760",
+        "recoveredTurn": "0131b49d-abb7-4117-a244-1175624ea85f",
+        "effects": 0
+      },
+      "seconds": 5.663
+    },
+    {
+      "name": "two-owner surface boundaries",
+      "status": "FAIL",
+      "observed": "exercise authenticated browser journey: browser operation failed"
+    }
+  ],
+  "notes": {
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser failure chat 98305c10aa9e": {
+      "stage": "exercise authenticated browser journey",
+      "category": "browser operation failed",
+      "recentTransport": [
+        [
+          "index",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "session",
+          401
+        ],
+        [
+          "session",
+          200
+        ],
+        [
+          "connection",
+          200
+        ],
+        [
+          "conversation",
+          201
+        ],
+        [
+          "conversation",
+          202
+        ],
+        [
+          "AG-UI",
+          200
+        ],
+        [
+          "AG-UI",
+          "ERR_ABORTED"
+        ]
+      ]
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181187.807999
+}

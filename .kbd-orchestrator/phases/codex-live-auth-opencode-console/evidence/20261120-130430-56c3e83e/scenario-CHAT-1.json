@@ -1,0 +1,76 @@
+{
+  "command": "scenario CHAT-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "opencode SDK session, transcript and native observer",
+      "status": "PASS",
+      "observed": {
+        "driver": "opencode",
+        "service_restarted": true,
+        "same_native_id": true,
+        "external_cancel_observed": "model socket disconnected"
+      },
+      "seconds": 3.079
+    },
+    {
+      "name": "codex SDK session, transcript and native observer",
+      "status": "PASS",
+      "observed": {
+        "driver": "codex",
+        "service_restarted": true,
+        "same_native_id": true,
+        "external_cancel_observed": "CLI peer SIGTERM"
+      },
+      "seconds": 1.013
+    },
+    {
+      "name": "genuine Codex CLI session",
+      "status": "BLOCKED",
+      "observed": "real SDK ran against disposable exec peer, provider use lacks consent"
+    }
+  ],
+  "notes": {
+    "auth-case-ejf7n1ex": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "57699",
+        "--backend-url",
+        "http://127.0.0.1:57698/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 3.01,
+      "exit": -15
+    },
+    "auth-case-pr4166tf": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "57764",
+        "--backend-url",
+        "http://127.0.0.1:57763/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 2,
+      "elapsedSeconds": 1.005,
+      "exit": -15
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795180620.9479208
+}

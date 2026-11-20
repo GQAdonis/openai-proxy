@@ -1,0 +1,58 @@
+{
+  "command": "negative FEATURE-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "two-user scoped list, search and delete preservation",
+      "status": "FAIL",
+      "observed": "POST /v1/memory/documents returned HTTP 500"
+    },
+    {
+      "name": "signed-out request cannot inject a foreign document",
+      "status": "FAIL",
+      "observed": "POST /v1/memory/documents returned HTTP 500"
+    },
+    {
+      "name": "disabled DB, disabled hooks and unregistered egress",
+      "status": "FAIL",
+      "observed": "POST /api/v1/admin/config/preview returned HTTP 422"
+    },
+    {
+      "name": "degraded DB, disabled hooks and unregistered egress",
+      "status": "FAIL",
+      "observed": "POST /api/v1/admin/config/preview returned HTTP 422"
+    },
+    {
+      "name": "authenticated shared upstream memory injection",
+      "status": "BLOCKED",
+      "observed": "Dedicated shared profiles have no live grants or independently routable shared direct-backend recipient"
+    }
+  ],
+  "notes": {
+    "memory variant (False, False)": {
+      "pid": 3228,
+      "enabled": false,
+      "degraded": false,
+      "port": 63099,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    },
+    "memory variant (True, True)": {
+      "pid": 3229,
+      "enabled": true,
+      "degraded": true,
+      "port": 63114,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181219.674974
+}

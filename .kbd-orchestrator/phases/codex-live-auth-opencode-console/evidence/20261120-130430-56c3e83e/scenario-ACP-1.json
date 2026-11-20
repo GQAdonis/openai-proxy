@@ -1,0 +1,82 @@
+{
+  "command": "scenario ACP-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "ACP packaged stdio stream and session",
+      "status": "PASS",
+      "observed": {
+        "session": "1a7ef028-d99f-4926-82c0-7ba0b0a9b20d",
+        "streamed": "kbd-fixture-reply",
+        "stopReason": "end_turn"
+      },
+      "seconds": 2.099
+    },
+    {
+      "name": "zed actual ACP editor prompt and terminal error",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: zed version unavailable from the isolated profile"
+    },
+    {
+      "name": "idea actual ACP editor prompt and terminal error",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: idea is absent from the isolated client PATH"
+    }
+  ],
+  "notes": {
+    "isolated protocol child 2a1f27fcbd06": {
+      "pid": 3018,
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--acp-stdio"
+      ]
+    },
+    "protocol reply f2d71decd892": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "ba56c9ac53283ca8d28396b03d0afa7af4838c2f0ab2cfbe97b720bd6603a899",
+      "error": false
+    },
+    "protocol reply d91130a3a30d": {
+      "method": "session/new",
+      "id": 2,
+      "sha256": "fa6e0e47c259d0e5b0ad67bc4c9a5d943e4d6af7639fcde0783e5ca8a3276bfb",
+      "error": false
+    },
+    "protocol reply fb868d62c484": {
+      "method": "session/prompt",
+      "id": 3,
+      "sha256": "948fb41b08b58c5a256dea8199102f1cd66de7412c30a0a9c95866a50703bd74",
+      "error": false
+    },
+    "protocol child exit 8557902aa0d1": {
+      "pid": 3018,
+      "code": -15
+    },
+    "client process 3ea17996be54": {
+      "argv": [
+        "/opt/homebrew/bin/zed",
+        "--version"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/98d19f02450f45808ebfa7404ffc66cb.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "604763f0ce3227ae9105e8b1df93ee13d8fba29c88b4cbf76ac1e67c27b0fc4d",
+        "output": "admin-originals/fd6c9fedc8e94b91ab85472d1a1a88aa.stderr",
+        "redacted": false
+      }
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181207.8742049
+}

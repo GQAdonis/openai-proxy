@@ -1,0 +1,292 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  1.109MB
+Step 1/48 : FROM node:26.5.0-bookworm-slim AS console_deps
+ ---> 9bad07e2c0bc
+Step 2/48 : RUN npm install --global npm@11.16.0
+ ---> Using cache
+ ---> 8c6caf2ec69a
+Step 3/48 : WORKDIR /build/frontend
+ ---> Using cache
+ ---> 4dd3d0367e3e
+Step 4/48 : COPY frontend/package.json frontend/package-lock.json ./
+ ---> Using cache
+ ---> 333033bfef72
+Step 5/48 : RUN npm ci --include=dev --no-audit --no-fund
+ ---> Using cache
+ ---> 3a5c3302bb3e
+Step 6/48 : FROM rust:1.95-bookworm AS builder
+ ---> 7cf1e580ef55
+Step 7/48 : COPY --from=console_deps /usr/local/bin/node /usr/local/bin/node
+ ---> Using cache
+ ---> 1baa81ac23b9
+Step 8/48 : COPY --from=console_deps /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
+ ---> Using cache
+ ---> 16570fa8c4b9
+Step 9/48 : RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+ ---> Using cache
+ ---> dcf1ded20081
+Step 10/48 : WORKDIR /build
+ ---> Using cache
+ ---> 030d75f40f08
+Step 11/48 : COPY Cargo.toml Cargo.lock build.rs ./
+ ---> Using cache
+ ---> a952b4432723
+Step 12/48 : COPY frontend ./frontend
+ ---> Using cache
+ ---> 85dd930d8271
+Step 13/48 : COPY --from=console_deps /build/frontend/node_modules ./frontend/node_modules
+ ---> Using cache
+ ---> b96c7a613695
+Step 14/48 : COPY src ./src
+ ---> Using cache
+ ---> 7d904571f7a2
+Step 15/48 : COPY data ./data
+ ---> Using cache
+ ---> 00fc0589c603
+Step 16/48 : COPY plugin ./plugin
+ ---> Using cache
+ ---> 2cd85077b87b
+Step 17/48 : COPY workers ./workers
+ ---> Using cache
+ ---> 2255af7ae7f3
+Step 18/48 : RUN cargo build --release --locked
+ ---> Using cache
+ ---> d34c9eea3ca6
+Step 19/48 : FROM oven/bun:1.4.4 AS sdk_deps
+ ---> d7c10dcddee8
+Step 20/48 : WORKDIR /opt/proxy/workers
+ ---> Using cache
+ ---> 56c3b9ef9e90
+Step 21/48 : COPY workers/package.json workers/bun.lock ./
+ ---> Using cache
+ ---> 3f4a3be8f48c
+Step 22/48 : RUN bun install --frozen-lockfile --production
+ ---> Using cache
+ ---> 752d8b6f6ef2
+Step 23/48 : COPY workers/ ./
+ ---> Using cache
+ ---> 965ee34029a7
+Step 24/48 : WORKDIR /opt/proxy/plugin
+ ---> Using cache
+ ---> 7acdf8dabc81
+Step 25/48 : COPY plugin/package.json plugin/bun.lock ./
+ ---> Using cache
+ ---> e63910afe2a1
+Step 26/48 : RUN bun install --frozen-lockfile --production
+ ---> Using cache
+ ---> 1b0423c7759e
+Step 27/48 : COPY plugin/src/ ./src/
+ ---> Using cache
+ ---> 812e82176d42
+Step 28/48 : RUN set -eu; cli="$(find /opt/proxy/workers/node_modules -type f -path '*/vendor/*' -name codex -perm /111 | head -1)";     test -n "$cli"; ln -s "$cli" /opt/proxy/codex; chmod 755 /opt/proxy/workers/codex-exec
+ ---> Using cache
+ ---> 8beadb891c53
+Step 29/48 : FROM debian:bookworm-slim AS runtime
+ ---> 5b6c2c6cbc90
+Step 30/48 : RUN apt-get update && apt-get install -y --no-install-recommends     ca-certificates     curl     && rm -rf /var/lib/apt/lists/*
+ ---> Running in 9003ba56f666
+Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+Get:4 http://deb.debian.org/debian bookworm/main arm64 Packages [8689 kB]
+Get:5 http://deb.debian.org/debian bookworm-updates/main arm64 Packages [6936 B]
+Get:6 http://deb.debian.org/debian-security bookworm-security/main arm64 Packages [375 kB]
+Fetched 9313 kB in 1s (8741 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libbrotli1 libcurl4 libgssapi-krb5-2 libk5crypto3 libkeyutils1 libkrb5-3
+  libkrb5support0 libldap-2.5-0 libnghttp2-14 libpsl5 librtmp1 libsasl2-2
+  libsasl2-modules-db libssh2-1 libssl3 openssl
+Suggested packages:
+  krb5-doc krb5-user
+Recommended packages:
+  krb5-locales libldap-common publicsuffix libsasl2-modules
+The following NEW packages will be installed:
+  ca-certificates curl libbrotli1 libcurl4 libgssapi-krb5-2 libk5crypto3
+  libkeyutils1 libkrb5-3 libkrb5support0 libldap-2.5-0 libnghttp2-14 libpsl5
+  librtmp1 libsasl2-2 libsasl2-modules-db libssh2-1 libssl3 openssl
+0 upgraded, 18 newly installed, 0 to remove and 0 not upgraded.
+Need to get 5511 kB of archives.
+After this operation, 15.1 MB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian-security bookworm-security/main arm64 libssl3 arm64 3.0.22-1~deb12u2 [1829 kB]
+Get:2 http://deb.debian.org/debian-security bookworm-security/main arm64 openssl arm64 3.0.22-1~deb12u2 [1410 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security/main arm64 ca-certificates all 20250419~deb12u2 [161 kB]
+Get:4 http://deb.debian.org/debian-security bookworm-security/main arm64 libbrotli1 arm64 1.0.9-2+deb12u1 [267 kB]
+Get:5 http://deb.debian.org/debian bookworm/main arm64 libkrb5support0 arm64 1.20.1-2+deb12u5 [32.6 kB]
+Get:6 http://deb.debian.org/debian bookworm/main arm64 libk5crypto3 arm64 1.20.1-2+deb12u5 [79.9 kB]
+Get:7 http://deb.debian.org/debian bookworm/main arm64 libkeyutils1 arm64 1.6.3-2 [8844 B]
+Get:8 http://deb.debian.org/debian bookworm/main arm64 libkrb5-3 arm64 1.20.1-2+deb12u5 [316 kB]
+Get:9 http://deb.debian.org/debian bookworm/main arm64 libgssapi-krb5-2 arm64 1.20.1-2+deb12u5 [124 kB]
+Get:10 http://deb.debian.org/debian-security bookworm-security/main arm64 libsasl2-modules-db arm64 2.1.28+dfsg-10+deb12u1 [21.0 kB]
+Get:11 http://deb.debian.org/debian-security bookworm-security/main arm64 libsasl2-2 arm64 2.1.28+dfsg-10+deb12u1 [58.3 kB]
+Get:12 http://deb.debian.org/debian bookworm/main arm64 libldap-2.5-0 arm64 2.5.13+dfsg-5 [171 kB]
+Get:13 http://deb.debian.org/debian bookworm/main arm64 libnghttp2-14 arm64 1.52.0-1+deb12u3 [69.0 kB]
+Get:14 http://deb.debian.org/debian bookworm/main arm64 libpsl5 arm64 0.21.2-1 [58.6 kB]
+Get:15 http://deb.debian.org/debian bookworm/main arm64 librtmp1 arm64 2.4+20151223.gitfa8646d.1-2+b2 [59.4 kB]
+Get:16 http://deb.debian.org/debian-security bookworm-security/main arm64 libssh2-1 arm64 1.10.0-3+deb12u1 [169 kB]
+Get:17 http://deb.debian.org/debian bookworm/main arm64 libcurl4 arm64 7.88.1-10+deb12u15 [367 kB]
+Get:18 http://deb.debian.org/debian bookworm/main arm64 curl arm64 7.88.1-10+deb12u15 [310 kB]
+[91mdebconf: delaying package configuration, since apt-utils is not installed
+[0mFetched 5511 kB in 0s (30.4 MB/s)
+Selecting previously unselected package libssl3:arm64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 6090 files and directories currently installed.)
+Preparing to unpack .../00-libssl3_3.0.22-1~deb12u2_arm64.deb ...
+Unpacking libssl3:arm64 (3.0.22-1~deb12u2) ...
+Selecting previously unselected package openssl.
+Preparing to unpack .../01-openssl_3.0.22-1~deb12u2_arm64.deb ...
+Unpacking openssl (3.0.22-1~deb12u2) ...
+Selecting previously unselected package ca-certificates.
+Preparing to unpack .../02-ca-certificates_20250419~deb12u2_all.deb ...
+Unpacking ca-certificates (20250419~deb12u2) ...
+Selecting previously unselected package libbrotli1:arm64.
+Preparing to unpack .../03-libbrotli1_1.0.9-2+deb12u1_arm64.deb ...
+Unpacking libbrotli1:arm64 (1.0.9-2+deb12u1) ...
+Selecting previously unselected package libkrb5support0:arm64.
+Preparing to unpack .../04-libkrb5support0_1.20.1-2+deb12u5_arm64.deb ...
+Unpacking libkrb5support0:arm64 (1.20.1-2+deb12u5) ...
+Selecting previously unselected package libk5crypto3:arm64.
+Preparing to unpack .../05-libk5crypto3_1.20.1-2+deb12u5_arm64.deb ...
+Unpacking libk5crypto3:arm64 (1.20.1-2+deb12u5) ...
+Selecting previously unselected package libkeyutils1:arm64.
+Preparing to unpack .../06-libkeyutils1_1.6.3-2_arm64.deb ...
+Unpacking libkeyutils1:arm64 (1.6.3-2) ...
+Selecting previously unselected package libkrb5-3:arm64.
+Preparing to unpack .../07-libkrb5-3_1.20.1-2+deb12u5_arm64.deb ...
+Unpacking libkrb5-3:arm64 (1.20.1-2+deb12u5) ...
+Selecting previously unselected package libgssapi-krb5-2:arm64.
+Preparing to unpack .../08-libgssapi-krb5-2_1.20.1-2+deb12u5_arm64.deb ...
+Unpacking libgssapi-krb5-2:arm64 (1.20.1-2+deb12u5) ...
+Selecting previously unselected package libsasl2-modules-db:arm64.
+Preparing to unpack .../09-libsasl2-modules-db_2.1.28+dfsg-10+deb12u1_arm64.deb ...
+Unpacking libsasl2-modules-db:arm64 (2.1.28+dfsg-10+deb12u1) ...
+Selecting previously unselected package libsasl2-2:arm64.
+Preparing to unpack .../10-libsasl2-2_2.1.28+dfsg-10+deb12u1_arm64.deb ...
+Unpacking libsasl2-2:arm64 (2.1.28+dfsg-10+deb12u1) ...
+Selecting previously unselected package libldap-2.5-0:arm64.
+Preparing to unpack .../11-libldap-2.5-0_2.5.13+dfsg-5_arm64.deb ...
+Unpacking libldap-2.5-0:arm64 (2.5.13+dfsg-5) ...
+Selecting previously unselected package libnghttp2-14:arm64.
+Preparing to unpack .../12-libnghttp2-14_1.52.0-1+deb12u3_arm64.deb ...
+Unpacking libnghttp2-14:arm64 (1.52.0-1+deb12u3) ...
+Selecting previously unselected package libpsl5:arm64.
+Preparing to unpack .../13-libpsl5_0.21.2-1_arm64.deb ...
+Unpacking libpsl5:arm64 (0.21.2-1) ...
+Selecting previously unselected package librtmp1:arm64.
+Preparing to unpack .../14-librtmp1_2.4+20151223.gitfa8646d.1-2+b2_arm64.deb ...
+Unpacking librtmp1:arm64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+Selecting previously unselected package libssh2-1:arm64.
+Preparing to unpack .../15-libssh2-1_1.10.0-3+deb12u1_arm64.deb ...
+Unpacking libssh2-1:arm64 (1.10.0-3+deb12u1) ...
+Selecting previously unselected package libcurl4:arm64.
+Preparing to unpack .../16-libcurl4_7.88.1-10+deb12u15_arm64.deb ...
+Unpacking libcurl4:arm64 (7.88.1-10+deb12u15) ...
+Selecting previously unselected package curl.
+Preparing to unpack .../17-curl_7.88.1-10+deb12u15_arm64.deb ...
+Unpacking curl (7.88.1-10+deb12u15) ...
+Setting up libkeyutils1:arm64 (1.6.3-2) ...
+Setting up libpsl5:arm64 (0.21.2-1) ...
+Setting up libbrotli1:arm64 (1.0.9-2+deb12u1) ...
+Setting up libssl3:arm64 (3.0.22-1~deb12u2) ...
+Setting up libnghttp2-14:arm64 (1.52.0-1+deb12u3) ...
+Setting up libkrb5support0:arm64 (1.20.1-2+deb12u5) ...
+Setting up libsasl2-modules-db:arm64 (2.1.28+dfsg-10+deb12u1) ...
+Setting up librtmp1:arm64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+Setting up libk5crypto3:arm64 (1.20.1-2+deb12u5) ...
+Setting up libsasl2-2:arm64 (2.1.28+dfsg-10+deb12u1) ...
+Setting up libssh2-1:arm64 (1.10.0-3+deb12u1) ...
+Setting up libkrb5-3:arm64 (1.20.1-2+deb12u5) ...
+Setting up openssl (3.0.22-1~deb12u2) ...
+Setting up libldap-2.5-0:arm64 (2.5.13+dfsg-5) ...
+Setting up ca-certificates (20250419~deb12u2) ...
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/aarch64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+debconf: falling back to frontend: Teletype
+Updating certificates in /etc/ssl/certs...
+rehash: warning: skipping orbstack-root.pem,it does not contain exactly one certificate or CRL
+149 added, 0 removed; done.
+Setting up libgssapi-krb5-2:arm64 (1.20.1-2+deb12u5) ...
+Setting up libcurl4:arm64 (7.88.1-10+deb12u15) ...
+Setting up curl (7.88.1-10+deb12u15) ...
+Processing triggers for libc-bin (2.36-9+deb12u14) ...
+Processing triggers for ca-certificates (20250419~deb12u2) ...
+Updating certificates in /etc/ssl/certs...
+0 added, 0 removed; done.
+Running hooks in /etc/ca-certificates/update.d...
+done.
+ ---> Removed intermediate container 9003ba56f666
+ ---> 9cda2ab3b91b
+Step 31/48 : RUN useradd --create-home --shell /bin/sh oproxy
+ ---> Running in f8ba61aea272
+ ---> Removed intermediate container f8ba61aea272
+ ---> 356bf21ca190
+Step 32/48 : WORKDIR /home/oproxy
+ ---> Running in 6e45e2f0df6d
+ ---> Removed intermediate container 6e45e2f0df6d
+ ---> 066848a6de77
+Step 33/48 : COPY --from=builder /build/target/release/openai-proxy /usr/local/bin/openai-proxy
+ ---> 865b3e256790
+Step 34/48 : RUN mkdir -p /home/oproxy/.config/oproxy /home/oproxy/.local/share/oproxy     && install -d -m 0700 -o oproxy -g oproxy /home/oproxy/.codex /home/oproxy/workspace /home/oproxy/.local/share/oproxy/console     && chown -R oproxy:oproxy /home/oproxy
+ ---> Running in 39bb4eaac168
+ ---> Removed intermediate container 39bb4eaac168
+ ---> cbdefdad2487
+Step 35/48 : USER oproxy
+ ---> Running in 8a905b9a90e1
+ ---> Removed intermediate container 8a905b9a90e1
+ ---> cd2d3f1b8f58
+Step 36/48 : ENV CODEX_HOME=/home/oproxy/.codex
+ ---> Running in 4a861d81428a
+ ---> Removed intermediate container 4a861d81428a
+ ---> 94a70a11c039
+Step 37/48 : ENV PROXY_CONSOLE_WORKSPACE=/home/oproxy/workspace
+ ---> Running in d6bd784ce42a
+ ---> Removed intermediate container d6bd784ce42a
+ ---> 6458ad574d64
+Step 38/48 : ENV HOST=0.0.0.0
+ ---> Running in b0eac4aa3592
+ ---> Removed intermediate container b0eac4aa3592
+ ---> 498d93e6ef3d
+Step 39/48 : ENV PORT=8181
+ ---> Running in 705e775c96cb
+ ---> Removed intermediate container 705e775c96cb
+ ---> 3409f46c7ca1
+Step 40/48 : ENV RUST_LOG=openai_proxy=info
+ ---> Running in 6cb755667529
+ ---> Removed intermediate container 6cb755667529
+ ---> abcb067c5438
+Step 41/48 : EXPOSE 8181
+ ---> Running in ebc6bca5854a
+ ---> Removed intermediate container ebc6bca5854a
+ ---> fb4679656cd0
+Step 42/48 : HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3     CMD curl -f http://localhost:8181/health || exit 1
+ ---> Running in f0d2652b8c81
+ ---> Removed intermediate container f0d2652b8c81
+ ---> ed6c2a04be37
+Step 43/48 : ENTRYPOINT ["openai-proxy"]
+ ---> Running in 68e1b22bdb1e
+ ---> Removed intermediate container 68e1b22bdb1e
+ ---> 3b967f6aa1c1
+Step 44/48 : CMD ["serve"]
+ ---> Running in c823904747fa
+ ---> Removed intermediate container c823904747fa
+ ---> 9ec6f5622d37
+Step 45/48 : FROM runtime AS sdk-runtime
+ ---> 9ec6f5622d37
+Step 46/48 : COPY --from=sdk_deps /usr/local/bin/bun /usr/local/bin/bun
+ ---> a4ae4fd17a17
+Step 47/48 : COPY --from=sdk_deps /opt/proxy /opt/proxy
+ ---> 82b51e12a4ea
+Step 48/48 : ENV PROXY_SDK_BUN=/usr/local/bin/bun     PROXY_SDK_WORKER=/opt/proxy/workers/main.mjs     PROXY_CODEX_BINARY=/opt/proxy/codex
+ ---> Running in aeccf56ad37f
+ ---> Removed intermediate container aeccf56ad37f
+ ---> 844f7ea3edfc
+Successfully built 844f7ea3edfc
+Successfully tagged kbd-console-20261120-130430-56c3e83e:latest

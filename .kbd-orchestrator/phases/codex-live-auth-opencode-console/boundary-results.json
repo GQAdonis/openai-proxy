@@ -19,8 +19,8 @@
   "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
   "runId": "codex-live-auth-opencode-console-20261119T193635Z",
   "planRevision": 1,
-  "contractDigest": "d0593e44cd3dbaf682980d043058e402e1d6c2cfad36524e1886a3e1036a7773",
-  "candidateDigest": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "contractDigest": "6dfe2af14bc2c906cc350b71866bc4fdd8c96d973c3fa9806a0ec9cec7ce596c",
+  "candidateDigest": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
   "scenarios": [
     {
       "id": "AUTH-1",
@@ -30,7 +30,7 @@
         "BLOCKED",
         "BLOCKED"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -45,7 +45,7 @@
         "BLOCKED",
         "PASS"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -60,7 +60,7 @@
         "PASS",
         "BLOCKED"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -75,7 +75,7 @@
         "BLOCKED",
         "BLOCKED"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -90,7 +90,7 @@
         "BLOCKED",
         "PASS"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -99,13 +99,13 @@
     },
     {
       "id": "TOOL-1",
-      "status": "FAIL",
+      "status": "BLOCKED",
       "attempted": "scenario TOOL-1, negative TOOL-1",
       "observed": [
         "BLOCKED",
-        "FAIL"
+        "BLOCKED"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -117,10 +117,10 @@
       "status": "FAIL",
       "attempted": "scenario UI-1, negative UI-1",
       "observed": [
-        "FAIL",
+        "BLOCKED",
         "FAIL"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -135,7 +135,7 @@
         "FAIL",
         "FAIL"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -144,13 +144,13 @@
     },
     {
       "id": "ADMIN-1",
-      "status": "FAIL",
+      "status": "PASS",
       "attempted": "scenario ADMIN-1, negative ADMIN-1",
       "observed": [
-        "FAIL",
-        "FAIL"
+        "PASS",
+        "PASS"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -159,12 +159,13 @@
     },
     {
       "id": "SETUP-1",
-      "status": "NOT_EXERCISED",
-      "attempted": "packet stopped before this row",
+      "status": "FAIL",
+      "attempted": "scenario SETUP-1, negative SETUP-1",
       "observed": [
-        "failed prerequisite or isolation control at negative ADMIN-1"
+        "FAIL",
+        "FAIL"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -173,12 +174,13 @@
     },
     {
       "id": "ACP-1",
-      "status": "NOT_EXERCISED",
-      "attempted": "packet stopped before this row",
+      "status": "BLOCKED",
+      "attempted": "scenario ACP-1, negative ACP-1",
       "observed": [
-        "failed prerequisite or isolation control at negative ADMIN-1"
+        "BLOCKED",
+        "PASS"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -187,12 +189,13 @@
     },
     {
       "id": "MCP-1",
-      "status": "NOT_EXERCISED",
-      "attempted": "packet stopped before this row",
+      "status": "FAIL",
+      "attempted": "scenario MCP-1, negative MCP-1",
       "observed": [
-        "failed prerequisite or isolation control at negative ADMIN-1"
+        "FAIL",
+        "PASS"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -201,12 +204,13 @@
     },
     {
       "id": "FEATURE-1",
-      "status": "NOT_EXERCISED",
-      "attempted": "packet stopped before this row",
+      "status": "FAIL",
+      "attempted": "scenario FEATURE-1, negative FEATURE-1",
       "observed": [
-        "failed prerequisite or isolation control at negative ADMIN-1"
+        "FAIL",
+        "FAIL"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -218,15 +222,15 @@
     "source": "clock and packet command/probe counter",
     "values": {
       "timeMinutes": {
-        "value": 68.59,
+        "value": 91.08,
         "class": "measured"
       },
       "toolCalls": {
-        "value": 233,
+        "value": 402,
         "class": "measured"
       },
       "repairAttempts": {
-        "value": 3,
+        "value": 4,
         "class": "measured"
       },
       "noProgress": {
@@ -235,12 +239,12 @@
       }
     }
   },
-  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-121703-2d4537e5",
+  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
   "cleanup": "PASS",
   "executedBy": {
     "harness": "Bash/Python KBD boundary runner",
     "model": "none (scripted observations)",
     "python": "3.11.3"
   },
-  "previousResultsSha256": "2aa303e010a38eb9fd379e559ca880aa6895efbcf1757176b12bde3da9b44382"
+  "previousResultsSha256": "b1892dbe159ee8b1c4f9283535406945dfb12a723823c231d9fc1a28a619ae9d"
 }

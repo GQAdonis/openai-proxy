@@ -1,0 +1,432 @@
+{
+  "command": "scenario SETUP-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "project opencode_provider discovery and restoration",
+      "status": "FAIL",
+      "observed": "Installed host did not resolve an installed provider model"
+    },
+    {
+      "name": "project opencode_plugin discovery and restoration",
+      "status": "FAIL",
+      "observed": "Installed host did not discover a Codex plugin model"
+    },
+    {
+      "name": "global opencode_provider discovery and restoration",
+      "status": "FAIL",
+      "observed": "Installed host did not resolve an installed provider model"
+    },
+    {
+      "name": "global opencode_plugin discovery and restoration",
+      "status": "FAIL",
+      "observed": "Installed host did not discover a Codex plugin model"
+    },
+    {
+      "name": "separate-machine V2 export",
+      "status": "PASS",
+      "observed": {
+        "target": "visitor",
+        "models": 1
+      },
+      "seconds": 0.001
+    }
+  ],
+  "notes": {
+    "client process 86c916e5f5b7": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/356d6d67d457484fa22c55169850741e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/787915eedf0843888c8724565650a2d9.stderr",
+        "redacted": false
+      }
+    },
+    "opencode version": "2.3.0",
+    "opencode_provider project before 296617747968": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/28e4d6472e7d43b3959f1d8b86aed3a8.bin"
+    },
+    "after preview 503d3f756498": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/322568a90a6544d794fad62b180e13ab.bin"
+    },
+    "after apply ed4ff8e8f6c5": {
+      "exists": true,
+      "sha256": "790e7ba97ea099c63b9a9bfe569e6ff7071f928b51c9e359836045f9f290f5d2",
+      "bytes": 2723,
+      "mode": 416,
+      "original": "admin-originals/ff599057132848d480082e35e864d509.bin"
+    },
+    "client process e30e9d1f188f": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "models",
+        "openai-proxy"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "08caf34a8211848582fe6d833c464c87e103e6edf5ccb67cca80657c283c4331",
+        "output": "admin-originals/067d48c7f152481289c404da984b7e42.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "4080453bb05253c759731ff95b44be523f496664313c0078e560dfed732daf2d",
+        "output": "admin-originals/a8fd928371a74622be5d1543dd678874.stderr",
+        "redacted": false
+      }
+    },
+    "after undo 13d609253eca": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/8158cb00560d4eb0b3de797f70d25fdf.bin"
+    },
+    "client process b78830803a0d": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/8775b1849f414c1d8d3af2f02736caa3.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/c0e8a732d20948bf9a0c013367f05774.stderr",
+        "redacted": false
+      }
+    },
+    "opencode_plugin project before 3c4515279df3": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/bcc6c2f2e75b4b7bb448b2cef40b561e.bin"
+    },
+    "after preview 74c63d2965da": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/cfb22bdccd6645f6941d13271dfae1ee.bin"
+    },
+    "after apply 963821d36222": {
+      "exists": true,
+      "sha256": "c7fd2a04ff3f859f5eedf6db0bccf93b59d4e9eec20696d7ea5ceda295337aaf",
+      "bytes": 187,
+      "mode": 416,
+      "original": "admin-originals/91d84a6d157b4e74b97726ddc535cc2c.bin"
+    },
+    "client process 7469c1d6d052": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "models",
+        "codex"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "08caf34a8211848582fe6d833c464c87e103e6edf5ccb67cca80657c283c4331",
+        "output": "admin-originals/bb99fe0c940748c2b65c24c620f3d00e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "760b1d03944ffcf870b082453b178da1d21ee56237fbbd0e36c01b932746bf1c",
+        "output": "admin-originals/810adac68b024b8eab49efa95f07aff2.stderr",
+        "redacted": false
+      }
+    },
+    "after undo b5dc634a763e": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/4329b9bb5fdb465abc1da938d5e2cd1f.bin"
+    },
+    "client process c3a138a7af6f": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/d12cbd210b45458abd3c2fd133225d02.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/b8317df6f5ea411f964d1912e7bbde62.stderr",
+        "redacted": false
+      }
+    },
+    "opencode_provider global before 3ecdc1739b72": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/02f8d4aeb5cb43a9a5356e88a7f2d244.bin"
+    },
+    "client process 6ff508a87af7": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--port",
+        "57083",
+        "--dry-run"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "aadca78a730093821e3daecbd0b42f26a000fc1eb45081554d1befe6c44c9594",
+        "output": "admin-originals/765e0927b8c6445f8eb5b1305f9e40c6.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/0adf2387118445fd94f7c280e4b3731d.stderr",
+        "redacted": false
+      }
+    },
+    "after preview b170c38988d1": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/c3611095cc614e74973d1821ce16700f.bin"
+    },
+    "client process 04b052069cc9": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--port",
+        "57083"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "1e26cfcfedcd2a5fd4a532681a6a6f505ded9d15799e934905be9e6390811f6e",
+        "output": "admin-originals/a41af0ae07bd47aa9ae1ebfdf658eadc.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/1788f9b65de441a9a31b8c62a1ffeb92.stderr",
+        "redacted": false
+      }
+    },
+    "after apply a034079de395": {
+      "exists": true,
+      "sha256": "790e7ba97ea099c63b9a9bfe569e6ff7071f928b51c9e359836045f9f290f5d2",
+      "bytes": 2723,
+      "mode": 416,
+      "original": "admin-originals/e4225d5e46c640dd9e62ba7dc8e8a817.bin"
+    },
+    "client process 262ac280798e": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "models",
+        "openai-proxy"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "08caf34a8211848582fe6d833c464c87e103e6edf5ccb67cca80657c283c4331",
+        "output": "admin-originals/336b61f5f1514ee1ac9049331e919cbd.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "4080453bb05253c759731ff95b44be523f496664313c0078e560dfed732daf2d",
+        "output": "admin-originals/480e543bf2b742ea918ca70962f528f1.stderr",
+        "redacted": false
+      }
+    },
+    "client process 50527326d032": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--port",
+        "57083",
+        "--undo",
+        "227800d4-d75b-407e-97ce-9f0453661c65"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "aaec7bcf5af1816c9844cd78f1ed287e801bad2f6d43d2e9c067d4d3d002a559",
+        "output": "admin-originals/b3d56e7817434a018f342511a99f9d4d.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/ba556fa088924334bdd33a832315c2f2.stderr",
+        "redacted": false
+      }
+    },
+    "after undo 2edf4919578c": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/32c7e8602c7a4cd2849389afa9da725c.bin"
+    },
+    "client process 7e0284b6c016": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/e453edcc27a24f2582acf700c65f9d2c.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/d8c56320628544fd9d91ae9b7f912d01.stderr",
+        "redacted": false
+      }
+    },
+    "opencode_plugin global before 54f544677fc6": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/196520803f80428aac11ea62bfd8f854.bin"
+    },
+    "client process cee40283b875": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--port",
+        "57083",
+        "--plugin",
+        "--dry-run"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "46410c6b79002d9b4ad4fba72be3dd04c6ce684df1a562af901e2c2d158dfeeb",
+        "output": "admin-originals/a7bbca12618b4bddba233da0697a0c91.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/618d4d07a5964e45aab61480580ac962.stderr",
+        "redacted": false
+      }
+    },
+    "after preview 4a9cecc3487b": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/06c51de5f3334cf9a335e7629ab5e67e.bin"
+    },
+    "client process f9f66e42a068": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--port",
+        "57083",
+        "--plugin"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fc2fc1baa70c4f0089005382936c1f44db53588c157cc046b395c9e03f7b893b",
+        "output": "admin-originals/99c6d2e8700f436b9957b9cabf3edabc.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/0070dce4fc2244e4a4d89a221a28aee8.stderr",
+        "redacted": false
+      }
+    },
+    "after apply 7f47f0fd9adc": {
+      "exists": true,
+      "sha256": "c7fd2a04ff3f859f5eedf6db0bccf93b59d4e9eec20696d7ea5ceda295337aaf",
+      "bytes": 187,
+      "mode": 416,
+      "original": "admin-originals/5c5dd3d7802048d3b9a4163eaaf8adcc.bin"
+    },
+    "client process b378561266de": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "models",
+        "codex"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "08caf34a8211848582fe6d833c464c87e103e6edf5ccb67cca80657c283c4331",
+        "output": "admin-originals/982ec8e1c9b3410fa6644391c8cdff66.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "760b1d03944ffcf870b082453b178da1d21ee56237fbbd0e36c01b932746bf1c",
+        "output": "admin-originals/f21bc1ec2269482581c18e0b71c519f3.stderr",
+        "redacted": false
+      }
+    },
+    "client process a76e90812dbb": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--port",
+        "57083",
+        "--plugin",
+        "--undo",
+        "50c09e5a-d03a-4cef-92f9-a8df2d55f4a3"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "a800711be0107c6afc245b4535e9be3fe4f8b2e31102443b7ec24c085bc4dc67",
+        "output": "admin-originals/635639f3126345d18495e6ec688da345.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/5a66b938144c4abaa7cefc01a7cb2b35.stderr",
+        "redacted": false
+      }
+    },
+    "after undo 3447268d1e22": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/0f6ac6002fc94e0bae61b5d41eb37102.bin"
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181198.54311
+}

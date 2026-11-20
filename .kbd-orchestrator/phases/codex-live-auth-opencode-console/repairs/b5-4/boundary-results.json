@@ -1,0 +1,250 @@
+{
+  "phase": "codex-live-auth-opencode-console",
+  "boundary": "B5",
+  "affectedScenarios": [
+    "AUTH-1",
+    "AUTH-2",
+    "AUTH-3",
+    "PLUGIN-1",
+    "CHAT-1",
+    "TOOL-1",
+    "UI-1",
+    "SURFACE-1",
+    "ADMIN-1",
+    "SETUP-1",
+    "ACP-1",
+    "MCP-1",
+    "FEATURE-1"
+  ],
+  "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
+  "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+  "planRevision": 1,
+  "contractDigest": "6dfe2af14bc2c906cc350b71866bc4fdd8c96d973c3fa9806a0ec9cec7ce596c",
+  "candidateDigest": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "scenarios": [
+    {
+      "id": "AUTH-1",
+      "status": "BLOCKED",
+      "attempted": "scenario AUTH-1, negative AUTH-1",
+      "observed": [
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "AUTH-2",
+      "status": "BLOCKED",
+      "attempted": "scenario AUTH-2, negative AUTH-2",
+      "observed": [
+        "BLOCKED",
+        "PASS"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "AUTH-3",
+      "status": "BLOCKED",
+      "attempted": "scenario AUTH-3, negative AUTH-3",
+      "observed": [
+        "PASS",
+        "BLOCKED"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "PLUGIN-1",
+      "status": "BLOCKED",
+      "attempted": "scenario PLUGIN-1, negative PLUGIN-1",
+      "observed": [
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "CHAT-1",
+      "status": "BLOCKED",
+      "attempted": "scenario CHAT-1, negative CHAT-1",
+      "observed": [
+        "BLOCKED",
+        "PASS"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "TOOL-1",
+      "status": "BLOCKED",
+      "attempted": "scenario TOOL-1, negative TOOL-1",
+      "observed": [
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "UI-1",
+      "status": "FAIL",
+      "attempted": "scenario UI-1, negative UI-1",
+      "observed": [
+        "BLOCKED",
+        "FAIL"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "SURFACE-1",
+      "status": "FAIL",
+      "attempted": "scenario SURFACE-1, negative SURFACE-1",
+      "observed": [
+        "FAIL",
+        "FAIL"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "ADMIN-1",
+      "status": "PASS",
+      "attempted": "scenario ADMIN-1, negative ADMIN-1",
+      "observed": [
+        "PASS",
+        "PASS"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "SETUP-1",
+      "status": "FAIL",
+      "attempted": "scenario SETUP-1, negative SETUP-1",
+      "observed": [
+        "FAIL",
+        "FAIL"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "ACP-1",
+      "status": "BLOCKED",
+      "attempted": "scenario ACP-1, negative ACP-1",
+      "observed": [
+        "BLOCKED",
+        "PASS"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "MCP-1",
+      "status": "FAIL",
+      "attempted": "scenario MCP-1, negative MCP-1",
+      "observed": [
+        "FAIL",
+        "PASS"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "FEATURE-1",
+      "status": "FAIL",
+      "attempted": "scenario FEATURE-1, negative FEATURE-1",
+      "observed": [
+        "FAIL",
+        "FAIL"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    }
+  ],
+  "budgetConsumption": {
+    "source": "clock and packet command/probe counter",
+    "values": {
+      "timeMinutes": {
+        "value": 91.08,
+        "class": "measured"
+      },
+      "toolCalls": {
+        "value": 402,
+        "class": "measured"
+      },
+      "repairAttempts": {
+        "value": 4,
+        "class": "measured"
+      },
+      "noProgress": {
+        "value": 0,
+        "class": "measured"
+      }
+    }
+  },
+  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-130430-56c3e83e",
+  "cleanup": "PASS",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "previousResultsSha256": "b1892dbe159ee8b1c4f9283535406945dfb12a723823c231d9fc1a28a619ae9d"
+}

@@ -1,0 +1,44 @@
+{
+  "command": "scenario FEATURE-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "selected skills, imported schemas, hooks and agent card",
+      "status": "FAIL",
+      "observed": "Recipient saw wrong skill, multiple skills, or empty skill injection"
+    },
+    {
+      "name": "two-principal database retrieval and cleanup",
+      "status": "FAIL",
+      "observed": "POST /v1/memory/documents returned HTTP 500"
+    },
+    {
+      "name": "actual local packaged memory retrieval, injection and billing configuration",
+      "status": "FAIL",
+      "observed": "POST /v1/memory/documents returned HTTP 500"
+    },
+    {
+      "name": "authenticated shared upstream memory injection",
+      "status": "BLOCKED",
+      "observed": "Dedicated shared profiles have no live grants or independently routable shared direct-backend recipient"
+    }
+  ],
+  "notes": {
+    "memory variant (True, False)": {
+      "pid": 3224,
+      "enabled": true,
+      "degraded": false,
+      "port": 63089,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795181217.936859
+}

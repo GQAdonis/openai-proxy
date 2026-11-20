@@ -1,0 +1,143 @@
+{
+  "command": "negative TOOL-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "workspace read and permission replay",
+      "status": "PASS",
+      "observed": {
+        "tool": "workspace_read",
+        "authorized": false,
+        "terminal": "cancelled",
+        "observed_tool_results": 0,
+        "permission_requests": 1
+      },
+      "seconds": 2.084
+    },
+    {
+      "name": "kernel-level canary file-open counter",
+      "status": "BLOCKED",
+      "observed": "this platform supplies independent tool-result counts only"
+    },
+    {
+      "name": "explicit Codex delegation and single executor",
+      "status": "PASS",
+      "observed": {
+        "tool": "delegate_codex",
+        "authorized": false,
+        "terminal": "cancelled",
+        "observed_tool_results": 0,
+        "permission_requests": 1
+      },
+      "seconds": 2.083
+    },
+    {
+      "name": "unsupported function rejected before native admission",
+      "status": "PASS",
+      "observed": {
+        "http": 422,
+        "error": "unsupported_or_invalid_input",
+        "new_conversations": 0,
+        "rejected_before_exec": true
+      },
+      "seconds": 0.508
+    },
+    {
+      "name": "self-referential provider fails without model traffic",
+      "status": "PASS",
+      "observed": {
+        "visible_terminal": "failed",
+        "independent_upstream_requests": 0
+      },
+      "seconds": 0.509
+    },
+    {
+      "name": "live shared native permission stays with its owner",
+      "status": "PASS",
+      "observed": {
+        "foreign_http": 404,
+        "owner_decision": "deny",
+        "terminal": "cancelled",
+        "canary_returns": 0
+      },
+      "seconds": 1.302
+    }
+  ],
+  "notes": {
+    "auth-case-3t9xvfjt": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58040",
+        "--backend-url",
+        "http://127.0.0.1:58039/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.009,
+      "exit": -15
+    },
+    "auth-case-s5858if4": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58097",
+        "--backend-url",
+        "http://127.0.0.1:58096/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.009,
+      "exit": -15
+    },
+    "auth-case-1cut57v7": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58157",
+        "--backend-url",
+        "http://127.0.0.1:58156/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    },
+    "auth-case-hd6f5bqc": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58162",
+        "--backend-url",
+        "http://127.0.0.1:58161/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795180637.090255
+}

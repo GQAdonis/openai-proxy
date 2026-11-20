@@ -1,0 +1,104 @@
+{
+  "command": "negative CHAT-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "opencode SDK session, transcript and native observer",
+      "status": "PASS",
+      "observed": {
+        "driver": "opencode",
+        "admissions": 1,
+        "already_completed_cancel_effects": 0
+      },
+      "seconds": 2.079
+    },
+    {
+      "name": "codex SDK session, transcript and native observer",
+      "status": "PASS",
+      "observed": {
+        "driver": "codex",
+        "admissions": 1,
+        "already_completed_cancel_effects": 0
+      },
+      "seconds": 0.509
+    },
+    {
+      "name": "incompatible native SDK rejected before session creation",
+      "status": "PASS",
+      "observed": {
+        "incompatible_version": "1.0.0",
+        "http": 503,
+        "worker_launches": 0
+      },
+      "seconds": 0.509
+    },
+    {
+      "name": "foreign actor cannot read shared conversation",
+      "status": "PASS",
+      "observed": {
+        "foreign_session_http": 404
+      },
+      "seconds": 0.016
+    }
+  ],
+  "notes": {
+    "auth-case-4skp4pv3": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "57805",
+        "--backend-url",
+        "http://127.0.0.1:57804/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.008,
+      "exit": -15
+    },
+    "auth-case-zkvc2za5": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "57857",
+        "--backend-url",
+        "http://127.0.0.1:57856/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 1,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    },
+    "auth-case-z6aqkfs0": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-jx7mbcxq/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "57886",
+        "--backend-url",
+        "http://127.0.0.1:57885/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    }
+  },
+  "candidate": "03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795180624.9626298
+}
