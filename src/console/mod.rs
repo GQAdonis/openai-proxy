@@ -21,7 +21,6 @@ use fs2::FileExt;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::{fs::File, path::PathBuf, sync::Arc};
-use tower::ServiceExt;
 
 #[derive(Default, Clone)]
 pub struct RuntimeInfo {
@@ -159,27 +158,24 @@ pub fn router_with_legacy(state: AppState, legacy: Router, enable_a2a: bool) -> 
     }
     let guarded = if shared {
         let s = server.clone();
-        legacy.layer(middleware::from_fn(
-            move |req: Request<Body>, next: Next| {
+        crate::direct_routes(enable_a2a).layer(middleware::from_fn(
+            move |mut req: Request<Body>, next: Next| {
                 let s = s.clone();
                 async move {
-                    if req.uri().path() == "/health"
-                        || (enable_a2a && req.uri().path() == "/.well-known/agent.json")
-                    {
-                        return next.run(req).await;
+                    let public = req.uri().path() == "/health"
+                        || (enable_a2a && req.uri().path() == "/.well-known/agent.json");
+                    let mut state = s.app.clone();
+                    if !public {
+                        let actor = match s.actor(req.headers(), req.method().clone()) {
+                            Ok(v) => v,
+                            Err(e) => return e.into_response(),
+                        };
+                        state.credentials = actor.credentials;
+                        Arc::make_mut(&mut state.runtime).memory_scope =
+                            Some(format!("actor:{}", access::digest(actor.id.as_bytes())));
                     }
-                    let actor = match s.actor(req.headers(), req.method().clone()) {
-                        Ok(v) => v,
-                        Err(e) => return e.into_response(),
-                    };
-                    let mut scoped = s.app.clone();
-                    scoped.credentials = actor.credentials;
-                    Arc::make_mut(&mut scoped.runtime).memory_scope =
-                        Some(format!("actor:{}", access::digest(actor.id.as_bytes())));
-                    crate::direct_app(scoped, enable_a2a)
-                        .oneshot(req)
-                        .await
-                        .unwrap_or_else(|e| match e {})
+                    req.extensions_mut().insert(state);
+                    next.run(req).await
                 }
             },
         ))

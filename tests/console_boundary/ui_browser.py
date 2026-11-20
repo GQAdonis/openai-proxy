@@ -426,6 +426,7 @@ def model_turn(h, base, actor, partial=False):
     if image_stop:
         from image_model_fixture import observations
         baseline = observations(h)
+        h.note("image recipient before turn", baseline)
         require(baseline["active"] == 0, "in-container model stream unexpectedly active before admission")
     with browser(h, base, actor) as page:
         prepare(page)
@@ -437,10 +438,18 @@ def model_turn(h, base, actor, partial=False):
             require(page.get_by_role("button", name="Stop reply").is_visible(), "partial reply was not live")
             (h.root / "ui-partial-visible").touch(exist_ok=False)
             page.get_by_text("Reply interrupted after partial output", exact=True).wait_for(timeout=35000)
-            observed = [r for r in rows(h) if marker in r.get("markers", [])]
-            delivered = [r for r in observed if "partialVisibleBeforeError" in r]
+            observed = [r for r in rows(h) if r["path"] == "/v1/chat/completions" and marker in r["markers"]]
             requests = [r for r in observed if "partialVisibleBeforeError" not in r and not r.get("disconnected")]
-            require(len(requests) == 1 and [r["partialVisibleBeforeError"] for r in delivered] == [True],
+            main = [r for r in requests if {"render_surface", "workspace_read"}.issubset(r["toolNames"])]
+            auxiliary = [r for r in requests if not r["toolNames"]]
+            delivered = [r for r in observed if "partialVisibleBeforeError" in r
+                         and {"render_surface", "workspace_read"}.issubset(r["toolNames"])]
+            h.note("partial reply recipient", {"nativeRequests": [r["sequence"] for r in main],
+                   "auxiliaryRequests": [r["sequence"] for r in auxiliary],
+                   "nativeErrors": [r["sequence"] for r in delivered]})
+            require(len(main) == 1 and len(requests) == len(main) + len(auxiliary)
+                    and [r["partialVisibleBeforeError"] for r in delivered] == [True]
+                    and main[0]["sequence"] < delivered[0]["sequence"],
                     "partial reply or terminal error was retried or delivered out of order")
         else:
             page.get_by_text(re.compile(re.escape(fixture.STOP))).first.wait_for(timeout=30000)
@@ -448,7 +457,8 @@ def model_turn(h, base, actor, partial=False):
             tab_to(page, stop)
             if image_stop:
                 active = observations(h)
-                require(active == dict(baseline, started=baseline["started"] + 1, active=1),
+                h.note("image recipient immediately before Stop", active)
+                require(active == dict(baseline, started=baseline["started"] + 1, active=1, auxiliary=active["auxiliary"]),
                         "in-container model stream was not active immediately before Stop")
             page.keyboard.press("Enter")
             observed_text(page, "Stopped")
@@ -460,13 +470,14 @@ def model_turn(h, base, actor, partial=False):
                 "composer focus was lost after terminal")
         if image_stop:
             final = observations(h, after_stop=True)
-            require(final == dict(active, active=0, disconnected=baseline["disconnected"] + 1),
+            h.note("image recipient after Stop", final)
+            require(final == dict(active, active=0, disconnected=baseline["disconnected"] + 1, auxiliary=final["auxiliary"]),
                     "native Stop failed to close the active in-container model socket")
-            h.note("image native stop recipient", {"before": baseline, "active": active, "after": final})
         elif not partial:
             deadline = time.monotonic() + 5
             while time.monotonic() < deadline:
-                if any(r.get("disconnected") and marker in r.get("markers", []) for r in rows(h)):
+                if any(r.get("disconnected") and marker in r.get("markers", [])
+                       and {"render_surface", "workspace_read"}.issubset(r.get("toolNames", [])) for r in rows(h)):
                     break
                 time.sleep(0.1)
             else:

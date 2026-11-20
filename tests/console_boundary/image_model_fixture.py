@@ -21,7 +21,7 @@ def provider_env():
 PEER = r"""
 import http from "node:http";
 const fixture = JSON.parse(process.env.KBD_RECEIVER_CONFIG);
-const stats = {started: 0, active: 0, disconnected: 0, expired: 0, rejected: 0};
+const stats = {started: 0, active: 0, disconnected: 0, expired: 0, rejected: 0, auxiliary: 0};
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && ["/stats", "/after-stop"].includes(req.url)) {
     if (req.url === "/after-stop") {
@@ -51,10 +51,25 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(400);
     return res.end();
   }
-  function send(delta) {
+  function send(delta, finish = null) {
     const value = {id:"chatcmpl-fixture",object:"chat.completion.chunk",created:1,model:fixture.model,
-                   choices:[{index:0,delta,finish_reason:null}]};
+                   choices:[{index:0,delta,finish_reason:finish}]};
     res.write("data: " + JSON.stringify(value) + "\n\n");
+  }
+  const names = (data.tools ?? []).map(t => t.function?.name ?? t.name);
+  if (!names.length) {
+    // The installed host also sends a tool-free auxiliary request. Finish it
+    // independently so only the actual assistant turn holds an open response.
+    ++stats.auxiliary;
+    res.writeHead(200, {"content-type":"text/event-stream"});
+    send({role:"assistant", content:"Fixture conversation"});
+    send({}, "stop");
+    return res.end("data: [DONE]\n\n");
+  }
+  if (!names.includes("render_surface") || !names.includes("workspace_read")) {
+    ++stats.rejected;
+    res.writeHead(400);
+    return res.end();
   }
   ++stats.started;
   ++stats.active;
@@ -91,7 +106,7 @@ def start(h, docker):
     result = docker("exec", cid, "curl", "--fail", "--silent", "--retry", "6", "--retry-connrefused",
                     "--retry-delay", "1", "--max-time", "2", BASE + "/stats")
     assert result.returncode == 0, "in-container model recipient did not become ready"
-    assert json.loads(result.stdout) == dict(started=0, active=0, disconnected=0, expired=0, rejected=0)
+    assert json.loads(result.stdout) == dict(started=0, active=0, disconnected=0, expired=0, rejected=0, auxiliary=0)
     return {"address": BASE, "model": MODEL, "network": "none"}
 
 
@@ -104,6 +119,6 @@ def observations(h, after_stop=False):
                             text=True, timeout=8)
     assert result.returncode == 0, "could not observe in-container model recipient"
     state = json.loads(result.stdout)
-    assert set(state) == {"started", "active", "disconnected", "expired", "rejected"}
+    assert set(state) == {"started", "active", "disconnected", "expired", "rejected", "auxiliary"}
     assert all(type(n) is int and n >= 0 for n in state.values())
     return state

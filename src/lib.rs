@@ -20,7 +20,7 @@ pub mod web_assets;
 
 use std::sync::Arc;
 
-use axum::{Router, routing::get, routing::post};
+use axum::{Extension, Router, extract::Request, handler::Handler, routing::get, routing::post};
 use tower_http::cors::CorsLayer;
 
 use crate::a2a::agent_card_handler;
@@ -185,19 +185,36 @@ impl std::fmt::Debug for AppState {
 /// When `enable_a2a` is `true`, mounts `GET /.well-known/agent.json` →
 /// [`agent_card_handler`] for A2A orchestrator discoverability.
 pub fn build_app(state: AppState, enable_a2a: bool) -> Router {
-    let legacy = direct_app(state.clone(), enable_a2a);
+    let legacy = direct_routes(enable_a2a).layer(Extension(state.clone()));
     crate::console::router_with_legacy(state, legacy, enable_a2a)
 }
 
-pub(crate) fn direct_app(state: AppState, enable_a2a: bool) -> Router {
+// Supply the state chosen for this request to the original handler. Its path
+// and body extractors operate on the request matched by the direct router.
+fn with_request_state<H, T>(
+    handler: H,
+) -> impl Fn(Extension<AppState>, Request) -> H::Future + Clone
+where
+    H: Handler<T, AppState>,
+{
+    move |Extension(state), request| handler.clone().call(request, state)
+}
+
+pub(crate) fn direct_routes(enable_a2a: bool) -> Router {
     let mut router = Router::new()
-        .route("/v1/chat/completions", post(proxy::chat_completions))
-        .route("/v1/models", get(models::list_models))
-        .route("/ag-ui/stream", post(agui_stream))
+        .route(
+            "/v1/chat/completions",
+            post(with_request_state(proxy::chat_completions)),
+        )
+        .route("/v1/models", get(with_request_state(models::list_models)))
+        .route("/ag-ui/stream", post(with_request_state(agui_stream)))
         .route("/health", get(health));
 
     if enable_a2a {
-        router = router.route("/.well-known/agent.json", get(agent_card_handler));
+        router = router.route(
+            "/.well-known/agent.json",
+            get(with_request_state(agent_card_handler)),
+        );
     }
 
     #[cfg(feature = "memory")]
@@ -205,13 +222,25 @@ pub(crate) fn direct_app(state: AppState, enable_a2a: bool) -> Router {
         use crate::memory::handlers as mem;
         use axum::routing::delete;
         router = router
-            .route("/v1/memory/documents", post(mem::create_document))
-            .route("/v1/memory/documents", get(mem::list_documents))
-            .route("/v1/memory/documents/{id}", delete(mem::delete_document))
-            .route("/v1/memory/search", get(mem::search_documents));
+            .route(
+                "/v1/memory/documents",
+                post(with_request_state(mem::create_document)),
+            )
+            .route(
+                "/v1/memory/documents",
+                get(with_request_state(mem::list_documents)),
+            )
+            .route(
+                "/v1/memory/documents/{id}",
+                delete(with_request_state(mem::delete_document)),
+            )
+            .route(
+                "/v1/memory/search",
+                get(with_request_state(mem::search_documents)),
+            );
     }
 
-    router.layer(CorsLayer::permissive()).with_state(state)
+    router.layer(CorsLayer::permissive())
 }
 
 async fn health() -> axum::Json<serde_json::Value> {

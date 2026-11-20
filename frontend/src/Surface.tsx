@@ -150,8 +150,11 @@ const entries = Object.keys(componentKeys).map((name) => {
           {...attrs}
           data-surface-control={context.componentModel.id}
           onClick={(event) => {
-            if (event.nativeEvent.isTrusted)
-              void context.dispatchAction(props.action)
+            if (!event.nativeEvent.isTrusted) return
+            const action = context.dataContext.resolveAction(props.action, {
+              userActivation: true,
+            })
+            if (object(action)) void context.dispatchAction(action)
           }}
         >
           {buildChild(props.child)}
