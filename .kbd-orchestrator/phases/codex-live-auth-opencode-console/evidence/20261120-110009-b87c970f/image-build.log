@@ -1,0 +1,746 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  1.109MB
+Step 1/48 : FROM node:26.5.0-bookworm-slim AS console_deps
+26.5.0-bookworm-slim: Pulling from library/node
+53bb9e501f18: Already exists
+7d79facd9550: Pulling fs layer
+6fa843ac8222: Pulling fs layer
+9d0ab12eefb0: Pulling fs layer
+9d0ab12eefb0: Verifying Checksum
+9d0ab12eefb0: Download complete
+7d79facd9550: Verifying Checksum
+7d79facd9550: Download complete
+7d79facd9550: Pull complete
+6fa843ac8222: Verifying Checksum
+6fa843ac8222: Download complete
+6fa843ac8222: Pull complete
+9d0ab12eefb0: Pull complete
+Digest: sha256:2d49d876e96237d76de412761cf05dbfe5aee325cc4406a4d41d5824c5bb8beb
+Status: Downloaded newer image for node:26.5.0-bookworm-slim
+ ---> 9bad07e2c0bc
+Step 2/48 : RUN npm install --global npm@11.16.0
+ ---> Running in b0715e54dd6c
+
+changed 18 packages in 3s
+
+15 packages are looking for funding
+  run `npm fund` for details
+ ---> Removed intermediate container b0715e54dd6c
+ ---> 8c6caf2ec69a
+Step 3/48 : WORKDIR /build/frontend
+ ---> Running in 61951eaa83e1
+ ---> Removed intermediate container 61951eaa83e1
+ ---> 4dd3d0367e3e
+Step 4/48 : COPY frontend/package.json frontend/package-lock.json ./
+ ---> 333033bfef72
+Step 5/48 : RUN npm ci --include=dev --no-audit --no-fund
+ ---> Running in 94707009f2b3
+[91mnpm warn ERESOLVE overriding peer dependency
+[0m[91mnpm warn While resolving: @a2ui/markdown-it@0.2.2
+npm warn Found: @a2ui/web_core@0.15.0
+npm warn node_modules/@a2ui/web_core
+npm warn   @a2ui/web_core@"0.15.0" from the root project
+npm warn   1 more (@a2ui/react)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer @a2ui/web_core@"^0.14.0" from @a2ui/markdown-it@0.2.2
+npm warn node_modules/@a2ui/markdown-it
+npm warn   @a2ui/markdown-it@"^0.2.2" from @a2ui/react@0.15.0
+npm warn   node_modules/@a2ui/react
+npm warn
+npm warn Conflicting peer dependency: @a2ui/web_core@0.14.0
+npm warn node_modules/@a2ui/web_core
+npm warn   peer @a2ui/web_core@"^0.14.0" from @a2ui/markdown-it@0.2.2
+npm warn   node_modules/@a2ui/markdown-it
+npm warn     @a2ui/markdown-it@"^0.2.2" from @a2ui/react@0.15.0
+npm warn     node_modules/@a2ui/react
+[0m
+added 71 packages in 6s
+[91mnpm notice
+npm notice New major version of npm available! 11.16.0 -> 12.2.3
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.3
+npm notice To update run: npm install -g npm@12.2.3
+npm notice
+[0m ---> Removed intermediate container 94707009f2b3
+ ---> 3a5c3302bb3e
+Step 6/48 : FROM rust:1.95-bookworm AS builder
+ ---> 7cf1e580ef55
+Step 7/48 : COPY --from=console_deps /usr/local/bin/node /usr/local/bin/node
+ ---> 1baa81ac23b9
+Step 8/48 : COPY --from=console_deps /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
+ ---> 16570fa8c4b9
+Step 9/48 : RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
+ ---> Running in 3a9635113ffc
+ ---> Removed intermediate container 3a9635113ffc
+ ---> dcf1ded20081
+Step 10/48 : WORKDIR /build
+ ---> Running in 4f9b3656034d
+ ---> Removed intermediate container 4f9b3656034d
+ ---> 030d75f40f08
+Step 11/48 : COPY Cargo.toml Cargo.lock build.rs ./
+ ---> a952b4432723
+Step 12/48 : COPY frontend ./frontend
+ ---> 85dd930d8271
+Step 13/48 : COPY --from=console_deps /build/frontend/node_modules ./frontend/node_modules
+ ---> b96c7a613695
+Step 14/48 : COPY src ./src
+ ---> 357d31cfde5e
+Step 15/48 : COPY data ./data
+ ---> 4a95991f8064
+Step 16/48 : COPY plugin ./plugin
+ ---> ba6de5843ad7
+Step 17/48 : COPY workers ./workers
+ ---> ee2fd6fd8eb3
+Step 18/48 : RUN cargo build --release --locked
+ ---> Running in e8cc3a61005a
+[91m    Updating[0m[91m crates.io index
+[0m[91m Downloading[0m[91m crates ...
+[0m[91m  Downloaded ahash v0.8.12
+[0m[91m  Downloaded futures-io v0.3.32
+[0m[91m  Downloaded form_urlencoded v1.2.2
+[0m[91m  Downloaded anyhow v1.0.102
+[0m[91m  Downloaded errno v0.3.14
+[0m[91m  Downloaded dirs-sys v0.4.1
+[0m[91m  Downloaded darling_macro v0.23.0
+[0m[91m  Downloaded crypto-common v0.1.7
+[0m[91m  Downloaded cpufeatures v0.2.17
+[0m[91m  Downloaded[0m[91m fs2 v0.4.3
+[0m[91m  Downloaded futures-sink v0.3.32
+[0m[91m  Downloaded getrandom v0.4.2
+[0m[91m  Downloaded futures-macro v0.3.32
+[0m[91m  Downloaded rustc_version v0.4.1
+[0m[91m  Downloaded fastrand v2.4.1
+[0m[91m  Downloaded keyring-core v1.0.0
+[0m[91m  Downloaded proc-macro-crate v3.5.0
+[0m[91m  Downloaded inout v0.1.4
+[0m[91m  Downloaded same-file v1.0.6
+[0m[91m  Downloaded lazy_static v1.5.0
+[0m[91m  Downloaded ref-cast-impl v1.0.25
+[0m[91m  Downloaded serde_spanned v0.6.9
+[0m[91m  Downloaded serde_urlencoded v0.7.1
+[0m[91m  Downloaded[0m[91m outref v0.5.2
+[0m[91m  Downloaded toml_write v0.1.2
+[0m[91m  Downloaded serde_path_to_error v0.1.20
+[0m[91m  Downloaded shell-words v1.1.1
+[0m[91m  Downloaded ppv-lite86 v0.2.21
+[0m[91m  Downloaded subtle v2.6.1
+[0m[91m  Downloaded num-rational v0.4.2
+[0m[91m  Downloaded stable_deref_trait v1.2.1
+[0m[91m  Downloaded quote v1.0.45
+[0m[91m  Downloaded[0m[91m toml_datetime v0.6.11
+[0m[91m  Downloaded strsim v0.11.1
+[0m[91m  Downloaded slab v0.4.12
+[0m[91m  Downloaded utf8parse v0.2.2
+[0m[91m  Downloaded strum_macros v0.28.0
+[0m[91m  Downloaded want v0.3.1
+[0m[91m  Downloaded uuid-simd v0.8.0
+[0m[91m  Downloaded zerofrom-derive v0.1.7
+[0m[91m  Downloaded zvariant_utils v3.5.0
+[0m[91m  Downloaded zvariant_derive v5.13.0
+[0m[91m  Downloaded tracing-core v0.1.36
+[0m[91m  Downloaded regex v1.12.3
+[0m[91m  Downloaded url v2.5.8
+[0m[91m  Downloaded zvariant v5.13.0
+[0m[91m  Downloaded winnow v0.7.15
+[0m[91m  Downloaded agent-client-protocol-schema v1.4.0
+[0m[91m  Downloaded regex-syntax v0.8.12
+[0m[91m  Downloaded chrono v0.4.44
+[0m[91m  Downloaded fancy-regex v0.20.2
+[0m[91m  Downloaded winnow v1.0.2
+[0m[91m  Downloaded webpki-roots v1.0.7
+[0m[91m  Downloaded[0m[91m syn v2.0.117
+[0m[91m  Downloaded tracing-subscriber v0.3.23
+[0m[91m  Downloaded zerotrie v0.2.4
+[0m[91m  Downloaded zerocopy v0.8.48
+[0m[91m  Downloaded zerovec v0.11.6
+[0m[91m  Downloaded rustix v1.1.4
+[0m[91m  Downloaded rustls v0.23.40
+[0m[91m  Downloaded zbus v5.17.0
+[0m[91m  Downloaded[0m[91m time v0.3.47
+[0m[91m  Downloaded regex-automata v0.4.19
+[0m[91m  Downloaded unicode-segmentation v1.13.2
+[0m[91m  Downloaded serde_json v1.0.149
+[0m[91m  Downloaded tracing v0.1.44
+[0m[91m  Downloaded quinn-proto v0.11.14
+[0m[91m  Downloaded typenum v1.20.0
+[0m[91m  Downloaded jsonschema v0.61.2
+[0m[91m  Downloaded serde_yml v0.0.12
+[0m[91m  Downloaded libc v0.2.186
+[0m[91m  Downloaded serde_with v3.21.0
+[0m[91m  Downloaded iri-string v0.7.12
+[0m[91m  Downloaded hkdf v0.12.4
+[0m[91m  Downloaded futures-util v0.3.32
+[0m[91m  Downloaded clap_builder v4.6.0
+[0m[91m  Downloaded hyper v1.9.0
+[0m[91m  Downloaded hashbrown v0.17.0
+[0m[91m  Downloaded axum v0.8.9
+[0m[91m  Downloaded agent-client-protocol v1.2.0
+[0m[91m  Downloaded tower-http v0.6.8
+[0m[91m  Downloaded toml_edit v0.25.11+spec-1.1.0
+[0m[91m  Downloaded[0m[91m tokio-util v0.7.18
+[0m[91m  Downloaded reqwest v0.12.28
+[0m[91m  Downloaded idna v1.1.0
+[0m[91m  Downloaded aes v0.8.4
+[0m[91m  Downloaded zbus_macros v5.17.0
+  Downloaded tokio v1.52.1
+[0m[91m  Downloaded yoke v0.8.2
+[0m[91m  Downloaded unicode-ident v1.0.24
+[0m[91m  Downloaded unicode-general-category v1.1.0
+[0m[91m  Downloaded tracing-attributes v0.1.31
+[0m[91m  Downloaded[0m[91m toml_edit v0.22.27
+[0m[91m  Downloaded[0m[91m tinyvec v1.11.0
+[0m[91m  Downloaded[0m[91m thiserror v2.0.18
+[0m[91m  Downloaded serde v1.0.228
+[0m[91m  Downloaded schemars v1.2.1
+[0m[91m  Downloaded mio v1.2.0
+[0m[91m  Downloaded icu_properties_data v2.2.0
+[0m[91m  Downloaded hyper-util v0.1.20
+[0m[91m  Downloaded zmij v1.0.23
+[0m[91m  Downloaded[0m[91m zerovec-derive v0.11.3
+  Downloaded zeroize v1.8.2
+[0m[91m  Downloaded zbus_names v4.3.3
+[0m[91m  Downloaded zbus-secret-service-keyring-store v1.0.0
+[0m[91m  Downloaded writeable v0.6.3
+[0m[91m  Downloaded[0m[91m walkdir v2.5.0
+[0m[91m  Downloaded vsimd v0.8.0
+[0m[91m  Downloaded tracing-log v0.2.0
+[0m[91m  Downloaded tower v0.5.3
+[0m[91m  Downloaded toml_parser v1.1.2+spec-1.1.0
+[0m[91m  Downloaded sharded-slab v0.1.7
+[0m[91m  Downloaded rand v0.9.4
+[0m[91m  Downloaded num-bigint v0.4.8
+[0m[91m  Downloaded libyml v0.0.5
+[0m[91m  Downloaded jsonschema-value v0.61.2
+[0m[91m  Downloaded jsonc-parser v0.34.0
+[0m[91m  Downloaded ring v0.17.14
+[0m[91m  Downloaded indexmap v2.14.0
+[0m[91m  Downloaded http v1.4.0
+[0m[91m  Downloaded hashbrown v0.12.3
+[0m[91m  Downloaded zerofrom v0.1.7
+[0m[91m  Downloaded yoke-derive v0.8.2
+  Downloaded uuid v1.23.1
+[0m[91m  Downloaded toml_datetime v1.1.1+spec-1.1.0
+[0m[91m  Downloaded toml v0.8.23
+  Downloaded time-macros v0.2.27
+[0m[91m  Downloaded tempfile v3.27.0
+[0m[91m  Downloaded socket2 v0.6.3
+[0m[91m  Downloaded schemars v0.9.0
+[0m[91m  Downloaded rustls-webpki v0.103.13
+[0m[91m  Downloaded quinn v0.11.9
+[0m[91m  Downloaded utf8_iter v1.0.4
+[0m[91m  Downloaded try-lock v0.2.5
+[0m[91m  Downloaded tower-layer v0.3.3
+[0m[91m  Downloaded smallvec v1.15.1
+[0m[91m  Downloaded icu_normalizer_data v2.2.0
+  Downloaded icu_normalizer v2.2.0
+[0m[91m  Downloaded icu_locale_core v2.2.0
+[0m[91m  Downloaded icu_collections v2.2.0
+[0m[91m  Downloaded fraction v0.17.0
+[0m[91m  Downloaded version_check v0.9.5
+  Downloaded untrusted v0.9.0
+[0m[91m  Downloaded unicode-xid v0.2.6
+[0m[91m  Downloaded tower-service v0.3.3
+  Downloaded tinystr v0.8.3
+[0m[91m  Downloaded thread_local v1.1.9
+[0m[91m  Downloaded thiserror-impl v2.0.18
+  Downloaded synstructure v0.13.2
+  Downloaded serde_with_macros v3.21.0
+  Downloaded referencing v0.61.2
+[0m[91m  Downloaded serde_derive v1.0.228
+[0m[91m  Downloaded serde_core v1.0.228
+[0m[91m  Downloaded proc-macro2 v1.0.106
+[0m[91m  Downloaded notify v8.2.2
+[0m[91m  Downloaded log v0.4.29
+[0m[91m  Downloaded indexmap v1.9.3
+[0m[91m  Downloaded icu_properties v2.2.0
+[0m[91m  Downloaded httparse v1.10.1
+[0m[91m  Downloaded tokio-rustls v0.26.4
+[0m[91m  Downloaded polling v3.11.0
+[0m[91m  Downloaded pin-project v1.1.11
+[0m[91m  Downloaded num-traits v0.2.19
+[0m[91m  Downloaded micromap v0.3.0
+[0m[91m  Downloaded icu_provider v2.2.0
+[0m[91m  Downloaded iana-time-zone v0.1.65
+[0m[91m  Downloaded derive_more-impl v2.1.1
+[0m[91m  Downloaded cc v1.2.61
+[0m[91m  Downloaded signal-hook-registry v1.4.8
+[0m[91m  Downloaded shlex v1.3.0
+[0m[91m  Downloaded quinn-udp v0.5.14
+[0m[91m  Downloaded num-integer v0.1.46
+[0m[91m  Downloaded matchit v0.8.4
+[0m[91m  Downloaded keyring v4.1.5
+[0m[91m  Downloaded sha2 v0.10.9
+[0m[91m  Downloaded rand_chacha v0.9.0
+[0m[91m  Downloaded piper v0.2.5
+[0m[91m  Downloaded once_cell v1.21.4
+  Downloaded hmac v0.12.1
+[0m[91m  Downloaded derive_more v2.1.1
+[0m[91m  Downloaded base64 v0.22.1
+[0m[91m  Downloaded tokio-macros v2.7.0
+[0m[91m  Downloaded tinyvec_macros v0.1.1
+[0m[91m  Downloaded time-core v0.1.8
+[0m[91m  Downloaded sync_wrapper v1.0.2
+[0m[91m  Downloaded serde_derive_internals v0.29.1
+[0m[91m  Downloaded semver v1.0.28
+[0m[91m  Downloaded secret-service v5.1.0
+  Downloaded ryu v1.0.23
+[0m[91m  Downloaded parking_lot_core v0.9.12
+[0m[91m  Downloaded parking_lot v0.12.5
+[0m[91m  Downloaded memchr v2.8.0
+[0m[91m  Downloaded litemap v0.8.2
+[0m[91m  Downloaded jsonschema-regex v0.61.2
+[0m[91m  Downloaded futures-concurrency v7.7.1
+[0m[91m  Downloaded rand_core v0.10.1
+[0m[91m  Downloaded rand_core v0.9.5
+[0m[91m  Downloaded num-complex v0.4.6
+[0m[91m  Downloaded[0m[91m notify-types v2.3.1
+[0m[91m  Downloaded hyper-rustls v0.27.9
+  Downloaded darling_core v0.23.0
+[0m[91m  Downloaded linux-raw-sys v0.12.1
+[0m[91m  Downloaded strum v0.28.0
+[0m[91m  Downloaded pin-project-internal v1.1.11
+[0m[91m  Downloaded ordered-stream v0.2.0
+[0m[91m  Downloaded ipnet v2.12.0
+[0m[91m  Downloaded heck v0.5.0
+[0m[91m  Downloaded nu-ansi-term v0.50.3
+  Downloaded lock_api v0.4.14
+[0m[91m  Downloaded inotify v0.11.5
+[0m[91m  Downloaded pin-project-lite v0.2.17
+[0m[91m  Downloaded schemars_derive v1.2.1
+[0m[91m  Downloaded rustls-pki-types v1.14.1
+[0m[91m  Downloaded ref-cast v1.0.25
+[0m[91m  Downloaded potential_utf v0.1.5
+[0m[91m  Downloaded percent-encoding v2.3.2
+[0m[91m  Downloaded[0m[91m num-cmp v0.1.0
+[0m[91m  Downloaded mime v0.3.17
+[0m[91m  Downloaded matchers v0.2.0
+[0m[91m  Downloaded bytes v1.11.1
+[0m[91m  Downloaded num-iter v0.1.45
+[0m[91m  Downloaded num-conv v0.2.1
+[0m[91m  Downloaded ident_case v1.0.1
+  Downloaded http-body v1.0.1
+[0m[91m  Downloaded futures v0.3.32
+[0m[91m  Downloaded async-lock v3.4.2
+[0m[91m  Downloaded powerfmt v0.2.0
+[0m[91m  Downloaded parking v2.2.1
+  Downloaded option-ext v0.2.0
+[0m[91m  Downloaded num v0.4.3
+[0m[91m  Downloaded lru-slab v0.1.2
+  Downloaded serde_repr v0.1.20
+[0m[91m  Downloaded scopeguard v1.2.0
+[0m[91m  Downloaded aho-corasick v1.1.4
+[0m[91m  Downloaded inotify-sys v0.1.8
+  Downloaded getrandom v0.3.4
+  Downloaded fluent-uri v0.4.1
+[0m[91m  Downloaded clap v4.6.1
+[0m[91m  Downloaded async-io v2.6.0
+[0m[91m  Downloaded foldhash v0.2.0
+  Downloaded bytecount v0.6.9
+[0m[91m  Downloaded async-task v4.7.1
+[0m[91m  Downloaded futures-lite v2.6.1
+[0m[91m  Downloaded[0m[91m axum-macros v0.5.1
+[0m[91m  Downloaded[0m[91m idna_adapter v1.2.2
+[0m[91m  Downloaded[0m[91m hex v0.4.3
+[0m[91m  Downloaded[0m[91m getrandom v0.2.17
+[0m[91m  Downloaded futures-channel v0.3.32
+[0m[91m  Downloaded fixedbitset v0.5.7
+[0m[91m  Downloaded event-listener v5.4.1
+[0m[91m  Downloaded displaydoc v0.2.5
+[0m[91m  Downloaded deranged v0.5.8
+[0m[91m  Downloaded[0m[91m darling v0.23.0
+[0m[91m  Downloaded crossbeam-utils v0.8.21
+[0m[91m  Downloaded clap_derive v4.6.1
+[0m[91m  Downloaded cipher v0.4.4
+[0m[91m  Downloaded bitflags v2.11.1
+[0m[91m  Downloaded axum-core v0.5.6
+[0m[91m  Downloaded async-trait v0.1.89
+[0m[91m  Downloaded async-executor v1.14.0
+[0m[91m  Downloaded anstream v1.0.0
+[0m[91m  Downloaded is_terminal_polyfill v1.70.2
+[0m[91m  Downloaded httpdate v1.0.3
+[0m[91m  Downloaded futures-task v0.3.32
+[0m[91m  Downloaded futures-executor v0.3.32
+[0m[91m  Downloaded dyn-clone v1.0.20
+  Downloaded concurrent-queue v2.5.0
+  Downloaded blocking v1.6.2
+  Downloaded async-broadcast v0.7.2
+  Downloaded itoa v1.0.18
+  Downloaded http-body-util v0.1.3
+  Downloaded find-msvc-tools v0.1.9
+  Downloaded email_address v0.2.9
+  Downloaded dotenvy v0.15.7
+[0m[91m  Downloaded digest v0.10.7
+[0m[91m  Downloaded[0m[91m data-encoding v2.11.0
+[0m[91m  Downloaded convert_case v0.10.0
+[0m[91m  Downloaded cbc v0.1.2
+[0m[91m  Downloaded bs58 v0.5.1
+  Downloaded autocfg v1.5.0
+  Downloaded async-signal v0.2.14
+[0m[91m  Downloaded async-process v2.5.0
+[0m[91m  Downloaded async-channel v2.5.0
+[0m[91m  Downloaded anstyle-query v1.1.5
+[0m[91m  Downloaded anstyle v1.0.14
+[0m[91m  Downloaded enumflags2 v0.7.12
+  Downloaded bit-vec v0.8.0
+[0m[91m  Downloaded anstyle-parse v1.0.0
+  Downloaded rustc-hash v2.1.2
+  Downloaded generic-array v0.14.7
+  Downloaded cfg-if v1.0.4
+  Downloaded async-stream-impl v0.3.6
+  Downloaded futures-core v0.3.32
+  Downloaded enumflags2_derive v0.7.12
+  Downloaded endi v1.1.1
+[0m[91m  Downloaded block-buffer v0.10.4
+  Downloaded async-stream v0.3.6
+[0m[91m  Downloaded equivalent v1.0.2
+  Downloaded colorchoice v1.0.5
+[0m[91m  Downloaded atomic-waker v1.1.2
+[0m[91m  Downloaded agent-client-protocol-derive v1.2.0
+[0m[91m  Downloaded event-listener-strategy v0.5.4
+[0m[91m  Downloaded dirs v5.0.1
+  Downloaded cfg_aliases v0.2.1
+[0m[91m  Downloaded borrow-or-share v0.2.4
+  Downloaded async-recursion v1.1.1
+[0m[91m  Downloaded clap_lex v1.1.0
+[0m[91m  Downloaded block-padding v0.3.3
+[0m[91m  Downloaded bit-set v0.8.0
+  Downloaded allocator-api2 v0.2.21
+[0m[91m   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.186
+   Compiling cfg-if v1.0.4
+   Compiling pin-project-lite v0.2.17
+   Compiling serde_core v1.0.228
+   Compiling futures-core v0.3.32
+   Compiling memchr v2.8.0
+[0m[91m   Compiling serde v1.0.228
+[0m[91m   Compiling version_check v0.9.5
+[0m[91m   Compiling once_cell v1.21.4
+[0m[91m   Compiling log v0.4.29
+[0m[91m   Compiling futures-io v0.3.32
+[0m[91m   Compiling itoa v1.0.18
+[0m[91m   Compiling[0m[91m autocfg v1.5.0
+[0m[91m   Compiling[0m[91m smallvec v1.15.1
+[0m[91m   Compiling[0m[91m slab v0.4.12
+[0m[91m   Compiling crossbeam-utils v0.8.21
+[0m[91m   Compiling parking v2.2.1
+[0m[91m   Compiling[0m[91m generic-array v0.14.7
+[0m[91m   Compiling tracing-core v0.1.36
+[0m[91m   Compiling[0m[91m futures-sink v0.3.32
+[0m[91m   Compiling equivalent v1.0.2
+[0m[91m   Compiling foldhash v0.2.0
+[0m[91m   Compiling allocator-api2 v0.2.21
+[0m[91m   Compiling[0m[91m bitflags v2.11.1
+[0m[91m   Compiling[0m[91m hashbrown v0.17.0
+[0m[91m   Compiling parking_lot_core v0.9.12
+[0m[91m   Compiling[0m[91m typenum v1.20.0
+[0m[91m   Compiling[0m[91m concurrent-queue v2.5.0
+[0m[91m   Compiling num-traits v0.2.19
+[0m[91m   Compiling[0m[91m futures-channel v0.3.32
+[0m[91m   Compiling[0m[91m scopeguard v1.2.0
+[0m[91m   Compiling[0m[91m stable_deref_trait v1.2.1
+[0m[91m   Compiling[0m[91m winnow v1.0.2
+[0m[91m   Compiling[0m[91m syn v2.0.117
+[0m[91m   Compiling[0m[91m fastrand v2.4.1
+[0m[91m   Compiling bytes v1.11.1
+[0m[91m   Compiling[0m[91m errno v0.3.14
+[0m[91m   Compiling[0m[91m signal-hook-registry v1.4.8
+[0m[91m   Compiling indexmap v2.14.0
+[0m[91m   Compiling[0m[91m lock_api v0.4.14
+[0m[91m   Compiling[0m[91m zmij v1.0.23
+[0m[91m   Compiling futures-task v0.3.32
+[0m[91m   Compiling parking_lot v0.12.5
+[0m[91m   Compiling serde_json v1.0.149
+[0m[91m   Compiling toml_datetime v1.1.1+spec-1.1.0
+[0m[91m   Compiling toml_parser v1.1.2+spec-1.1.0
+[0m[91m   Compiling rustix v1.1.4
+[0m[91m   Compiling atomic-waker v1.1.2
+[0m[91m   Compiling futures-lite v2.6.1
+[0m[91m   Compiling mio v1.2.0
+[0m[91m   Compiling[0m[91m event-listener v5.4.1
+[0m[91m   Compiling[0m[91m toml_edit v0.25.11+spec-1.1.0
+[0m[91m   Compiling linux-raw-sys v0.12.1
+[0m[91m   Compiling subtle v2.6.1
+[0m[91m   Compiling event-listener-strategy v0.5.4
+[0m[91m   Compiling num-integer v0.1.46
+[0m[91m   Compiling[0m[91m crypto-common v0.1.7
+[0m[91m   Compiling[0m[91m socket2 v0.6.3
+[0m[91m   Compiling[0m[91m shlex v1.3.0
+[0m[91m   Compiling[0m[91m find-msvc-tools v0.1.9
+[0m[91m   Compiling http v1.4.0
+[0m[91m   Compiling[0m[91m proc-macro-crate v3.5.0
+[0m[91m   Compiling[0m[91m cc v1.2.61
+[0m[91m   Compiling[0m[91m getrandom v0.2.17
+[0m[91m   Compiling async-io v2.6.0
+[0m[91m   Compiling[0m[91m percent-encoding v2.3.2
+[0m[91m   Compiling[0m[91m ref-cast v1.0.25
+[0m[91m   Compiling[0m[91m getrandom v0.4.2
+[0m[91m   Compiling http-body v1.0.1
+[0m[91m   Compiling num-bigint v0.4.8
+[0m[91m   Compiling async-task v4.7.1
+[0m[91m   Compiling litemap v0.8.2
+[0m[91m   Compiling writeable v0.6.3
+[0m[91m   Compiling[0m[91m num-iter v0.1.45
+[0m[91m   Compiling async-channel v2.5.0
+   Compiling num-complex v0.4.6
+[0m[91m   Compiling block-buffer v0.10.4
+[0m[91m   Compiling block-padding v0.3.3
+[0m[91m   Compiling httparse v1.10.1
+[0m[91m   Compiling tower-service v0.3.3
+[0m[91m   Compiling zeroize v1.8.2
+[0m[91m   Compiling icu_normalizer_data v2.2.0
+[0m[91m   Compiling synstructure v0.13.2
+[0m[91m   Compiling ring v0.17.14
+[0m[91m   Compiling[0m[91m strsim v0.11.1
+[0m[91m   Compiling[0m[91m heck v0.5.0
+[0m[91m   Compiling[0m[91m ident_case v1.0.1
+[0m[91m   Compiling icu_properties_data v2.2.0
+[0m[91m   Compiling[0m[91m regex-syntax v0.8.12
+[0m[91m   Compiling[0m[91m utf8_iter v1.0.4
+[0m[91m   Compiling[0m[91m endi v1.1.1
+[0m[91m   Compiling num-rational v0.4.2
+[0m[91m   Compiling darling_core v0.23.0
+[0m[91m   Compiling rustls-pki-types v1.14.1
+[0m[91m   Compiling[0m[91m num v0.4.3
+[0m[91m   Compiling[0m[91m inout v0.1.4
+[0m[91m   Compiling[0m[91m digest v0.10.7
+[0m[91m   Compiling async-lock v3.4.2
+[0m[91m   Compiling[0m[91m piper v0.2.5
+[0m[91m   Compiling[0m[91m aho-corasick v1.1.4
+[0m[91m   Compiling[0m[91m zerocopy v0.8.48
+[0m[91m   Compiling serde_derive v1.0.228
+[0m[91m   Compiling zerofrom-derive v0.1.7
+[0m[91m   Compiling tracing-attributes v0.1.31
+[0m[91m   Compiling yoke-derive v0.8.2
+[0m[91m   Compiling futures-macro v0.3.32
+[0m[91m   Compiling zerovec-derive v0.11.3
+[0m[91m   Compiling zerofrom v0.1.7
+[0m[91m   Compiling tracing v0.1.44
+[0m[91m   Compiling yoke v0.8.2
+[0m[91m   Compiling[0m[91m enumflags2_derive v0.7.12
+[0m[91m   Compiling displaydoc v0.2.5
+[0m[91m   Compiling tokio-macros v2.7.0
+[0m[91m   Compiling futures-util v0.3.32
+[0m[91m   Compiling[0m[91m polling v3.11.0
+[0m[91m   Compiling ref-cast-impl v1.0.25
+[0m[91m   Compiling zerotrie v0.2.4
+[0m[91m   Compiling zerovec v0.11.6
+[0m[91m   Compiling tokio v1.52.1
+[0m[91m   Compiling try-lock v0.2.5
+[0m[91m   Compiling untrusted v0.9.0
+[0m[91m   Compiling async-signal v0.2.14
+[0m[91m   Compiling getrandom v0.3.4
+[0m[91m   Compiling anyhow v1.0.102
+[0m[91m   Compiling[0m[91m tinystr v0.8.3
+[0m[91m   Compiling[0m[91m potential_utf v0.1.5
+[0m[91m   Compiling[0m[91m icu_collections v2.2.0
+[0m[91m   Compiling icu_locale_core v2.2.0
+[0m[91m   Compiling[0m[91m async-process v2.5.0
+[0m[91m   Compiling want v0.3.1
+[0m[91m   Compiling zvariant_utils v3.5.0
+[0m[91m   Compiling enumflags2 v0.7.12
+[0m[91m   Compiling[0m[91m darling_macro v0.23.0
+[0m[91m   Compiling regex-automata v0.4.19
+[0m[91m   Compiling zvariant_derive v5.13.0
+[0m[91m   Compiling icu_provider v2.2.0
+[0m[91m   Compiling blocking v1.6.2
+[0m[91m   Compiling cipher v0.4.4
+[0m[91m   Compiling serde_derive_internals v0.29.1
+[0m[91m   Compiling uuid v1.23.1
+[0m[91m   Compiling[0m[91m cpufeatures v0.2.17
+[0m[91m   Compiling[0m[91m ahash v0.8.12
+[0m[91m   Compiling zvariant v5.13.0
+[0m[91m   Compiling sync_wrapper v1.0.2
+[0m[91m   Compiling[0m[91m tower-layer v0.3.3
+[0m[91m   Compiling[0m[91m rustls v0.23.40
+[0m[91m   Compiling[0m[91m unicode-segmentation v1.13.2
+[0m[91m   Compiling[0m[91m httpdate v1.0.3
+[0m[91m   Compiling[0m[91m icu_properties v2.2.0
+[0m[91m   Compiling[0m[91m icu_normalizer v2.2.0
+[0m[91m   Compiling[0m[91m convert_case v0.10.0
+[0m[91m   Compiling schemars_derive v1.2.1
+[0m[91m   Compiling[0m[91m darling v0.23.0
+[0m[91m   Compiling[0m[91m rustls-webpki v0.103.13
+[0m[91m   Compiling[0m[91m zbus_names v4.3.3
+[0m[91m   Compiling hyper v1.9.0
+[0m[91m   Compiling zbus_macros v5.17.0
+[0m[91m   Compiling[0m[91m serde_repr v0.1.20
+[0m[91m   Compiling[0m[91m async-trait v0.1.89
+[0m[91m   Compiling[0m[91m strum_macros v0.28.0
+[0m[91m   Compiling[0m[91m async-recursion v1.1.1
+[0m[91m   Compiling[0m[91m hmac v0.12.1
+[0m[91m   Compiling[0m[91m async-executor v1.14.0
+[0m[91m   Compiling form_urlencoded v1.2.2
+[0m[91m   Compiling async-broadcast v0.7.2
+[0m[91m   Compiling ordered-stream v0.2.0
+[0m[91m   Compiling ipnet v2.12.0
+[0m[91m   Compiling[0m[91m hex v0.4.3
+[0m[91m   Compiling dyn-clone v1.0.20
+[0m[91m   Compiling base64 v0.22.1
+[0m[91m   Compiling unicode-xid v0.2.6
+[0m[91m   Compiling utf8parse v0.2.2
+[0m[91m   Compiling ryu v1.0.23
+[0m[91m   Compiling inotify-sys v0.1.8
+[0m[91m   Compiling anstyle-parse v1.0.0
+[0m[91m   Compiling hyper-util v0.1.20
+[0m[91m   Compiling[0m[91m derive_more-impl v2.1.1
+[0m[91m   Compiling schemars v1.2.1
+[0m[91m   Compiling[0m[91m hkdf v0.12.4
+[0m[91m   Compiling tower v0.5.3
+[0m[91m   Compiling serde_with_macros v3.21.0
+[0m[91m   Compiling[0m[91m strum v0.28.0
+[0m[91m   Compiling zbus v5.17.0
+[0m[91m   Compiling[0m[91m idna_adapter v1.2.2
+[0m[91m   Compiling[0m[91m aes v0.8.4
+[0m[91m   Compiling[0m[91m sha2 v0.10.9
+[0m[91m   Compiling[0m[91m cbc v0.1.2
+[0m[91m   Compiling pin-project-internal v1.1.11
+[0m[91m   Compiling http-body-util v0.1.3
+[0m[91m   Compiling[0m[91m jsonschema-value v0.61.2
+[0m[91m   Compiling is_terminal_polyfill v1.70.2
+[0m[91m   Compiling[0m[91m anstyle-query v1.1.5
+[0m[91m   Compiling[0m[91m borrow-or-share v0.2.4
+[0m[91m   Compiling anstyle v1.0.14
+[0m[91m   Compiling[0m[91m bit-vec v0.8.0
+[0m[91m   Compiling[0m[91m unicode-general-category v1.1.0
+[0m[91m   Compiling[0m[91m colorchoice v1.0.5
+[0m[91m   Compiling[0m[91m bit-set v0.8.0
+[0m[91m   Compiling anstream v1.0.0
+[0m[91m   Compiling[0m[91m serde_with v3.21.0
+[0m[91m   Compiling[0m[91m fluent-uri v0.4.1
+[0m[91m   Compiling[0m[91m idna v1.1.0
+[0m[91m   Compiling[0m[91m derive_more v2.1.1
+[0m[91m   Compiling serde_urlencoded v0.7.1
+[0m[91m   Compiling[0m[91m pin-project v1.1.11
+[0m[91m   Compiling futures-executor v0.3.32
+[0m[91m   Compiling[0m[91m serde_spanned v0.6.9
+[0m[91m   Compiling[0m[91m toml_datetime v0.6.11
+[0m[91m   Compiling[0m[91m fraction v0.17.0
+[0m[91m   Compiling[0m[91m webpki-roots v1.0.7
+[0m[91m   Compiling serde_yml v0.0.12
+[0m[91m   Compiling[0m[91m keyring-core v1.0.0
+[0m[91m   Compiling vsimd v0.8.0
+[0m[91m   Compiling[0m[91m outref v0.5.2
+[0m[91m   Compiling[0m[91m iri-string v0.7.12
+[0m[91m   Compiling[0m[91m option-ext v0.2.0
+[0m[91m   Compiling same-file v1.0.6
+[0m[91m   Compiling[0m[91m num-cmp v0.1.0
+[0m[91m   Compiling winnow v0.7.15
+[0m[91m   Compiling[0m[91m bytecount v0.6.9
+[0m[91m   Compiling thiserror v2.0.18
+[0m[91m   Compiling[0m[91m mime v0.3.17
+[0m[91m   Compiling[0m[91m fixedbitset v0.5.7
+[0m[91m   Compiling toml_write v0.1.2
+[0m[91m   Compiling clap_lex v1.1.0
+[0m[91m   Compiling lazy_static v1.5.0
+[0m[91m   Compiling micromap v0.3.0
+[0m[91m   Compiling sharded-slab v0.1.7
+[0m[91m   Compiling[0m[91m clap_builder v4.6.0
+[0m[91m   Compiling tokio-rustls v0.26.4
+[0m[91m   Compiling agent-client-protocol-schema v1.4.0
+[0m[91m   Compiling hyper-rustls v0.27.9
+[0m[91m   Compiling[0m[91m referencing v0.61.2
+[0m[91m   Compiling futures-concurrency v7.7.1
+[0m[91m   Compiling axum-core v0.5.6
+[0m[91m   Compiling toml_edit v0.22.27
+[0m[91m   Compiling[0m[91m tower-http v0.6.8
+[0m[91m   Compiling walkdir v2.5.0
+[0m[91m   Compiling uuid-simd v0.8.0
+[0m[91m   Compiling[0m[91m dirs-sys v0.4.1
+[0m[91m   Compiling[0m[91m futures v0.3.32
+[0m[91m   Compiling[0m[91m url v2.5.8
+[0m[91m   Compiling[0m[91m inotify v0.11.5
+[0m[91m   Compiling[0m[91m fancy-regex v0.20.2
+[0m[91m   Compiling[0m[91m regex v1.12.3
+[0m[91m   Compiling[0m[91m secret-service v5.1.0
+[0m[91m   Compiling[0m[91m matchers v0.2.0
+[0m[91m   Compiling tokio-util v0.7.18
+[0m[91m   Compiling libyml v0.0.5
+[0m[91m   Compiling email_address v0.2.9
+[0m[91m   Compiling jsonschema-regex v0.61.2
+[0m[91m   Compiling thiserror-impl v2.0.18
+[0m[91m   Compiling zbus-secret-service-keyring-store v1.0.0
+[0m[91m   Compiling[0m[91m agent-client-protocol-derive v1.2.0
+[0m[91m   Compiling axum-macros v0.5.1
+[0m[91m   Compiling clap_derive v4.6.1
+[0m[91m   Compiling[0m[91m async-stream-impl v0.3.6
+[0m[91m   Compiling[0m[91m serde_path_to_error v0.1.20
+[0m[91m   Compiling tracing-log v0.2.0
+[0m[91m   Compiling notify-types v2.3.1
+[0m[91m   Compiling thread_local v1.1.9
+[0m[91m   Compiling[0m[91m openai-proxy v0.1.0 (/build)
+[0m[91m   Compiling[0m[91m shell-words v1.1.1
+[0m[91m   Compiling nu-ansi-term v0.50.3
+[0m[91m   Compiling matchit v0.8.4
+[0m[91m   Compiling[0m[91m data-encoding v2.11.0
+[0m[91m   Compiling rustc-hash v2.1.2
+[0m[91m   Compiling agent-client-protocol v1.2.0
+[0m[91m   Compiling[0m[91m axum v0.8.9
+[0m[91m   Compiling[0m[91m jsonschema v0.61.2
+[0m[91m   Compiling clap v4.6.1
+[0m[91m   Compiling[0m[91m tracing-subscriber v0.3.23
+[0m[91m   Compiling notify v8.2.2
+[0m[91m   Compiling async-stream v0.3.6
+[0m[91m   Compiling keyring v4.1.5
+[0m[91m   Compiling[0m[91m reqwest v0.12.28
+[0m[91m   Compiling[0m[91m toml v0.8.23
+[0m[91m   Compiling dirs v5.0.1
+[0m[91m   Compiling tempfile v3.27.0
+[0m[91m   Compiling[0m[91m jsonc-parser v0.34.0
+[0m[91m   Compiling fs2 v0.4.3
+[0m[91m   Compiling semver v1.0.28
+[0m[91m   Compiling[0m[91m dotenvy v0.15.7
+[0m[91m    Finished `release` profile [optimized] target(s) in 3m 11s
+[0m ---> Removed intermediate container e8cc3a61005a
+ ---> 79cffc946be2
+Step 19/48 : FROM oven/bun:1.3.10 AS sdk_deps
+1.3.10: Pulling from oven/bun
+ac9148dc57ca: Pulling fs layer
+4c2f73d039a5: Pulling fs layer
+557f3e7ffdc8: Pulling fs layer
+04320dec943a: Pulling fs layer
+1ba5c011290f: Pulling fs layer
+f69bb4450976: Pulling fs layer
+1ba5c011290f: Waiting
+f69bb4450976: Waiting
+04320dec943a: Waiting
+4c2f73d039a5: Verifying Checksum
+4c2f73d039a5: Download complete
+04320dec943a: Verifying Checksum
+04320dec943a: Download complete
+1ba5c011290f: Verifying Checksum
+1ba5c011290f: Download complete
+f69bb4450976: Verifying Checksum
+f69bb4450976: Download complete
+ac9148dc57ca: Verifying Checksum
+ac9148dc57ca: Download complete
+557f3e7ffdc8: Verifying Checksum
+557f3e7ffdc8: Download complete
+ac9148dc57ca: Pull complete
+4c2f73d039a5: Pull complete
+557f3e7ffdc8: Pull complete
+04320dec943a: Pull complete
+1ba5c011290f: Pull complete
+f69bb4450976: Pull complete
+Digest: sha256:b86c67b531d87b4db11470d9b2bd0c519b1976eee6fcd71634e73abfa6230d2e
+Status: Downloaded newer image for oven/bun:1.3.10
+ ---> b5fe095e89e9
+Step 20/48 : WORKDIR /opt/proxy/workers
+ ---> Running in debaff3a044b
+ ---> Removed intermediate container debaff3a044b
+ ---> 9083d982d80c
+Step 21/48 : COPY workers/package.json workers/bun.lock ./
+ ---> ce80e34aa671
+Step 22/48 : RUN bun install --frozen-lockfile --production
+ ---> Running in 79d8324a04d1
+bun install v1.3.10 (30e609e0)
+[91m2[0m[91m |   "lockfileVersion": 2,
+                         ^
+error: Unknown lockfile version
+    at bun.lock:2:22
+UnknownLockfileVersion: failed to parse lockfile: 'bun.lock'
+[0mThe command '/bin/sh -c bun install --frozen-lockfile --production' returned a non-zero code: 1

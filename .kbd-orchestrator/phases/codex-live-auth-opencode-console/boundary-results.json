@@ -1,10 +1,15 @@
 {
   "phase": "codex-live-auth-opencode-console",
+  "boundary": "B5",
+  "affectedScenarios": [
+    "PLUGIN-1",
+    "UI-1"
+  ],
   "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
   "runId": "codex-live-auth-opencode-console-20261119T193635Z",
   "planRevision": 1,
   "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
-  "candidateDigest": "55c6f3452da7527f069d5367ac917c43cc015104bfaf413627b6e388e3720778",
+  "candidateDigest": "8c74915f50f47b08221db18bb95635d3879bb9dad2f137bf70c5ccd958341351",
   "scenarios": [
     {
       "id": "AUTH-1",
@@ -50,12 +55,13 @@
     },
     {
       "id": "PLUGIN-1",
-      "status": "NOT_EXERCISED",
-      "attempted": "packet stopped before this row",
+      "status": "FAIL",
+      "attempted": "scenario PLUGIN-1, negative PLUGIN-1",
       "observed": [
-        "failed prerequisite or isolation control at build"
+        "FAIL",
+        "FAIL"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-003944-05a45aa1",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-110009-b87c970f",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -92,12 +98,13 @@
     },
     {
       "id": "UI-1",
-      "status": "FAIL",
-      "attempted": "packet stopped before this row",
+      "status": "BLOCKED",
+      "attempted": "scenario UI-1, negative UI-1",
       "observed": [
-        "failed prerequisite or isolation control at build"
+        "BLOCKED",
+        "BLOCKED"
       ],
-      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-003944-05a45aa1",
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-110009-b87c970f",
       "executedBy": {
         "harness": "Bash/Python KBD boundary runner",
         "model": "none (scripted observations)",
@@ -193,15 +200,15 @@
     "source": "clock and packet command/probe counter",
     "values": {
       "timeMinutes": {
-        "value": 0.95,
+        "value": 18.39,
         "class": "measured"
       },
       "toolCalls": {
-        "value": 13,
+        "value": 54,
         "class": "measured"
       },
       "repairAttempts": {
-        "value": 0,
+        "value": 1,
         "class": "measured"
       },
       "noProgress": {
@@ -210,11 +217,12 @@
       }
     }
   },
-  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-003944-05a45aa1",
+  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-110009-b87c970f",
   "cleanup": "PASS",
   "executedBy": {
     "harness": "Bash/Python KBD boundary runner",
     "model": "none (scripted observations)",
     "python": "3.11.3"
-  }
+  },
+  "previousResultsSha256": "fea35cea12d0a16c520c79d2b8a3791f856d8faa26ede183870febd0ce63441e"
 }

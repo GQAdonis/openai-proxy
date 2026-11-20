@@ -1,0 +1,9 @@
+bun install v1.4.4 (38afee6c8)
+
++ @openai/codex-sdk@0.169.0
++ @opencode/plugin@2.3.0
++ @opencode/sdk@2.3.0
+
+367 packages installed [7.90s]
+
+Blocked 1 postinstall. Run `bun pm untrusted` for details.

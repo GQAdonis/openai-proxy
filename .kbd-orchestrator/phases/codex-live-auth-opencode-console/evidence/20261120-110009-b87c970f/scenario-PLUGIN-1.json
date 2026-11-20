@@ -1,0 +1,86 @@
+{
+  "command": "scenario PLUGIN-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "installed plugin project",
+      "status": "FAIL",
+      "observed": "installed plugin/host oracle failed in project (exit 1)"
+    },
+    {
+      "name": "installed plugin installed",
+      "status": "FAIL",
+      "observed": "installed plugin/host oracle failed in installed (exit 1)"
+    },
+    {
+      "name": "installed plugin override",
+      "status": "FAIL",
+      "observed": "installed plugin/host oracle failed in override (exit 1)"
+    },
+    {
+      "name": "real highest-tier subscription turn and independent allowance attribution",
+      "status": "BLOCKED",
+      "observed": "requires current consent and correlated provider usage evidence"
+    }
+  ],
+  "notes": {
+    "auth-case-19kiukgm": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-_dgwfojz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "61759",
+        "--backend-url",
+        "http://127.0.0.1:61758/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.005,
+      "exit": -15
+    },
+    "auth-case-6gjf4cnr": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-_dgwfojz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "61787",
+        "--backend-url",
+        "http://127.0.0.1:61786/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.515,
+      "exit": -15
+    },
+    "auth-case-pkqp3kc4": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-_dgwfojz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "61876",
+        "--backend-url",
+        "http://127.0.0.1:61875/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 1.508,
+      "exit": -15
+    }
+  },
+  "candidate": "8c74915f50f47b08221db18bb95635d3879bb9dad2f137bf70c5ccd958341351",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795172954.523712
+}

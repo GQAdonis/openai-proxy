@@ -1,0 +1,70 @@
+{
+  "command": "negative UI-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "local asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.01
+    },
+    {
+      "name": "chat asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.003
+    },
+    {
+      "name": "final image packaged console",
+      "status": "BLOCKED",
+      "observed": "final image service unavailable"
+    },
+    {
+      "name": "failed native stream preserves usable text",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: installed Chromium unavailable to the isolated Playwright driver"
+    },
+    {
+      "name": "chat user cannot write host settings",
+      "status": "PASS",
+      "observed": {
+        "status": 403,
+        "changed": false
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "controlled failed frontend build",
+      "status": "PASS",
+      "observed": {
+        "originalSource": "01fda6036c5f35ff4c53c02f58cbb869befc40c7ed83e16c38ca54b6de12cba3",
+        "derivativeSource": "093c18e48364c88d9a294a4b73da2eb94074af8e332070e8f51ed6d6b6cbd5eb",
+        "originalHtml": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "baselineBinary": "a5d182508c2136a77f31df29bb1717250495de010813d64bfe34b14a783a23f5",
+        "resultBinary": "a5d182508c2136a77f31df29bb1717250495de010813d64bfe34b14a783a23f5",
+        "resultHtml": null,
+        "resultExit": 101,
+        "log": "ui-derivative-failed-mutated.log"
+      },
+      "seconds": 173.871
+    }
+  ],
+  "notes": {},
+  "candidate": "8c74915f50f47b08221db18bb95635d3879bb9dad2f137bf70c5ccd958341351",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795173455.569612
+}

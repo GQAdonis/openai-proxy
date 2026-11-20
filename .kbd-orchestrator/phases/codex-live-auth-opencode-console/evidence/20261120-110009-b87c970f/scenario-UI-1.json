@@ -1,0 +1,83 @@
+{
+  "command": "scenario UI-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "local packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.008
+    },
+    {
+      "name": "local keyboard settings and driver capabilities",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: installed Chromium unavailable to the isolated Playwright driver"
+    },
+    {
+      "name": "local native stop",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: installed Chromium unavailable to the isolated Playwright driver"
+    },
+    {
+      "name": "chat packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.004
+    },
+    {
+      "name": "chat keyboard settings and driver capabilities",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: installed Chromium unavailable to the isolated Playwright driver"
+    },
+    {
+      "name": "chat native stop",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: installed Chromium unavailable to the isolated Playwright driver"
+    },
+    {
+      "name": "final image packaged console",
+      "status": "BLOCKED",
+      "observed": "final image service unavailable"
+    },
+    {
+      "name": "standalone release without worker runtime",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: installed Chromium unavailable to the isolated Playwright driver"
+    },
+    {
+      "name": "incremental embedded asset replacement",
+      "status": "PASS",
+      "observed": {
+        "originalSource": "01fda6036c5f35ff4c53c02f58cbb869befc40c7ed83e16c38ca54b6de12cba3",
+        "derivativeSource": "eafb90b54525079113e01e2850b88a3ae9926edcd69715202d5fef72f6ae218e",
+        "originalHtml": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "baselineBinary": "93440bb07a24b89f447cd428e4733ec995e0879a862db77a58fb0dbec7b2037a",
+        "resultBinary": "be170d4924e867f99c78213399d81127021d2e6f8de642489f90e89024cb918d",
+        "resultHtml": "62ebe9636aeddf161824e226cd2b050baf497cdedaa4694eeb4b717933395cb6",
+        "resultExit": 0,
+        "log": "ui-derivative-incremental-mutated.log"
+      },
+      "seconds": 320.169
+    }
+  ],
+  "notes": {},
+  "candidate": "8c74915f50f47b08221db18bb95635d3879bb9dad2f137bf70c5ccd958341351",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795173279.806614
+}

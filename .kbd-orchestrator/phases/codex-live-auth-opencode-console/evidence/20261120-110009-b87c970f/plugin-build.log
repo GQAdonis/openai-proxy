@@ -1,0 +1,5 @@
+$ bun build ./src/index.ts --outfile ./dist/index.js --format esm --target bun --external @opencode/plugin && cp src/login.mjs dist/login.mjs
+Bundled 3 modules in 7ms
+
+  index.js  7.51 KB  (entry point)
+

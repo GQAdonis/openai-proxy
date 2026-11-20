@@ -1,0 +1,21 @@
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @a2ui/markdown-it@0.2.2
+npm warn Found: @a2ui/web_core@0.15.0
+npm warn node_modules/@a2ui/web_core
+npm warn   @a2ui/web_core@"0.15.0" from the root project
+npm warn   1 more (@a2ui/react)
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer @a2ui/web_core@"^0.14.0" from @a2ui/markdown-it@0.2.2
+npm warn node_modules/@a2ui/markdown-it
+npm warn   @a2ui/markdown-it@"^0.2.2" from @a2ui/react@0.15.0
+npm warn   node_modules/@a2ui/react
+npm warn
+npm warn Conflicting peer dependency: @a2ui/web_core@0.14.0
+npm warn node_modules/@a2ui/web_core
+npm warn   peer @a2ui/web_core@"^0.14.0" from @a2ui/markdown-it@0.2.2
+npm warn   node_modules/@a2ui/markdown-it
+npm warn     @a2ui/markdown-it@"^0.2.2" from @a2ui/react@0.15.0
+npm warn     node_modules/@a2ui/react
+
+added 72 packages in 4s

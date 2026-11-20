@@ -9,6 +9,13 @@
       "authorizer": "travis@tribehealthsolutions.com",
       "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
       "reason": "Explicit user approval to sign and run the fixture-only B4 packet for candidate SHA-256 55c6f3452da7527f069d5367ac917c43cc015104bfaf413627b6e388e3720778 at source cad17b0. Disposable profiles only."
+    },
+    {
+      "boundary": "B5",
+      "authorizedAt": "2026-11-20T10:59:51.475Z",
+      "authorizer": "travis@tribehealthsolutions.com",
+      "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
+      "reason": "Owner authorized first fixture-only B5 repair of the Inter import and plugin Node types. Frozen candidate SHA-256 8c74915f50f47b08221db18bb95635d3879bb9dad2f137bf70c5ccd958341351 at source 8573a9d. Build, PLUGIN-1 and UI-1 with negative controls, disposable profiles and synthetic credentials only."
     }
   ]
 }
