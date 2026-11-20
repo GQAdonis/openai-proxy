@@ -1,0 +1,232 @@
+{
+  "phase": "codex-live-auth-opencode-console",
+  "contract": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8",
+  "candidate": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "source": "885a17a",
+  "imageConfigDigest": "sha256:b0558c5097cfd633eb1f25f1e35dc80dfc853262dadd0fbf44a0e8d089223886",
+  "platform": "linux/arm64",
+  "purpose": "bounded genuine account verification",
+  "actor": "dedicated subscriber profile",
+  "tools": {
+    "hostLogin": "codex-cli 0.169.0",
+    "imageCodexCli": "0.169.0",
+    "codexSdk": "0.169.0",
+    "openCodeSdkHost": "2.3.0",
+    "plugin": "@prometheus-ags/opencode-codex-proxy 0.2.0",
+    "cliSha256": "3bb41c9a80187773e2a59278d4fc355b1a163c31bb5a79581e37d4fe428af047",
+    "proxySha256": "c46d15bfedcb9b127d069c799f3b79b1ee5780462c18f91ad9cb0552936c793f",
+    "turnVerifierSha256": "cb1b424a60f8f8f8f8b504fb4f5df8baaa535706500391aa83e82ae2ebe1125a"
+  },
+  "process": {
+    "sameContainer": true,
+    "samePid": true,
+    "startedAt": "2026-11-20T15:06:31.752577851Z",
+    "publishedPorts": false
+  },
+  "apiKeyEnvironmentAbsent": true,
+  "login": {
+    "exit": 0,
+    "freshDirectoryMount": true,
+    "initial": {
+      "status": "signed_out",
+      "source": "none",
+      "mode": "none",
+      "generation": 0,
+      "lastRefresh": null,
+      "refreshRuntime": "not_applicable",
+      "capabilities": {
+        "reload": true,
+        "refresh": false
+      }
+    },
+    "pickup": {
+      "state": {
+        "status": "ready",
+        "source": "file",
+        "mode": "managed",
+        "generation": 1,
+        "lastRefresh": null,
+        "refreshRuntime": "supported",
+        "capabilities": {
+          "reload": true,
+          "refresh": true
+        }
+      },
+      "observedMsSinceFileMtime": 1644.7
+    },
+    "timingDefinition": "Host auth.json modification time to receipt of first ready console connection response. Independent account read followed separately."
+  },
+  "renewal": {
+    "manualRequests": 1,
+    "before": {
+      "status": "observed",
+      "authMode": "chatgpt",
+      "accountPlan": "promax",
+      "ordinaryUsageAllowed": true,
+      "defaultLimits": {
+        "plan": "promax",
+        "primary": {
+          "usedPercent": 30,
+          "windowDurationMins": 10080,
+          "resetsAt": 1795528416
+        }
+      },
+      "codexLimits": {
+        "plan": "promax",
+        "primary": {
+          "usedPercent": 30,
+          "windowDurationMins": 10080,
+          "resetsAt": 1795528416
+        }
+      }
+    },
+    "result": {
+      "status": "ready",
+      "source": "file",
+      "mode": "managed",
+      "generation": 2,
+      "lastRefresh": "1795188012",
+      "refreshRuntime": "supported",
+      "capabilities": {
+        "reload": true,
+        "refresh": true
+      }
+    },
+    "authenticatedAfter": {
+      "status": "observed",
+      "authMode": "chatgpt",
+      "accountPlan": "promax",
+      "ordinaryUsageAllowed": true,
+      "defaultLimits": {
+        "plan": "promax",
+        "primary": {
+          "usedPercent": 30,
+          "windowDurationMins": 10080,
+          "resetsAt": 1795528417
+        }
+      },
+      "codexLimits": {
+        "plan": "promax",
+        "primary": {
+          "usedPercent": 30,
+          "windowDurationMins": 10080,
+          "resetsAt": 1795528417
+        }
+      }
+    }
+  },
+  "turn": {
+    "cataloguePreflight": {
+      "mode": "live",
+      "stage": "activation",
+      "guard": "catalogue",
+      "model": "gpt-5.5",
+      "admitted": 0,
+      "refused": 0,
+      "httpStatus": 0,
+      "bundleBuilt": true,
+      "replyMatched": false
+    },
+    "operatorInput": "Reply with exactly the word READY.",
+    "modelSelection": "gpt-5.5 unavailable in live catalogue. Used listed gpt-6.2-sol.",
+    "host": {
+      "mode": "live",
+      "stage": "done",
+      "guard": "",
+      "model": "gpt-6.2-sol",
+      "admitted": 1,
+      "refused": 0,
+      "httpStatus": 200,
+      "bundleBuilt": true,
+      "replyMatched": true
+    },
+    "binding": {
+      "codexDriver": true,
+      "modelMatched": true,
+      "nativeSessionMatched": true,
+      "conversationTurns": 1,
+      "projectionPath": "/api/v1/drivers/codex/v1/chat/completions"
+    },
+    "rollout": {
+      "rollouts": 1,
+      "modelMatched": true,
+      "matchingNativeTurn": true,
+      "events": {
+        "task_started": 1,
+        "token_count": 1,
+        "task_complete": 1
+      },
+      "usage": {
+        "codexBucket": true,
+        "rateLimitIdIsNull": false,
+        "plan": "promax",
+        "primaryPercent": 30.0,
+        "primaryWindowMinutes": 10080,
+        "totalTokens": 11434,
+        "inputTokens": 11429,
+        "outputTokens": 5,
+        "eventTime": "2026-11-20T15:21:34.580Z"
+      }
+    },
+    "controls": {
+      "compactionOrErrorEvents": [],
+      "freshIsolatedCodexHome": true
+    },
+    "credits": {
+      "creditsReported": true,
+      "hasCredits": false,
+      "unlimited": false,
+      "rateLimitReached": false,
+      "spendControlReached": null,
+      "individualLimitReported": false
+    },
+    "accountAfter": {
+      "status": "observed",
+      "authMode": "chatgpt",
+      "accountPlan": "promax",
+      "ordinaryUsageAllowed": true,
+      "defaultLimits": {
+        "plan": "promax",
+        "primary": {
+          "usedPercent": 30,
+          "windowDurationMins": 10080,
+          "resetsAt": 1795528416
+        }
+      },
+      "codexLimits": {
+        "plan": "promax",
+        "primary": {
+          "usedPercent": 30,
+          "windowDurationMins": 10080,
+          "resetsAt": 1795528416
+        }
+      }
+    },
+    "startedAt": "2026-11-20T15:21:26.890966+00:00",
+    "threadUsageLookups": [
+      {
+        "status": "unavailable",
+        "stage": "account/usage/read",
+        "error": "thread_usage_unavailable"
+      },
+      {
+        "status": "unavailable",
+        "stage": "account/usage/read",
+        "error": "thread_usage_unavailable",
+        "observedAt": "2026-11-20T15:26:11+00:00"
+      }
+    ]
+  },
+  "cleanup": {
+    "isolatedProfileRemoved": true,
+    "verificationContainerRemoved": true,
+    "stagingDeploymentPerformed": false
+  },
+  "entitlement": {
+    "verdict": "PASS",
+    "plan": "promax",
+    "meter": "codex",
+    "evidence": "Independent native single-turn provider quota and token event, corroborated by separate account/rateLimits/read on the same dedicated profile and matched proxy/native session. No compaction or error events. See execution.md for release-source provenance.",
+    "measuredPerTurnDebit": null
+  }
+}
