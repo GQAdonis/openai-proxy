@@ -1,0 +1,89 @@
+{
+  "scenario": "AUTH-1",
+  "status": "PASS",
+  "combinedWith": [
+    "20261120-133440-37a73290/scenario-AUTH-1.json",
+    "20261120-133440-37a73290/negative-AUTH-1.json",
+    "20261120-151920-live-pro/receipt.json"
+  ],
+  "observedAtUtc": "2026-11-20T16:26:12+00:00",
+  "contractDigest": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "candidateDigest": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "candidateImageConfig": "sha256:b0558c5097cfd633eb1f25f1e35dc80dfc853262dadd0fbf44a0e8d089223886",
+  "fixtureImageConfig": "sha256:86c129adcb1a9f86ce10ad94e1f845775282fb3869d46a2bde7787bf4b020dfb",
+  "setupClientSha256": "5c7d89bc2d5fa5d83cc7768b813ca671368e70b8b9eda9d1ca9e6ec6b66d8ce0",
+  "setupClientArchive": {
+    "url": "https://github.com/anomalyco/opencode/releases/download/v2.3.0/opencode-linux-arm64.tar.gz",
+    "sha256": "3207fb5cdec448d479242c0f1a14f4f7bdfcad3a79209b5eb8f9003725e93711"
+  },
+  "fixtures": {
+    "Dockerfile": "8c877eec808b9a9720d6e3d6c023b8afa405abeaebf2639e2b21a21f1ab9637d",
+    "broker.py": "1a882c0dd3a9284d2447ec3952b1edaa9d6c915ba6b9ba45741f2b1ad50783c0"
+  },
+  "positive": {
+    "broker": "GNOME Secret Service, private D-Bus and tmpfs login collection",
+    "providerConfig": "keyring",
+    "setupClient": "opencode v2.3.0",
+    "binary": "c46d15bfedcb9b127d069c799f3b79b1ee5780462c18f91ad9cb0552936c793f",
+    "owners": [
+      {
+        "principal": "owner-a",
+        "publicationToRecipientMs": 542,
+        "generation": 1,
+        "sameProcess": true,
+        "recipientMatched": true,
+        "modelIdsAndLimitsEqual": 8,
+        "transports": [
+          "REST",
+          "legacy AG-UI",
+          "MCP HTTP"
+        ]
+      },
+      {
+        "principal": "owner-b",
+        "publicationToRecipientMs": 444,
+        "generation": 2,
+        "sameProcess": true,
+        "recipientMatched": true,
+        "modelIdsAndLimitsEqual": 8,
+        "transports": [
+          "REST",
+          "legacy AG-UI",
+          "MCP HTTP"
+        ]
+      }
+    ],
+    "afterKeyringRemoval": {
+      "apiModelStatus": 500,
+      "freshSetupModels": 0,
+      "servicePidUnchanged": true
+    },
+    "fileStoreAbsent": true,
+    "recipientCalls": 6
+  },
+  "timing": "Monotonic time from invoking the native credential write to verifying the REST recipient accepted the selected identity and returned text; AG-UI and MCP HTTP calls followed. No explicit service reload or restart.",
+  "environment": {
+    "network": "none; loopback only",
+    "effectiveUid": 65534,
+    "capabilities": "all dropped",
+    "noNewPrivileges": true,
+    "keyringStorage": "tmpfs login collection, separate D-Bus session",
+    "hostCredentialMounts": 0,
+    "profile": "new empty directories",
+    "realAccountOperations": 0,
+    "paidRequests": 0
+  },
+  "reproduction": [
+    "Extract /usr/local/bin/openai-proxy unchanged from the candidate image, verify its SHA-256, and place it alongside broker.py and the verified Linux arm64 OpenCode executable as opencode.",
+    "Build the helper image from fixtures/keyring/Dockerfile.",
+    "Launch the helper image with --rm --network none --cap-drop ALL --security-opt no-new-privileges --user 65534:65534 --tmpfs /w:uid=65534,gid=65534,mode=0700. Mount the fixture directory read-only at /opt/fixture. Set HOME=/w and XDG_RUNTIME_DIR=/w/runtime.",
+    "mkdir -m 700 \"$XDG_RUNTIME_DIR\" && dbus-run-session -- sh -c 'printf fixture-pass | gnome-keyring-daemon --unlock --components=secrets >/dev/null && exec python3 -B /opt/fixture/broker.py'"
+  ],
+  "limitation": "The Linux Secret Service is the broker covered by this subcase. macOS Keychain was not accessed. Signed-out GET /v1/models returned HTTP 500 on this candidate; the contract checks denial and zero stale inventory.",
+  "cleanup": {
+    "verificationContainersRemoved": true,
+    "scratchDirectoryRemoved": true,
+    "helperImageTagRemoved": true,
+    "retainedCandidateUnchanged": true
+  }
+}

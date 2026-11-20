@@ -1,0 +1,3 @@
+openai_base_url = "http://127.0.0.1:43195/v1"
+chatgpt_base_url = "http://127.0.0.1:43195"
+cli_auth_credentials_store = "file"

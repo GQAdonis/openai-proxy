@@ -1,0 +1,185 @@
+{
+  "phase": "codex-live-auth-opencode-console",
+  "contract": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "attempt": 7,
+  "candidateDigest": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "source": "885a17ac07712ffefada88c6f37fa770ac4b1eb7",
+  "image": "sha256:b0558c5097cfd633eb1f25f1e35dc80dfc853262dadd0fbf44a0e8d089223886",
+  "platform": "linux/arm64",
+  "proxySha256": "c46d15bfedcb9b127d069c799f3b79b1ee5780462c18f91ad9cb0552936c793f",
+  "codexCliSha256": "3bb41c9a80187773e2a59278d4fc355b1a163c31bb5a79581e37d4fe428af047",
+  "versions": {
+    "codexSDK": "0.169.0",
+    "codexCLI": "0.169.0",
+    "OpenCodeSDK": "2.3.0",
+    "fixturePython": "3.11.2"
+  },
+  "isolation": {
+    "network": "none",
+    "uid": "oproxy",
+    "capDrop": [
+      "ALL"
+    ],
+    "readOnlyRoot": true,
+    "tmp": "private writable tmpfs",
+    "fixtureMounts": "read-only test code and tools; no host credentials or workspace",
+    "account": "synthetic",
+    "modelRecipient": "loopback inside container"
+  },
+  "assembly": "Place the frozen source tests/console_boundary at /verify/fixture. Mount run.py and real.py at /verify; mount config.toml at /etc/codex/config.toml in the genuine CLI container. Provide the test-only Python identified below. The candidate starts the packaged SDK worker and pinned CLI. The isolated Responses server returns HTTP/1.1 426 to request SSE fallback during the WebSocket handshake.",
+  "fixtureSha256": {
+    "run.py": "834207074296094d12fee06e54c141f61ff9b89ac61a0a2edc312764de7ba433",
+    "real.py": "6058fc35b42c516fef3adad669a6c1914a92a1deeb50acb9bf9373da97f64ed6",
+    "config.toml": "7d25001ea60703d88642bf0bfdda67411339d5a63e43e4d4b7dd14440b2040e5"
+  },
+  "observations": {
+    "opencode": {
+      "startedAt": "2026-11-20T16:25:53.129337+00:00",
+      "seconds": 10.941,
+      "exit": 0,
+      "command": [
+        "docker",
+        "--context",
+        "orbstack",
+        "exec",
+        "-e",
+        "LD_LIBRARY_PATH=/verify/support",
+        "-e",
+        "PYTHONHOME=/verify/python",
+        "kbd-ct-closeout-ci7p",
+        "/verify/python/bin/python3.11",
+        "-B",
+        "/verify/run.py",
+        "opencode"
+      ],
+      "observed": [
+        {
+          "driver": "opencode",
+          "service_restarted": true,
+          "same_native_id": true,
+          "external_cancel_observed": "model socket disconnected"
+        },
+        {
+          "driver": "opencode",
+          "admissions": 1,
+          "already_completed_cancel_effects": 0
+        }
+      ]
+    },
+    "real": {
+      "startedAt": "2026-11-20T16:26:04.070853+00:00",
+      "seconds": 3.961,
+      "exit": 0,
+      "command": [
+        "docker",
+        "--context",
+        "orbstack",
+        "exec",
+        "-e",
+        "LD_LIBRARY_PATH=/verify/support",
+        "-e",
+        "PYTHONHOME=/verify/python",
+        "kbd-ct-real-ci7p",
+        "/verify/python/bin/python3.11",
+        "-B",
+        "/verify/run.py",
+        "real"
+      ],
+      "observed": [
+        {
+          "driver": "codex",
+          "cli": "0.169.0",
+          "successfulReply": true,
+          "replayedAfterCursor": true,
+          "serviceRestarted": true,
+          "nativeSessionMatched": true,
+          "resumedHistoryObserved": true,
+          "cancelTerminalCount": 1,
+          "recipientSocketClosed": true,
+          "admittedRequests": 2,
+          "recipient": [
+            {
+              "held": false,
+              "model": "gpt-5.5",
+              "authMatched": true,
+              "previousAnswerInContext": false,
+              "accountMatched": true
+            },
+            {
+              "held": true,
+              "model": "gpt-5.5",
+              "authMatched": true,
+              "previousAnswerInContext": true,
+              "accountMatched": true
+            }
+          ]
+        }
+      ]
+    },
+    "tool": {
+      "startedAt": "2026-11-20T16:25:44.250167+00:00",
+      "seconds": 8.875,
+      "exit": 0,
+      "command": [
+        "docker",
+        "--context",
+        "orbstack",
+        "exec",
+        "-e",
+        "LD_LIBRARY_PATH=/verify/support",
+        "-e",
+        "PYTHONHOME=/verify/python",
+        "kbd-ct-closeout-ci7p",
+        "/verify/python/bin/python3.11",
+        "-B",
+        "/verify/run.py",
+        "tool"
+      ],
+      "observed": [
+        {
+          "tool": "workspace_read",
+          "authorized": true,
+          "terminal": "completed",
+          "observed_tool_results": 1,
+          "permission_requests": 1,
+          "inotifyOpenCloseNowrite": [
+            1,
+            1
+          ]
+        },
+        {
+          "tool": "workspace_read",
+          "authorized": false,
+          "terminal": "cancelled",
+          "observed_tool_results": 0,
+          "permission_requests": 1,
+          "inotifyOpenCloseNowrite": [
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "resolved": {
+    "CHAT-1": "PASS together with direct route, owner and driver boundary controls in earlier receipts",
+    "TOOL-1": "PASS together with existing delegation, schema, ownership and cycle controls"
+  },
+  "priorEvidence": [
+    "../20261120-133440-37a73290/scenario-CHAT-1.json",
+    "../20261120-133440-37a73290/negative-CHAT-1.json",
+    "../20261120-133440-37a73290/scenario-TOOL-1.json",
+    "../20261120-133440-37a73290/negative-TOOL-1.json"
+  ],
+  "limits": "Synthetic HTTP recipients exercised native transports without subscriber or billing activity. End-to-end Pro entitlement was a separate live run.",
+  "attemptAccounting": {
+    "finalScenarioCommandCount": 3,
+    "priorAccounting": "Conservatively reserve the full 78-command workstream allotment including pre-restart setup, diagnosis and confirmation."
+  },
+  "cleanup": {
+    "verificationContainersRemoved": 2,
+    "privateFixtureRootRemoved": true,
+    "imageRetained": true,
+    "completedAt": "2026-11-20T16:26:54.820505+00:00"
+  }
+}

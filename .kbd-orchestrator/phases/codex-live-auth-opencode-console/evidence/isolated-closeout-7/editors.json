@@ -1,0 +1,209 @@
+{
+  "kind": "isolated-editor-collaborators",
+  "recordedAt": "2026-11-20T16:36:05.286406+00:00",
+  "contract": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "candidate": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "image": "sha256:b0558c5097cfd633eb1f25f1e35dc80dfc853262dadd0fbf44a0e8d089223886",
+  "attempt": 7,
+  "editors": {
+    "zed": "1.28.1",
+    "vscode": "1.122.1"
+  },
+  "controls": {
+    "containersNetwork": "none",
+    "privileged": false,
+    "credential": "synthetic file in disposable profile",
+    "zedConfig": "Dedicated HOME, CFFIXED_USER_HOME, XDG_CONFIG_HOME and unique --user-data-dir. Workspace trust and tool approval applied only to the disposable verification workspace. Scripted local model could request only set_model.",
+    "codeConfig": "Dedicated HOME, --user-data-dir, --extensions-dir, extension test host and trusted disposable workspace",
+    "httpRelay": "Client loopback to isolated container loopback by docker exec curl. Forwarded method and body, original status and response bytes.",
+    "stdioRelay": "Protocol observer copied JSON-RPC lines in each direction between the actual Zed editor and docker exec -i openai-proxy serve.",
+    "inspectedChildArgv": [
+      [
+        "openai-proxy",
+        "serve",
+        "--acp-stdio"
+      ],
+      [
+        "openai-proxy",
+        "serve",
+        "--mcp-stdio"
+      ]
+    ],
+    "budgetReservationUpperBoundCommands": 80
+  },
+  "ACP-1-Zed": {
+    "verdict": "PASS",
+    "sessionPseudonym": "d848088c9d6b",
+    "correlatedPrompts": 3,
+    "matchingUpdates": 2,
+    "successfulPromptTerminals": 2,
+    "failedPromptTerminals": 1,
+    "failureInput": "kbd-editor-fail",
+    "positiveMarkerOnScreen": "kbd-editor-chunk",
+    "otherVisibleNegative": "Incompatible wire configuration rendered the ACP requires a Responses API route error; unavailable workspace rendered workspace unavailable.",
+    "offlineRecipient": {
+      "ok": {
+        "correlated": true,
+        "path": "/v1/responses"
+      },
+      "fail": {
+        "correlated": true,
+        "path": "/v1/responses"
+      }
+    }
+  },
+  "MCP-1-Zed": {
+    "verdict": "PASS",
+    "transport": "stdio",
+    "catalogue": [
+      "chat_completion",
+      "list_models",
+      "check_auth",
+      "set_model"
+    ],
+    "calls": 1,
+    "tool": "set_model",
+    "modelPeer": [
+      {
+        "names": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "ask": true,
+        "result": false,
+        "hasMarker": true,
+        "path": "/v1/chat/completions"
+      },
+      {
+        "names": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "ask": false,
+        "result": true,
+        "hasMarker": true,
+        "path": "/v1/chat/completions"
+      },
+      {
+        "names": [],
+        "ask": false,
+        "result": true,
+        "hasMarker": true,
+        "path": "/v1/chat/completions"
+      }
+    ],
+    "displayedToolCall": "Run MCP tool set_model quick kbd-editor-zed-mcp"
+  },
+  "MCP-1-VSCode": {
+    "verdict": "PASS",
+    "transport": "http",
+    "client": [
+      {
+        "version": "1.122.1",
+        "trusted": true,
+        "workspace": 1
+      },
+      {
+        "available": true
+      },
+      {
+        "tools": [
+          "mcp_openai-proxy_chat_completion",
+          "mcp_openai-proxy_check_auth",
+          "mcp_openai-proxy_list_models",
+          "mcp_openai-proxy_set_model"
+        ]
+      },
+      {
+        "marker": true,
+        "advisory": true
+      }
+    ],
+    "httpObserver": [
+      {
+        "met": "POST",
+        "rpc": "initialize",
+        "tool": null,
+        "status": 200
+      },
+      {
+        "met": "POST",
+        "rpc": "notifications/initialized",
+        "tool": null,
+        "status": 204
+      },
+      {
+        "met": "POST",
+        "rpc": "tools/list",
+        "tool": null,
+        "status": 200
+      },
+      {
+        "met": "GET",
+        "rpc": null,
+        "tool": null,
+        "status": 405
+      },
+      {
+        "met": "POST",
+        "rpc": "tools/call",
+        "tool": "set_model",
+        "status": 200
+      }
+    ]
+  },
+  "registration": {
+    "observations": [
+      {
+        "target": "zed ACP",
+        "firstExit": 0,
+        "first": [
+          "ready",
+          "applied"
+        ],
+        "reapplyExit": 0,
+        "applied": true,
+        "sameReapplyBytes": true,
+        "undoExit": 0,
+        "originalRestored": true
+      },
+      {
+        "target": "zed MCP",
+        "firstExit": 0,
+        "first": [
+          "ready",
+          "applied"
+        ],
+        "reapplyExit": 0,
+        "applied": true,
+        "sameReapplyBytes": true,
+        "undoExit": 0,
+        "originalRestored": true
+      },
+      {
+        "target": "VS Code MCP",
+        "firstExit": 0,
+        "first": [
+          "ready",
+          "applied"
+        ],
+        "reapplyExit": 0,
+        "applied": true,
+        "sameReapplyBytes": true,
+        "undoExit": 0,
+        "originalRestored": true
+      }
+    ],
+    "scope": "Frozen Linux setup CLI read version-only adapters containing the exact outputs of the installed macOS editors. Project files with unrelated settings were applied, reapplied, and undone. The macOS editor protocols were tested separately with equivalent descriptors and a transport relay into the frozen image."
+  },
+  "ACP-1-JetBrains": "Independent collaborator run owned by parent; see its separate receipt.",
+  "cleanup": {
+    "scratchDirectoryRemoved": true,
+    "dedicatedGuiClientsRemaining": 0,
+    "containersRemoved": 2
+  }
+}

@@ -1,0 +1,20 @@
+services:
+  proxy:
+    build: !reset null
+    image: openai-proxy:kbd-196a0ba3f60b
+    pull_policy: never
+    platform: linux/arm64
+    ports: !override
+      - "127.0.0.1:18181:8181"
+    environment: !override
+      CODEX_HOME: /home/oproxy/.codex
+      PROXY_CONSOLE_DATA: /home/oproxy/.local/share/oproxy/console
+      PROXY_CONSOLE_ORIGIN: http://127.0.0.1:18181
+      PROXY_CONSOLE_WORKSPACE: /home/oproxy/workspace
+      CODEX_WIRE_API: responses
+      RUST_LOG: openai_proxy=info
+    volumes: !override
+      - oproxy-codex:/home/oproxy/.codex
+      - oproxy-config:/home/oproxy/.config/oproxy
+      - oproxy-data:/home/oproxy/.local/share/oproxy
+      - oproxy-workspace:/home/oproxy/workspace

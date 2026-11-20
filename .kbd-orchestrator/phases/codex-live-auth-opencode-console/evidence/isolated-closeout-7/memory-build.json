@@ -1,0 +1,26 @@
+{
+  "source": "885a17ac07712ffefada88c6f37fa770ac4b1eb7",
+  "contract": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "releaseImageConfig": "sha256:b0558c5097cfd633eb1f25f1e35dc80dfc853262dadd0fbf44a0e8d089223886",
+  "productionInputsVerifiedAgainstGit": 40,
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "lockfileSha256": "b2406464cf7718dfe2d22d2ac3fb01008b2b3cd7861fa048c592114e56bbcd1a",
+  "retainedImageHasMemoryFeature": false,
+  "standardMemoryBuildSha256": "96ac93990921894e77a59b721289fee049c88fcd781b8075eaa27e781aeda161",
+  "testedMemoryBuildSha256": "7c59f6417bdd3e2ae5e5ec230e573f32da16a0864b79e11fc99369ebd2fccf5d",
+  "buildArgv": [
+    "cargo",
+    "build",
+    "--locked",
+    "--offline",
+    "--features",
+    "memory,reqwest/rustls-tls-native-roots",
+    "--bin",
+    "openai-proxy"
+  ],
+  "purpose": "The extra Cargo dependency feature gives the memory verification binary an isolated trust file for the local TLS recipient. All production Rust sources match the frozen source. The retained SDK image has the default feature set.",
+  "probeSha256": "c9542ed0dce6509cc7950200f475b0c8d30fdf77a3602566de0ca3abf58ba409",
+  "reproduce": "Install the locked frontend dependencies in an archive of the frozen source. Build the indicated Cargo target with debug info disabled. From the project root run python3 -B <memory_probe.py> --binary <absolute built binary> --output <receipt.json> --openssl <OpenSSL 3>. The probe starts fresh private homes and removes them on exit.",
+  "fixtureCorrection": "The first test recipient omitted Content-Length on its local TLS stream and the caller returned HTTP 502. The bounded confirmation supplied the stream length. The final source-clean probe completed with HTTP 200 for both actors.",
+  "productionChanges": false
+}

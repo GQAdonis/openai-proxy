@@ -1,0 +1,36 @@
+{
+  "feature": "PASS",
+  "embedding": "PASS",
+  "execution": "frozen production source; memory,reqwest/rustls-tls-native-roots",
+  "binarySha256": "7c59f6417bdd3e2ae5e5ec230e573f32da16a0864b79e11fc99369ebd2fccf5d",
+  "shared": [
+    {
+      "actor": "first",
+      "ownMarker": true,
+      "foreignMarker": false,
+      "spoofedScope": "second"
+    },
+    {
+      "actor": "second",
+      "ownMarker": true,
+      "foreignMarker": false,
+      "spoofedScope": "first"
+    }
+  ],
+  "unauthorizedStatus": 401,
+  "sharedEmbeddingCalls": 0,
+  "sharedModelCalls": 2,
+  "embeddingCases": [
+    {
+      "explicitEmbeddingCredential": false,
+      "recipientCalls": 0,
+      "chatCredentialCalls": 0
+    },
+    {
+      "explicitEmbeddingCredential": true,
+      "recipientCalls": 1,
+      "chatCredentialCalls": 0
+    }
+  ],
+  "privateRunRootRemoved": true
+}
