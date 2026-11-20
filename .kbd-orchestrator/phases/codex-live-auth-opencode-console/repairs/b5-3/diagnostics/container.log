@@ -1,0 +1,4 @@
+[2m2026-11-20T12:14:02.922972Z[0m [32m INFO[0m [2mopenai_proxy_lib::console::access[0m[2m:[0m Read this file to pair the local console [3mpath[0m[2m=[0m/home/oproxy/.local/share/oproxy/console/pairing-token
+[2m2026-11-20T12:14:02.923142Z[0m [32m INFO[0m [2mopenai_proxy[0m[2m:[0m OpenAI proxy listening on http://0.0.0.0:8181
+[2m2026-11-20T12:14:02.923144Z[0m [32m INFO[0m [2mopenai_proxy[0m[2m:[0m endpoints: POST /v1/chat/completions  GET /v1/models  GET /health  POST /ag-ui/stream
+[2m2026-11-20T12:14:02.923145Z[0m [32m INFO[0m [2mopenai_proxy[0m[2m:[0m point opencode at: http://0.0.0.0:8181/v1

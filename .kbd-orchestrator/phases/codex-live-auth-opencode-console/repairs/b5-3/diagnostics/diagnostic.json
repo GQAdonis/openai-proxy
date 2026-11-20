@@ -1,0 +1,122 @@
+{
+  "sourceCommit": "929b220",
+  "diagnosticOnly": true,
+  "commands": 44,
+  "network": true,
+  "containerCreated": true,
+  "observations": [
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    },
+    {
+      "state": "running",
+      "exitCode": 0,
+      "insideExit": 0,
+      "insideStatus": "200",
+      "host": {
+        "error": "ConnectionRefusedError"
+      }
+    }
+  ],
+  "cleanup": {
+    "container": 0,
+    "network": 0,
+    "image": 0
+  }
+}
