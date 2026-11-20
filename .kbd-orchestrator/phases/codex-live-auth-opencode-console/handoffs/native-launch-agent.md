@@ -20,3 +20,13 @@ Run the retained restore script from the same macOS login session. It checks the
 ```
 
 The backup also contains the exact previous executable and plist. Codex credentials and console data stay on disk.
+
+## Chat selector update
+
+The active macOS executable now builds from commit `78e19bb`. The chat selects from the active driver's model list and submits the model shown in the form. A different driver or model uses a new conversation on the next send while preserving the visible transcript and draft. The local service still requires a scoped provider to enable OpenCode chat. [Hotfix deployment receipt](native-chat-selector-hotfix.json)
+
+To roll back this update to the first native release, run the restore script for the active executable.
+
+```bash
+/bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261120T213502Z/restore.sh"
+```

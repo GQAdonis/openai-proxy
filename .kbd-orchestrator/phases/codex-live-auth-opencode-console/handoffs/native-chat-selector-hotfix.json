@@ -1,0 +1,25 @@
+{
+  "pid": 46242,
+  "asset": "/ui/assets/index-axiYJpFT.js",
+  "managedConnection": "ready",
+  "firstOfferedModel": "gpt-6.2-sol",
+  "codexModelCount": 10,
+  "openCode": "scoped_provider_required",
+  "mcpTools": 4,
+  "executableSha256": "f040226b33e8e79f8898c25e470fadd22de88f1df8e99147844d69581db5f4de",
+  "priorExecutableSha256": "b9360f9d2ff2ab351a045678def50153996699b383ac1d3cbe3f18eccae61175",
+  "previousPid": 44815,
+  "backup": "~/Library/Application Support/OpenAI Proxy/rollbacks/20261120T213502Z",
+  "rollback": "~/Library/Application Support/OpenAI Proxy/rollbacks/20261120T213502Z/restore.sh",
+  "verifiedAt": "2026-11-20T21:35:03.685277+00:00",
+  "livePrompts": 0,
+  "source": "78e19bb9ecf02d4d81c542f0f4aacb0e209205f2",
+  "firstCutover": "Restored the previous executable after a Python name collision in the health checker. Health was independently verified and the corrected cutover passed.",
+  "isolatedProof": [
+    "Previous packaged build reproduced the mismatch",
+    "Patched packaged UI submitted the displayed model",
+    "Idle driver or model changes preserved the draft and transcript and created a new conversation on send",
+    "Missing provider and missing model both gave actionable information",
+    "Per-driver API verified explicit provider model, service default and empty list"
+  ]
+}
