@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import '@fontsource-variable/inter/latin.css'
+import '@fontsource-variable/inter/wght.css'
 import './styles.css'
 import { api, ApiError, errorText, type Connection, type Session } from './api'
 import { Button } from './components/ui/button'

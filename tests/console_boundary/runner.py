@@ -25,11 +25,25 @@ import runtime
 REPO = Path(__file__).resolve().parents[2]
 PHASE = 'codex-live-auth-opencode-console'
 PHASE_DIR = REPO/'.kbd-orchestrator/phases'/PHASE
-FROZEN = PHASE_DIR/'verification-candidate.json'
-ATTEMPT = PHASE_DIR/'boundary-run.json'
+# A repair has its own frozen inputs, attempt pointer and predecessor report.
+# The original B4 packet remains independently addressable.
+repair_arg = os.environ.get('KBD_REPAIR_ATTEMPT', '0')
+if repair_arg not in ('0', '1', '2'):
+    raise ValueError('unsupported repair attempt')
+REPAIR = int(repair_arg)
+BOUNDARY = 'B5' if REPAIR else 'B4'
+PACKET_DIR = PHASE_DIR/'repairs'/f'b5-{REPAIR}' if REPAIR else PHASE_DIR
+FROZEN = PACKET_DIR/'verification-candidate.json'
+ATTEMPT = PACKET_DIR/'boundary-run.json'
 IDS = ['AUTH-1','AUTH-2','AUTH-3','PLUGIN-1','CHAT-1','TOOL-1','UI-1','SURFACE-1',
        'ADMIN-1','SETUP-1','ACP-1','MCP-1','FEATURE-1']
-COMMANDS = ['build','run',*[name+' '+row for row in IDS for name in ('scenario','negative')],'cleanup']
+def affected_rows():
+    if not REPAIR:
+        return IDS
+    selected = read(FROZEN)['affectedScenarios']
+    if not selected or selected != [row for row in IDS if row in selected]:
+        raise ValueError('repair scenarios must follow the adopted packet order')
+    return selected
 
 
 def sha(path):
@@ -219,7 +233,7 @@ def build(h):
     for package in ('workers','plugin'):
         shutil.copytree(h.source/package,h.root/'install/lib/openai-proxy'/package,symlinks=True)
     h.note('installedRelease',{'path':str(h.binary),'sha256':sha(h.binary)})
-    if build_step('cargo-memory',['cargo','build','--locked','--features','memory'],h.source):
+    if 'FEATURE-1' in affected_rows() and build_step('cargo-memory',['cargo','build','--locked','--features','memory'],h.source):
         shutil.copy2(h.root/'target/debug/openai-proxy',h.memory_binary)
         h.note('memoryBuild',sha(h.memory_binary))
     engine=runtime.docker_env(env)
@@ -254,15 +268,28 @@ def verify_authority(contract):
         selected=shutil.which(name)
         if bool(selected)!=bool(expected) or (selected and sha(Path(selected).resolve())!=expected):
             raise RuntimeError('installed tool identity changed: '+name)
-    if not (latest['boundary']=='B4' and contract['status']['implementationComplete']
+    if REPAIR:
+        previous_file = PACKET_DIR/'previous-results.json'
+        previous = read(previous_file)
+        if (sha(previous_file) != read(FROZEN)['previousResultsSha256']
+                or previous['budgetConsumption']['values']['repairAttempts']['value'] + 1 != REPAIR
+                or not any(r['status']=='FAIL' for r in previous['scenarios'])):
+            raise RuntimeError('repair does not match the preceding failed attempt')
+    if not (latest['boundary']==BOUNDARY and contract['status']['implementationComplete']
             and latest['contractDigest']==contract['identity']['contractDigest']==read(FROZEN)['contractDigest']
             and candidate in latest.get('reason','')):
-        raise RuntimeError('B4 requires current owner authorization bound to this frozen candidate')
+        raise RuntimeError(f'{BOUNDARY} requires current owner authorization bound to this frozen candidate')
 
 
 def summary(h):
     outcomes=[]
+    previous = read(PACKET_DIR/'previous-results.json') if REPAIR else {}
+    prior_rows = {row['id']: row for row in previous.get('scenarios', [])}
+    selected = affected_rows()
     for row in IDS:
+        if row not in selected:
+            outcomes.append(prior_rows[row])
+            continue
         reports=[]
         for side in ['scenario','negative']:
             file=h.evidence/(side+'-'+row+'.json')
@@ -277,17 +304,22 @@ def summary(h):
     contract=read(PHASE_DIR/'adopted-contract.json')
     values={k:{'value':v,'class':'measured'} for k,v in {
         'timeMinutes':round((time.time()-h.state['started'])/60,2),'toolCalls':h.state['calls'],
-        'repairAttempts':0,'noProgress':0}.items()}
-    runtime.write(PHASE_DIR/'boundary-results.json',{
-        'phase':PHASE,**{k:v for k,v in contract['identity'].items() if k!='phaseId'},
+        'repairAttempts':REPAIR,'noProgress':h.state.get('previousNoProgress',0)}.items()}
+    result={
+        'phase':PHASE,'boundary':BOUNDARY,'affectedScenarios':selected,**{k:v for k,v in contract['identity'].items() if k!='phaseId'},
         'candidateDigest':sha(FROZEN),'scenarios':outcomes,'budgetConsumption':{
         'source':'clock and packet command/probe counter','values':values},
-        'evidence':str(h.evidence.relative_to(REPO)),'cleanup':h.state.get('cleanup'),'executedBy':h.state['executor']})
+        'evidence':str(h.evidence.relative_to(REPO)),'cleanup':h.state.get('cleanup'),'executedBy':h.state['executor']}
+    if REPAIR:
+        result['previousResultsSha256']=read(FROZEN)['previousResultsSha256']
+        runtime.write(PACKET_DIR/'boundary-results.json',result)
+    runtime.write(PHASE_DIR/'boundary-results.json',result)
 
 
 def main(argv):
     command=' '.join(argv)
-    if command not in COMMANDS:
+    commands=['build','run',*[name+' '+row for row in affected_rows() for name in ('scenario','negative')],'cleanup']
+    if command not in commands:
         raise SystemExit('expected build, run, scenario ID, negative ID, or cleanup')
     os.umask(0o077)
     contract=read(PHASE_DIR/'adopted-contract.json')
@@ -297,9 +329,17 @@ def main(argv):
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         if command=='build':
             if ATTEMPT.exists():
-                raise RuntimeError('the B4 packet already started; keep the original receipts')
+                raise RuntimeError(f'{BOUNDARY} packet already started; keep the original receipts')
+            prior = {}
+            if REPAIR:
+                if sha(PHASE_DIR/'boundary-results.json') != read(FROZEN)['previousResultsSha256']:
+                    raise RuntimeError('newer results already exist for this phase')
+                prior = read(PACKET_DIR/'previous-results.json')['budgetConsumption']['values']
             root=Path(tempfile.mkdtemp(prefix='kbd-console-')).resolve()
-            state={'label':secrets_label(),'root':str(root),'next':0,'calls':0,'started':time.time(),
+            state={'label':secrets_label(),'root':str(root),'next':0,
+                   'calls':prior.get('toolCalls',{}).get('value',0),
+                   'started':time.time()-60*prior.get('timeMinutes',{}).get('value',0),
+                   'previousNoProgress':prior.get('noProgress',{}).get('value',0),
                    'executor':{'harness':os.environ.get('KBD_EXECUTOR_HARNESS','Bash/Python KBD boundary runner'),
                                'model':os.environ.get('KBD_EXECUTOR_MODEL','none (scripted observations)'),
                                'python':platform.python_version()},'candidate':sha(FROZEN)}
@@ -316,7 +356,7 @@ def main(argv):
             h=Harness(state)
             if sha(FROZEN)!=state['candidate']:
                 raise RuntimeError('candidate identity changed; retain this attempt')
-        if command!='cleanup' and (state.get('stopReason') or COMMANDS[state['next']]!=command):
+        if command!='cleanup' and (state.get('stopReason') or commands[state['next']]!=command):
             raise RuntimeError('packet order or preceding result prevents this step')
         if command!='cleanup':
             inputs(h)
