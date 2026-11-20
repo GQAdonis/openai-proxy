@@ -1,0 +1,21 @@
+{
+  "action": "amend-contract",
+  "approver": "travis@tribehealthsolutions.com",
+  "contractPath": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/adopted-contract.json",
+  "kind": "kbd.scope-authority",
+  "namespace": "prometheus-kbd-scope-amendment",
+  "newContractDigest": "d0593e44cd3dbaf682980d043058e402e1d6c2cfad36524e1886a3e1036a7773",
+  "nonce": "0de3ccedaee348bd82e5bfffcbb26175",
+  "phaseId": "codex-live-auth-opencode-console",
+  "previousContractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
+  "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
+  "reason": "Allow one additional bounded recovery for SDK container readiness and fixture acceptance. Diagnose container startup and loopback health with disposable profiles, retain prior evidence and consumed budget, and verify all 13 adopted scenarios on one frozen candidate. Account use and deployment require separate explicit consent.",
+  "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+  "scenarioChanges": {
+    "added": [],
+    "modified": [],
+    "removed": []
+  },
+  "schemaVersion": "1",
+  "timestamp": "2026-11-20T12:03:37Z"
+}

@@ -2,16 +2,16 @@
   "schemaVersion": "2",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 133,
-  "derivedRevision": 133,
+  "sourceRevision": 135,
+  "derivedRevision": 135,
   "frontier": {
-    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 133
+    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 135
   },
   "conflictCount": 0,
   "phase": "codex-live-auth-opencode-console",
   "phaseId": "codex-live-auth-opencode-console",
   "parentPhase": null,
-  "last_updated": "2026-11-20T00:38:33.623640Z",
+  "last_updated": "2026-11-20T12:07:19.284274Z",
   "last_updated_by": "kbd-runtime",
   "changes_total": 4,
   "changes_completed": 4,
