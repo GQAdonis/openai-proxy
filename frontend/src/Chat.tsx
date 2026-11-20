@@ -26,7 +26,30 @@ type Entry = {
   notice?: string
   permission?: string
 }
+type Selection = { driver: string; model: string }
+type Conversation = Selection & { id: string }
+
 const terminal = new Set(['completed', 'cancelled', 'failed', 'indeterminate'])
+const driverLabel: Record<string, string> = {
+  codex: 'Codex',
+  opencode: 'OpenCode',
+}
+const driverReason: Record<string, string> = {
+  scoped_provider_required: 'requires an approved provider in the service configuration.',
+  worker_not_installed: 'requires the SDK worker to be installed.',
+  bun_unavailable: 'requires the Bun runtime.',
+  codex_runtime_or_home_unavailable: 'requires a managed Codex connection and supported CLI.',
+  sdk_missing_or_incompatible: 'requires the supported SDK version.',
+}
+
+function choose(options: string[], requested?: string, preferred?: string) {
+  return (
+    [requested, preferred].find((id) => id && options.includes(id)) ??
+    options[0] ??
+    ''
+  )
+}
+
 function outcome(row: Entry) {
   if (row.state === 'failed')
     return row.text
@@ -54,18 +77,9 @@ export function Chat({
   connection: Connection
 }) {
   const [entries, setEntries] = useState<Entry[]>([]),
-    [thread, setThread] = useState(''),
+    [thread, setThread] = useState<Conversation | null>(null),
     [draft, setDraft] = useState('')
-  const available = connection.drivers.filter((d) => d.available)
-  const [driver, setDriver] = useState(
-    connection.defaultDriver ||
-      available[0]?.id ||
-      connection.drivers[0]?.id ||
-      '',
-  )
-  const [model, setModel] = useState(
-    connection.defaultModel || connection.models[0] || '',
-  )
+  const [selection, setSelection] = useState<Selection>({ driver: '', model: '' })
   const [instructions, setInstructions] = useState(''),
     [temperature, setTemperature] = useState(''),
     [maxTokens, setMaxTokens] = useState('')
@@ -87,8 +101,28 @@ export function Chat({
       { id: string; pending: boolean; done: boolean; action: SurfaceAction }
     >(),
   )
+  const available = connection.drivers
+    .filter((d) => d.available)
+    .map((d) => d.id)
+  const unavailable = connection.drivers.filter((d) => !d.available)
+  const driver =
+    thread?.driver ?? choose(available, selection.driver, connection.defaultDriver)
   const selected = connection.drivers.find((d) => d.id === driver)
+  const models = selected?.available ? selected.models ?? connection.models : []
+  const model =
+    thread?.model ?? choose(models, selection.model, connection.defaultModel)
+  const modelReady = Boolean(selected?.available && models.includes(model))
   const controls = selected?.controls ?? []
+  const current = entries.at(-1)
+  const admissionUnknown = current?.state === 'admission-unknown'
+  const changeBlocked = busy || admissionUnknown
+  const selectionHelp = admissionUnknown
+    ? 'Check whether the last message was accepted before changing the driver or model.'
+    : thread
+      ? 'Changing the driver or model starts a new chat.'
+      : entries.length > 0
+        ? 'Your next message starts a new chat.'
+        : ''
   useEffect(() => {
     alive.current = true
     const set = controllers.current
@@ -228,22 +262,32 @@ export function Chat({
     }
   }
   async function send(prompt: string, previous?: Entry) {
-    if (pending.current || !prompt.trim() || !selected?.available) return
+    if (
+      pending.current ||
+      !prompt.trim() ||
+      (previous
+        ? previous.thread !== thread?.id
+        : !modelReady || admissionUnknown)
+    ) return
     const key = previous?.key ?? crypto.randomUUID()
-    let conversation = previous?.thread || thread
+    let conversation = previous?.thread ?? thread?.id ?? ''
     locked(true)
     setAlert('')
     setAnnouncement('Sending message.')
     try {
       if (!conversation) {
-        const result = await api<{ id: string }>(
+        const result = await api<Conversation>(
           '/conversations',
           session,
           'POST',
           { driver, model, workspace: session.workspace },
         )
         conversation = result.id
-        setThread(result.id)
+        setThread({
+          id: result.id,
+          driver: result.driver ?? driver,
+          model: result.model ?? model,
+        })
       }
       if (!previous)
         setEntries((rows) => [
@@ -284,7 +328,7 @@ export function Chat({
         state: turn.state,
         reason: undefined,
       }))
-      setDraft('')
+      setDraft((value) => (value.trim() === prompt ? '' : value))
       stick.current = true
       setLatest(true)
       // AG-UI projects the admitted turn. REST owns text, replay and terminal state.
@@ -380,6 +424,7 @@ export function Chat({
     }
   }
   async function act(row: Entry, message: string, action: SurfaceAction) {
+    if (row.thread !== thread?.id) return
     const identity = JSON.stringify([
       row.thread,
       row.turn,
@@ -456,20 +501,27 @@ export function Chat({
     }
   }
   function newChat() {
-    setThread('')
+    if (pending.current || admissionUnknown) return
+    setSelection({ driver, model })
+    setThread(null)
     setEntries([])
-    setDraft('')
     setAlert('')
     cursors.current.clear()
     restSurfaces.current.clear()
     actionKeys.current.clear()
     composer.current?.focus()
   }
+  function changeSelection(next: Selection) {
+    if (pending.current || admissionUnknown) return
+    setSelection(next)
+    setThread(null)
+    setAlert('')
+    if (thread) setAnnouncement('Your next message starts a new chat.')
+  }
   function submit(e: FormEvent) {
     e.preventDefault()
     void send(draft.trim())
   }
-  const current = entries.at(-1)
   return (
     <main className="chat">
       <div className="pagehead">
@@ -477,7 +529,7 @@ export function Chat({
           <h1>Conversation</h1>
           <p className="subtle">{session.workspace} workspace</p>
         </div>
-        <Button disabled={busy || !entries.length} onClick={newChat}>
+        <Button disabled={changeBlocked || !entries.length} onClick={newChat}>
           New chat
         </Button>
       </div>
@@ -488,32 +540,59 @@ export function Chat({
           <select
             id="driver"
             value={driver}
-            disabled={!!thread || busy}
-            onChange={(e) => setDriver(e.target.value)}
+            disabled={changeBlocked || !available.length}
+            aria-describedby={unavailable.length ? 'driver-availability' : undefined}
+            onChange={(e) =>
+              changeSelection({ driver: e.target.value, model: '' })
+            }
           >
+            {!driver && <option value="">No driver available</option>}
             {connection.drivers.map((d) => (
               <option key={d.id} value={d.id} disabled={!d.available}>
-                {d.id}
+                {driverLabel[d.id] ?? d.id}
                 {!d.available ? ' (unavailable)' : ''}
               </option>
             ))}
           </select>
-          {!selected?.available && (
-            <p role="status">
-              {selected?.reason || 'No chat driver is available.'}
-            </p>
+          {unavailable.length > 0 && (
+            <div id="driver-availability">
+              {unavailable.map((d) => (
+                <p key={d.id} className="note">
+                  {driverLabel[d.id] ?? d.id}{' '}
+                  {driverReason[d.reason ?? ''] ?? 'is currently unavailable.'}
+                </p>
+              ))}
+            </div>
           )}
           <label htmlFor="model">Model</label>
           <select
             id="model"
             value={model}
-            disabled={!!thread || busy}
-            onChange={(e) => setModel(e.target.value)}
+            disabled={changeBlocked || !models.length}
+            aria-describedby={selectionHelp ? 'selection-context' : undefined}
+            onChange={(e) => changeSelection({ driver, model: e.target.value })}
           >
-            {connection.models.map((m) => (
-              <option key={m}>{m}</option>
+            {!model && <option value="">No model available</option>}
+            {model && !models.includes(model) && (
+              <option value={model} disabled>
+                {model} (unavailable)
+              </option>
+            )}
+            {models.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
+          {driver === 'opencode' && selected?.available && !models.length && (
+            <p className="note">
+              Set a model for the approved OpenCode provider, then reload the
+              connection.
+            </p>
+          )}
+          {selectionHelp && (
+            <p className="note" id="selection-context">{selectionHelp}</p>
+          )}
           {controls.some((v) =>
             ['instructions', 'temperature', 'maxTokens'].includes(v),
           ) && (
@@ -581,12 +660,17 @@ export function Chat({
                 <h2>Start a conversation</h2>
                 <p>
                   Write a message to{' '}
-                  {selected?.available ? driver : 'your chat driver'}.
+                  {selected?.available
+                    ? driverLabel[driver] ?? driver
+                    : 'your chat driver'}.
                 </p>
               </div>
             )}
-            {entries.map((row) => (
+            {entries.map((row, index) => (
               <article className="turn" key={row.key}>
+                {index > 0 && entries[index - 1].thread !== row.thread && (
+                  <p className="turn-boundary">New chat</p>
+                )}
                 <div className="speaker">You</div>
                 <p className="message">{row.prompt}</p>
                 <div className="speaker assistant">Assistant</div>
@@ -594,14 +678,16 @@ export function Chat({
                 {Object.entries(row.surfaces).map(([id, ops]) => (
                   <Surface
                     key={id}
-                    disabled={busy}
+                    disabled={busy || row.thread !== thread?.id}
                     operations={ops}
                     onAction={(a) => void act(row, id, a)}
                   />
                 ))}
                 <div className="turn-state">
                   {outcome(row)}
-                  {row.reason && ' · ' + row.reason}
+                  {row.reason === 'model_unavailable'
+                    ? '. Choose another model to start a new chat.'
+                    : row.reason && ' · ' + row.reason}
                 </div>
                 {row.notice && <p className="note">{row.notice}</p>}
                 {row.permission && (
@@ -622,11 +708,14 @@ export function Chat({
                     {row.state === 'expired' ? 'Read saved turn' : 'Reconnect'}
                   </Button>
                 )}
-                {row.state === 'failed' && row.safeRetry && (
-                  <Button disabled={busy} onClick={() => send(row.prompt)}>
-                    Retry message
-                  </Button>
-                )}
+                {row.state === 'failed' &&
+                  row.reason !== 'model_unavailable' &&
+                  row.safeRetry &&
+                  row.thread === thread?.id && (
+                    <Button disabled={busy} onClick={() => send(row.prompt)}>
+                      Retry message
+                    </Button>
+                  )}
               </article>
             ))}
           </div>
@@ -676,7 +765,7 @@ export function Chat({
               ) : (
                 <Button
                   tone="primary"
-                  disabled={busy || !draft.trim() || !selected?.available}
+                  disabled={changeBlocked || !draft.trim() || !modelReady}
                 >
                   Send message
                 </Button>

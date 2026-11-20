@@ -102,7 +102,11 @@ async fn personal(s: &Console, actor: &Actor) -> Result<Value> {
     let status = actor.credentials.status().await;
     let profile = actor.credentials.observed_profile().await;
     let mut catalogue_status = "configured profile";
-    let mut models: Vec<String> = if worker::availability(actor, "codex").await.0 {
+    let mut drivers = drivers(actor).await;
+    let mut models: Vec<String> = if drivers
+        .iter()
+        .any(|d| d["id"] == "codex" && d["available"] == true)
+    {
         match worker::catalog(s, actor).await {
             Ok(rows) => {
                 catalogue_status = "native catalogue";
@@ -124,17 +128,35 @@ async fn personal(s: &Console, actor: &Actor) -> Result<Value> {
             .map(|e| e.model_id.to_string())
             .collect()
     };
-    if let Some(p) = actor.provider.as_ref()
-        && let Some(id) = p["model"].as_str().filter(|s| worker::valid_model(s))
-        && !models.iter().any(|s| s == id)
-    {
+    let provider_model = actor
+        .provider
+        .as_ref()
+        .and_then(|provider| provider["model"].as_str())
+        .filter(|id| worker::valid_model(id));
+    let prefs = s.settings.get()?;
+    let opencode_model = provider_model.or_else(|| {
+        prefs
+            .default_model
+            .as_deref()
+            .or(s.app.default_model.as_deref())
+            .filter(|id| worker::valid_model(id))
+    });
+    for driver in &mut drivers {
+        driver["models"] = if driver["available"] != true {
+            json!([])
+        } else if driver["id"] == "codex" {
+            json!(models)
+        } else {
+            json!(opencode_model.into_iter().collect::<Vec<_>>())
+        };
+    }
+    if let Some(id) = provider_model.filter(|id| !models.iter().any(|s| s == *id)) {
         models.push(id.into());
     }
-    let prefs = s.settings.get()?;
     Ok(
         json!({"status":status.state,"mode":status.mode,"source":status.source,"refreshRuntime":status.refresh_runtime,"generation":status.generation,"lastReconciled":status.last_reconciled,
             "lastRefresh":status.last_renewed.map(|v|v.to_string()),"retryAfterSeconds":status.retry_after_seconds,
-            "capabilities":{"reload":true,"refresh":status.can_refresh},"drivers":drivers(actor).await,"models":models,"catalogueStatus":catalogue_status,"workspace":"default",
+            "capabilities":{"reload":true,"refresh":status.can_refresh},"drivers":drivers,"models":models,"catalogueStatus":catalogue_status,"workspace":"default",
             "defaultDriver":prefs.default_driver,"defaultModel":prefs.default_model.or_else(||s.app.default_model.clone()).unwrap_or_else(||"gpt-5.5".into())
         }),
     )

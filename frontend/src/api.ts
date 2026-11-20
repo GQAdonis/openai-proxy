@@ -10,6 +10,7 @@ export type Driver = {
   reason?: string
   controls?: string[]
   retrySafe?: boolean
+  models?: string[]
 }
 export type Connection = {
   status: string

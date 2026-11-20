@@ -320,6 +320,11 @@ textarea::placeholder {
 .message {
   white-space: pre-wrap;
 }
+.turn-boundary {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.8rem;
+}
 .turn-state,
 .note,
 .shortcut {
