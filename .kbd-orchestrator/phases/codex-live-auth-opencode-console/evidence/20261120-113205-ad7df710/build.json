@@ -1,0 +1,188 @@
+{
+  "command": "build",
+  "status": "PASS",
+  "observations": [],
+  "notes": {
+    "version-rustc": {
+      "argv": [
+        "rustc",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "55cd0529c005d3f62869ea6e2271bfa9d5196f56dc65a8be00a371af114a4a98"
+    },
+    "version-cargo": {
+      "argv": [
+        "cargo",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "c35608815f43d0b8788a9b826fad2bb17384f49fb328dc4fe64da9db5f5ef4d6"
+    },
+    "version-node": {
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "cbed609d6cd010549ef4f6c6804420506719da2c844a68616ad02a4a5ef75b8a"
+    },
+    "version-npm": {
+      "argv": [
+        "npm",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "041fb0a6f23ccf0102a18d4591e1bfa36eebc17d27d348727a5eee18806d1c3c"
+    },
+    "version-bun": {
+      "argv": [
+        "bun",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "d03d8b268b4171328ac2458ce8ca82d69a1fde38469d4e4faae4f8fa8d8a5e35"
+    },
+    "frontend-install": {
+      "argv": [
+        "npm",
+        "ci",
+        "--include=dev",
+        "--ignore-scripts"
+      ],
+      "exit": 0,
+      "sha256": "c6d4527a7163d4813e61486d8eca7f1f94360e2942afc4c4b47b345f5efdb5da"
+    },
+    "worker-install": {
+      "argv": [
+        "bun",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "exit": 0,
+      "sha256": "3af9840da0a7c26fa9ecf40e24d10124d013f6f41068eb4a98537907863841b2"
+    },
+    "plugin-install": {
+      "argv": [
+        "bun",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "exit": 0,
+      "sha256": "b4316e238fff0a4d7aca904b3ed32e17e5d65815e833effeaab0f6848c290f21"
+    },
+    "plugin-typecheck": {
+      "argv": [
+        "bun",
+        "run",
+        "typecheck"
+      ],
+      "exit": 0,
+      "sha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    },
+    "plugin-build": {
+      "argv": [
+        "bun",
+        "run",
+        "build"
+      ],
+      "exit": 0,
+      "sha256": "be76c36029284ec64a4d958de817d938fef6553e5779bd5588a889a26373815e"
+    },
+    "plugin-pack": {
+      "argv": [
+        "npm",
+        "pack",
+        "--ignore-scripts",
+        "--pack-destination",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-avj_ftib"
+      ],
+      "exit": 0,
+      "sha256": "1350db85b4ca514d7c2946d824e86ea30a0ee4337e77774893d85645459f00b4"
+    },
+    "cargo-build": {
+      "argv": [
+        "cargo",
+        "build",
+        "--locked"
+      ],
+      "exit": 0,
+      "sha256": "f6ecfab2427184d3323ec25dbbd7777b88e08326c350a6bfc4313effc8d19676"
+    },
+    "cargo-clippy": {
+      "argv": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "sha256": "5f6547ea35c258eca006aa430a80ac2043107c3b7d169855faa0b7344ff76619"
+    },
+    "cargo-unit": {
+      "argv": [
+        "cargo",
+        "test",
+        "--locked",
+        "--lib"
+      ],
+      "exit": 0,
+      "sha256": "a62f66c1e6fcfb5a91d22ae8ba5068d34d8cf2ce7eb4ecd27ba225d3c6d27264"
+    },
+    "cargo-release": {
+      "argv": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked"
+      ],
+      "exit": 0,
+      "sha256": "16f2459e1eda26d3908bb502ea9179785a1abd62c88b0bca64c810f3eaf783c1"
+    },
+    "installedRelease": {
+      "path": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-avj_ftib/install/bin/openai-proxy",
+      "sha256": "82e37dd7882c6f64675575762b3f0f899e904be6c685baf6814b54edf3abbaea"
+    },
+    "cargo-memory": {
+      "argv": [
+        "cargo",
+        "build",
+        "--locked",
+        "--features",
+        "memory"
+      ],
+      "exit": 0,
+      "sha256": "a47ab33c25a9a5ab2e447ff499508c9deadd28e520945232bcbdbf688d5eb3ca"
+    },
+    "memoryBuild": "11a2e00f553a6640416d69bf8fd40a55877264cfbdaeb1d6d8fa5a8ceb8e2688",
+    "engine": "29.8.2",
+    "image-build": {
+      "argv": [
+        "docker",
+        "build",
+        "--force-rm",
+        "--target",
+        "sdk-runtime",
+        "--iidfile",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-avj_ftib/image.id",
+        "-t",
+        "kbd-console-20261120-113205-ad7df710",
+        "."
+      ],
+      "exit": 0,
+      "sha256": "813dbc33a045584e0afdbe58cd4ae1ce7e77a295b6622b4527ab5d71e178fab8"
+    },
+    "imageId": "sha256:b3cb59eb6ee2fa6b5a86c91795dc98cdb8238e07f61d36200a72041ce41059a0"
+  },
+  "candidate": "030c79ba732985520a276a825be90f545d739524cbe7bac3be0f75e9fa911ff4",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795175347.230861
+}

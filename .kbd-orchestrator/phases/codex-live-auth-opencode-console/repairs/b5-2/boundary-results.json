@@ -1,0 +1,237 @@
+{
+  "phase": "codex-live-auth-opencode-console",
+  "boundary": "B5",
+  "affectedScenarios": [
+    "AUTH-1",
+    "AUTH-2",
+    "AUTH-3",
+    "PLUGIN-1",
+    "CHAT-1",
+    "TOOL-1",
+    "UI-1",
+    "SURFACE-1",
+    "ADMIN-1",
+    "SETUP-1",
+    "ACP-1",
+    "MCP-1",
+    "FEATURE-1"
+  ],
+  "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
+  "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+  "planRevision": 1,
+  "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
+  "candidateDigest": "030c79ba732985520a276a825be90f545d739524cbe7bac3be0f75e9fa911ff4",
+  "scenarios": [
+    {
+      "id": "AUTH-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "AUTH-2",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "AUTH-3",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "PLUGIN-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "CHAT-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "TOOL-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "UI-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "SURFACE-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "ADMIN-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "SETUP-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "ACP-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "MCP-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    },
+    {
+      "id": "FEATURE-1",
+      "status": "NOT_EXERCISED",
+      "attempted": "packet stopped before this row",
+      "observed": [
+        "failed prerequisite or isolation control at run"
+      ],
+      "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+      "executedBy": {
+        "harness": "Bash/Python KBD boundary runner",
+        "model": "none (scripted observations)",
+        "python": "3.11.3"
+      }
+    }
+  ],
+  "budgetConsumption": {
+    "source": "clock and packet command/probe counter",
+    "values": {
+      "timeMinutes": {
+        "value": 35.9,
+        "class": "measured"
+      },
+      "toolCalls": {
+        "value": 73,
+        "class": "measured"
+      },
+      "repairAttempts": {
+        "value": 2,
+        "class": "measured"
+      },
+      "noProgress": {
+        "value": 0,
+        "class": "measured"
+      }
+    }
+  },
+  "evidence": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/evidence/20261120-113205-ad7df710",
+  "cleanup": "PASS",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "previousResultsSha256": "4fdf4a5f938922e826dc794bc2d85ce55ecd04da9e8e7ae271cb5709ddf1d3eb"
+}
