@@ -1,0 +1,103 @@
+{
+  "status": "PASS",
+  "serviceLabel": "dev.prometheusags.openai-proxy",
+  "source": "885a17ac07712ffefada88c6f37fa770ac4b1eb7",
+  "platform": "darwin/arm64",
+  "installedBinary": "~/.local/bin/openai-proxy",
+  "executableSha256": "b9360f9d2ff2ab351a045678def50153996699b383ac1d3cbe3f18eccae61175",
+  "priorExecutableSha256": "129499781ad4fcac392da958ba682f44a6bd70e0c24611092af2d2340104475b",
+  "priorPlistSha256": "ce9ebdc27e33b6c6696828779fef1de7d8583cad01c1b868cc60a086087b34b2",
+  "installedPlistSha256": "8494b8381711ce61af3326febe6ee8259e0e6aec273698a66e96fdd5de0966a6",
+  "runtime": "~/.local/lib/openai-proxy/releases/885a17a-b9360f9d2ff2",
+  "workersLockSha256": "023cf69105b57675db6475e53aa5c484c356c406fc702c933c0aaec8ef626d08",
+  "bunSha256": "0a2237cdcfa0d16ef501d9acca9f0026309ef348bea7393a64e8d1e3609565cc",
+  "codexSha256": "739cda86e15d30a6e2b40cf8dcbbfb988aaf48b305b27065573bb8e9fd41d002",
+  "oldPid": 124,
+  "pid": 3891,
+  "priorListeners": {
+    "8181": "*:8181",
+    "8081": "*:8081"
+  },
+  "listeners": {
+    "8181": "*:8181",
+    "8081": "127.0.0.1:8081"
+  },
+  "backup": "~/Library/Application Support/OpenAI Proxy/rollbacks/20261120T212001Z",
+  "rollback": "~/Library/Application Support/OpenAI Proxy/rollbacks/20261120T212001Z/restore.sh",
+  "consoleState": "~/Library/Application Support/oproxy/console",
+  "preflight": {
+    "status": "PASS",
+    "health": 200,
+    "console": 200,
+    "settings": 200,
+    "anonymousSettings": 401,
+    "foreignOrigin": 403,
+    "embeddedAssets": [
+      "/ui/assets/index-lc4qDhFz.js"
+    ],
+    "settingsAreaCount": 16,
+    "credentialState": "signed_out",
+    "credentialMode": "none",
+    "driverStates": {
+      "codex": [
+        false,
+        "codex_runtime_or_home_unavailable"
+      ],
+      "opencode": [
+        false,
+        "scoped_provider_required"
+      ]
+    },
+    "mcpTools": [
+      "chat_completion",
+      "check_auth",
+      "list_models",
+      "set_model"
+    ]
+  },
+  "smoke": {
+    "status": "PASS",
+    "health": 200,
+    "console": 200,
+    "settings": 200,
+    "anonymousSettings": 401,
+    "foreignOrigin": 403,
+    "embeddedAssets": [
+      "/ui/assets/index-lc4qDhFz.js"
+    ],
+    "settingsAreaCount": 16,
+    "credentialState": "ready",
+    "credentialMode": "managed",
+    "driverStates": {
+      "codex": [
+        true,
+        "installed"
+      ],
+      "opencode": [
+        false,
+        "scoped_provider_required"
+      ]
+    },
+    "mcpTools": [
+      "chat_completion",
+      "check_auth",
+      "list_models",
+      "set_model"
+    ]
+  },
+  "verifiedAt": "2026-11-20T21:20:04.413535+00:00",
+  "acceptedContract": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+  "toolchain": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "node": "v24.21.0",
+    "bun": "1.4.4",
+    "codexCli": "0.169.0",
+    "openCodeSdk": "2.3.0"
+  },
+  "firstCutover": {
+    "rolledBack": true,
+    "cause": "Listener verification used a name-resolved lsof endpoint. The second cutover used numeric output.",
+    "rollbackHealth": 200
+  },
+  "scope": "macOS user launch agent with local console administration"
+}
