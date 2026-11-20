@@ -183,18 +183,75 @@ def config_change(h):
     return {"appliedWrites":1,"restored":True,"effective":source["effective"]}
 
 
-def denied(h, label, method, path, actor, body=None, headers=None):
-    before = http(h, ME, actor="admin")
-    cfg = inventory(h,"admin")
-    config_path = private(h,cfg["service"]["value"]["config"])
-    original = snapshot(h,config_path,label + " before")
-    status, _, raw = h.http(path,method=method,body=body,actor=actor,headers=headers or {})
-    require(status in (400,401,403), f"Protected endpoint returned {status}")
-    require(all(token.encode() not in raw for token in h.keys.values()), "A protected response disclosed a synthetic token")
-    after = http(h, ME, actor="admin")
-    require((before["defaultModel"],before["generation"]) == (after["defaultModel"],after["generation"]) and
-            original == snapshot(h,config_path,label + " after"), "Denied operation changed admin state")
-    return {"http":status,"configWrites":0,"generationChanges":0}
+def denial_file_identity(path):
+    # An atomic replacement or same-byte rewrite must still count as a write.
+    try:
+        stat = path.stat()
+    except FileNotFoundError:
+        return None
+    return stat.st_dev, stat.st_ino, stat.st_mode, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+
+
+def denied(h, label, method, path, actor, body=None, headers=None, *, subject_validation=False):
+    cfg = inventory(h, "admin")
+    shared_env = h.state["shared"]["env"]
+    config = private(h, shared_env["OPROXY_CONFIG"])
+    require(private(h, cfg["service"]["value"]["config"]) == config, "Wrong service config under observation")
+    defaults = private(h, Path(shared_env["PROXY_CONSOLE_DATA"]) / "defaults.json")
+    owners = {name: principal(h, name) for name in ("admin", "chat", "chat2")}
+    stores = [private(h, Path(owner["codexHome"]) / "auth.json") for owner in owners.values()]
+    files = [config, defaults, *stores]
+    secrets = [value.encode() for value in h.keys.values()]
+    secrets.extend(owner["tokenSha256"].encode() for owner in owners.values())
+    private_values = [value.encode() for owner in owners.values()
+                      for value in (owner["codexHome"], owner["workspace"], owner["openCodeProvider"]["model"])]
+    log = private(h, h.root / "shared.log")
+
+    def state():
+        observed = {}
+        for name in owners:
+            connection = http(h, ME, actor=name)
+            observed[name] = (connection["defaultModel"], connection["generation"], connection["lastRefresh"])
+        return observed
+
+    before = state()
+    originals = [snapshot(h, file, label + " before " + file.name) for file in (config, defaults)]
+    initial_files = [denial_file_identity(file) for file in files]
+    log_start = log.stat().st_size
+    status, response_headers, raw = h.http(path, method=method, body=body, actor=actor, headers=headers or {})
+    h.note(label + " HTTP response", {"status": status, "bytes": len(raw)})
+
+    accepted = status in (400, 401, 403)
+    if status == 422 and subject_validation:
+        try:
+            payload = json.loads(raw)
+        except (ValueError, UnicodeDecodeError):
+            payload = None
+        error = payload.get("error") if isinstance(payload, dict) else None
+        accepted = (isinstance(error, dict) and error.get("code") == "unsupported_or_invalid_input"
+                    and set(payload) == {"error"} and set(error) <= {"code", "message"})
+
+    after = state()
+    current = [snapshot(h, file, label + " after " + file.name) for file in (config, defaults)]
+    file_changes = sum(denial_file_identity(file) != original for file, original in zip(files, initial_files))
+    with log.open("rb") as stream:
+        require(stream.seek(0, os.SEEK_END) >= log_start, "Shared-service log was truncated during observation")
+        stream.seek(log_start)
+        appended = stream.read()
+    wire = raw + json.dumps(response_headers).encode()
+    redacted = (all(secret not in wire and secret not in appended for secret in secrets)
+                and all(value not in wire for value in private_values))
+    detail = {"http": status, "rejectionMatched": accepted, "stateUnchanged": before == after,
+              "configWrites": sum(a != b for a, b in zip(originals, current)),
+              "generationChanges": sum(before[name][1] != after[name][1] for name in owners),
+              "configAndDefaultsUnchanged": originals == current, "changedFiles": file_changes,
+              "responseAndLogRedacted": redacted, "logBytesChecked": len(appended)}
+    h.note(label + " rejection observations", detail)
+    require(accepted, f"Protected endpoint returned HTTP {status} without the expected rejection")
+    require(redacted, "Protected response or shared-service log disclosed fixture credentials")
+    require(before == after, "Denied operation changed defaults or credential freshness")
+    require(originals == current and file_changes == 0, "Denied operation wrote host settings or a credential store")
+    return detail
 
 
 def admin(h, negative):
@@ -212,10 +269,12 @@ def admin(h, negative):
         ("chat admin inventory","GET",SETTINGS,"chat",None,{}),
         ("chat admin defaults","PATCH",SETTINGS,"chat",{"defaultModel":"kbd-denied"},{}),
         ("invalid browser origin","PATCH",SETTINGS,"admin",{"defaultModel":"kbd-denied"},{"Origin":"https://outside.invalid"}),
-        ("untrusted role header","GET",SETTINGS,"chat",None,{"X-Role":"admin"}),
-        ("personal subject query","GET",ME+"?subject=admin","chat",None,{}),
-        ("foreign refresh subject","POST",ME+"/refresh?subject=admin","chat",{"generation":0},{})]:
+        ("untrusted role header","GET",SETTINGS,"chat",None,{"X-Role":"admin"})]:
         case(h,label,lambda: denied(h,label,method,path,actor,body,headers))
+    for label, method, path, body in [
+        ("personal subject query", "GET", ME+"?subject=admin", None),
+        ("foreign refresh subject", "POST", ME+"/refresh?subject=admin", {"generation": 0})]:
+        case(h, label, lambda: denied(h, label, method, path, "chat", body, subject_validation=True))
 
 
 def run(h, row, negative):

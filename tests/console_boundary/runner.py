@@ -63,6 +63,9 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 class Harness:
     def __init__(self,state):
         self.state=state
+        budget = read(PHASE_DIR/'adopted-contract.json')['budgets']
+        self.command_ceiling = budget['toolCalls']
+        self.deadline = state['started'] + 60 * budget['timeMinutes']
         self.root=Path(state['root'])
         self.repo=REPO
         self.source=self.root/'source'
@@ -97,7 +100,7 @@ class Harness:
              env=runtime.docker_env(runtime.sanitized(self.root/'docker')),text=True,timeout=10).strip()
 
     def count(self):
-        if self.state['calls'] >= 240 or time.time()-self.state['started'] >= 240*60:
+        if self.state['calls'] >= self.command_ceiling or time.time() >= self.deadline:
             self.state['stopReason'] = 'boundary budget reached'
             self.save()
             raise TimeoutError('boundary budget reached')
@@ -157,7 +160,7 @@ class Harness:
     def command(self,label,args,env,cwd,limit=2400):
         self.count()
         path=self.evidence/(label+'.log')
-        remaining=max(1,self.state['started']+240*60-time.time())
+        remaining=max(1,self.deadline-time.time())
         with path.open('xb') as record:
             proc=subprocess.Popen(args,cwd=cwd,env=env,stdin=subprocess.DEVNULL,stdout=record,
                                   stderr=subprocess.STDOUT,start_new_session=True)
@@ -243,7 +246,6 @@ def build(h):
         shutil.copy2(h.root/'target/debug/openai-proxy',h.memory_binary)
         h.note('memoryBuild',sha(h.memory_binary))
     engine=runtime.docker_env(env)
-    engine['DOCKER_BUILDKIT'] = '1'
     if not shutil.which('docker',path=env['PATH']):
         h.block('final image','local Docker engine CLI unavailable')
         return

@@ -1,5 +1,6 @@
 """Browser journeys through the frozen release and its native, loopback-backed worker."""
 import contextlib
+from collections import deque
 from datetime import datetime
 import hashlib
 from importlib import metadata, util
@@ -10,6 +11,7 @@ from pathlib import Path
 import re
 import tempfile
 import time
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from admin_common import MissingPeer, require
@@ -136,6 +138,10 @@ def playwright_driver(h, packages, private):
 
 @contextlib.contextmanager
 def browser(h, base, actor, pairing_path=None):
+    target = urlsplit(base)
+    require(target.scheme == "http" and target.hostname in ("127.0.0.1", "localhost", "::1")
+            and target.port is not None and target.username is None and target.password is None
+            and not (target.path or target.query or target.fragment), "invalid fixture browser origin")
     peer, packages, executable = browser_inputs(h)
     with tempfile.TemporaryDirectory(prefix="ui-browser-", dir=h.root) as folder:
         profile = Path(folder)
@@ -149,9 +155,10 @@ def browser(h, base, actor, pairing_path=None):
             try:
                 chrome = pw.chromium.launch(
                     env=private, executable_path=str(executable), headless=True,
+                    # Share the exact fixture host exception between Chromium and
+                    # Playwright's API client. External HTTP(S) goes to a closed proxy.
+                    proxy={"server": "http://127.0.0.1:1", "bypass": "[::1]" if target.hostname == "::1" else target.hostname},
                     args=["--disable-background-networking", "--disable-component-update", "--disable-sync",
-                          "--proxy-server=http://127.0.0.1:1", "--proxy-bypass-list=127.0.0.1;localhost;[::1]",
-                          "--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost",
                           "--force-webrtc-ip-handling-policy=disable_non_proxied_udp"])
             except launch_error as exc:
                 raise MissingPeer(f"frozen Chromium could not launch (revision {peer['revision']})") from exc
@@ -166,19 +173,64 @@ def browser(h, base, actor, pairing_path=None):
                 chrome.close()
 
 
+def request_kind(url, base):
+    # Only return fixed labels. URLs can contain private IDs, queries or fragments.
+    if not url.startswith(base + "/"):
+        return "outside fixture origin"
+    path = urlsplit(url).path
+    if path.startswith("/ui/assets/"):
+        return "asset"
+    if path.startswith("/api/v1/conversations"):
+        return "conversation"
+    return {"/ui/": "index", "/ui/settings": "settings page", "/ui/favicon.svg": "icon",
+            "/api/v1/session": "session", "/api/v1/me/connection": "connection",
+            "/api/v1/admin/settings": "host settings", STREAM: "AG-UI"}.get(path, "other fixture route")
+
+
+def failure_kind(detail):
+    # Browser errors may echo request bodies, source code and locator values.
+    # Retain only stable categories, never any original text from the peer.
+    for code in ("ERR_NAME_NOT_RESOLVED", "ERR_CONNECTION_REFUSED", "ERR_CONNECTION_RESET",
+                 "ERR_PROXY_CONNECTION_FAILED", "ERR_TUNNEL_CONNECTION_FAILED",
+                 "ERR_BLOCKED_BY_CLIENT", "ERR_HTTP_RESPONSE_CODE_FAILURE", "ERR_UNSAFE_PORT",
+                 "ERR_EMPTY_RESPONSE", "ERR_ABORTED", "ERR_TIMED_OUT", "ERR_FAILED"):
+        if code in detail:
+            return code
+    lowered = detail.lower()
+    for needle, label in (("strict mode violation", "ambiguous locator"),
+                          ("timeout", "timeout"), ("target closed", "closed browser target"),
+                          ("has been closed", "closed browser target"), ("protocol error", "browser protocol error")):
+        if needle in lowered:
+            return label
+    return "browser operation failed"
+
+
 @contextlib.contextmanager
 def logged_in(h, chrome, base, actor, pairing_path=None):
-    ctx = chrome.new_context(service_workers="block")
+    from playwright.sync_api import Error as BrowserError
+
+    stage = "create isolated browser context"
+    events = deque(maxlen=24)
+    ctx = None
     try:
-        # Guard every browser request, including redirects and all subresources.
+        ctx = chrome.new_context(service_workers="block")
+        stage = "install same-origin request guard"
         ctx.route("**/*", lambda r: r.continue_() if r.request.url.startswith(base + "/")
                   else r.abort("blockedbyclient"))
+        ctx.on("response", lambda r: events.append([request_kind(r.url, base), r.status]))
+        ctx.on("requestfailed", lambda r: events.append([request_kind(r.url, base), failure_kind(r.failure or "")]))
+        stage = "open blank browser page"
         page = ctx.new_page()
         page.set_default_timeout(15000)
-        page.goto(base + "/ui/", wait_until="domcontentloaded")
+        page.on("pageerror", lambda _: events.append(["page", "uncaught script exception"]))
+        stage = "navigate to packaged UI"
+        index = page.goto(base + "/ui/", wait_until="domcontentloaded")
+        require(index is not None and index.status == 200, "browser did not receive the packaged index")
+        stage = "locate pairing control"
         access = page.get_by_label("Console access code")
         access.wait_for()
         require(access.evaluate("el => el === document.activeElement"), "pairing field did not receive focus")
+        stage = "read disposable pairing input"
         if actor == "local" or pairing_path is not None:
             path = pairing_path or (Path(h.env["PROXY_CONSOLE_DATA"]) / "pairing-token")
             require(path.resolve().is_relative_to(h.root.resolve()), "pairing file outside disposable root")
@@ -189,12 +241,25 @@ def logged_in(h, chrome, base, actor, pairing_path=None):
                 raise MissingPeer("disposable final-image pairing code unavailable")
         else:
             token = h.keys[actor]
+        stage = "submit console pairing"
         access.fill(token)
-        page.keyboard.press("Enter")
+        with page.expect_response(lambda r: r.url == base + "/api/v1/session" and r.request.method == "POST") as session:
+            page.keyboard.press("Enter")
+        require(session.value.status == 200, f"console pairing returned HTTP {session.value.status}")
+        stage = "wait for authenticated chat"
         page.get_by_role("heading", name="Conversation", exact=True).wait_for()
+        stage = "exercise authenticated browser journey"
         yield page
+    except (BrowserError, AssertionError, MissingPeer) as exc:
+        detail = failure_kind(str(exc)) if isinstance(exc, BrowserError) else type(exc).__name__
+        h.note("browser failure " + actor + " " + uuid4().hex[:12],
+               {"stage": stage, "category": detail, "recentTransport": list(events)})
+        if isinstance(exc, BrowserError):
+            raise AssertionError(f"{stage}: {detail}") from None
+        raise
     finally:
-        ctx.close()
+        if ctx is not None:
+            ctx.close()
 
 
 def nav(h, base, actor):

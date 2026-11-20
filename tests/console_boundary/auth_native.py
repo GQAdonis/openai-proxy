@@ -150,7 +150,7 @@ def tool(h, negative, delegate=False):
             path = start(f, cid, key)
             def pending():
                 state = view(f, path)
-                assert state["state"] not in ("failed", "indeterminate", "completed"), "native request ended before permission"
+                assert state["state"] not in ("failed", "indeterminate", "completed", "cancelled"), "native request ended before permission"
                 return state["permissions"]
             permissions = wait_for(pending, 30)
             assert len(permissions) == 1
@@ -161,11 +161,14 @@ def tool(h, negative, delegate=False):
             if negative:
                 assert f.api(path + "/permissions/expired-fixture", "POST", {"decision": "allow"})[0] == 409
             assert f.api(endpoint, "POST", {"decision": "deny" if negative else "allow"})[0] == 200
-            finish(f, path)
+            terminal = "cancelled" if negative else "completed"
+            finish(f, path, terminal)
             transcript = events(f, path)
+            assert [e["state"] for e in transcript if e["type"] == "terminal"] == [terminal], "unexpected terminal event history"
             assert events(f, path) == transcript
             assert f.api(endpoint, "POST", {"decision": "allow"})[0] == 409
             reports = model_requests(h, key)
+            assert reports, "independent model recipient did not observe the marked turn"
             count = sum(r["delegated_returns" if delegate else "canary_returns"] for r in reports)
             assert count == (0 if negative else 1), "independent recipient result count differs"
             assert sum(e["type"] == "permission" and e["requestId"] == ident for e in transcript) == 1
@@ -173,7 +176,8 @@ def tool(h, negative, delegate=False):
                 assert len(f.events("exec")) == count
             if observed is not None:
                 assert observed() == [count, count], "canary file-open count differs from authorized effect count"
-            return {"tool": label, "authorized": not negative, "observed_tool_results": count, "permission_requests": 1}
+            return {"tool": label, "authorized": not negative, "terminal": terminal,
+                    "observed_tool_results": count, "permission_requests": 1}
 
 
 
@@ -182,9 +186,16 @@ def unsupported(h):
         install(f, credential("owner-a", managed=True))
         req = {"model": "gpt-5.5", "messages": [{"role": "user", "content": "fixture"}],
                "tools": [{"type": "function", "function": {"name": "unavailable", "parameters": {"type": "object"}}}]}
-        assert f.api("/api/v1/drivers/codex/v1/chat/completions", "POST", req)[0] == 400
-        assert not f.events("exec") and not f.trace
-        return {"rejected_before_exec": True}
+        registry = Path(f.env["PROXY_CONSOLE_DATA"]) / "conversations"
+        assert registry.is_dir(), "disposable conversation registry unavailable"
+        existing = set(registry.glob("*.json"))
+        code, _, raw = f.api("/api/v1/drivers/codex/v1/chat/completions", "POST", req)
+        assert code == 422, f"unsupported function returned HTTP {code}, expected 422"
+        error = json.loads(raw).get("error", {})
+        assert error.get("code") == "unsupported_or_invalid_input" and error.get("message"), "missing capability rejection"
+        assert set(registry.glob("*.json")) == existing, "unsupported function created a conversation"
+        assert not f.events("exec") and not f.events("exchange") and not f.trace, "unsupported function caused dispatch"
+        return {"http": code, "error": error["code"], "new_conversations": 0, "rejected_before_exec": True}
 
 
 def exercise(h, row, negative):
@@ -275,7 +286,7 @@ def foreign_permission(h):
         path = start(f, cid, key)
         def pending():
             state = view(f, path)
-            assert state["state"] not in {"failed", "completed", "indeterminate"}, "permission was not reached"
+            assert state["state"] not in {"failed", "completed", "indeterminate", "cancelled"}, "permission was not reached"
             return state["permissions"]
         asks = wait_for(pending, 30)
         assert len(asks) == 1
@@ -285,10 +296,13 @@ def foreign_permission(h):
         assert code in (403, 404) and key.encode() not in raw
         assert view(f, path)["permissions"] == asks
         assert f.api(resource, "POST", {"decision":"deny"})[0] == 200
-        finish(f, path)
-        assert sum(r["canary_returns"] for r in model_requests(h, key)) == 0
+        finish(f, path, "cancelled")
+        reports = model_requests(h, key)
+        assert reports, "independent model recipient did not observe the shared turn"
+        assert sum(r["canary_returns"] for r in reports) == 0, "denied canary reached the model"
+        assert [e["state"] for e in events(f, path) if e["type"] == "terminal"] == ["cancelled"]
         path = None
-        return {"foreign_http":code, "owner_decision":"deny", "canary_returns":0}
+        return {"foreign_http":code, "owner_decision":"deny", "terminal":"cancelled", "canary_returns":0}
     finally:
         try:
             if path:
