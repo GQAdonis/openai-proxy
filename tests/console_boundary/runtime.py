@@ -6,8 +6,10 @@ import secrets
 import shutil
 import signal
 import socket
+import socketserver
 import subprocess
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -169,21 +171,59 @@ def start(h):
                 h.save()
         else:
             wait_http(origin(env['PORT']),proc)
-    # The final image serves its embedded assets in an isolated, separately identified container.
+    # Host lanes are independent of the image and remain available after an
+    # isolated image readiness failure.
+    h.state['hostReady'] = True
+    h.save()
     if 'image' in h.state:
-        env=docker_env(sanitized(h.root/'docker'))
-        network=subprocess.check_output(['docker','network','create','--internal',h.state['tag']],env=env,text=True).strip()
-        h.state['dockerNetwork']=network
-        h.save()
-        p=port()
-        container=subprocess.check_output(['docker','run','-d','--network',network,'--name',h.state['tag'],
-                      '-e','PROXY_CONSOLE_TOKEN='+h.keys['image'],'-e','PROXY_CONSOLE_ORIGIN='+origin(p),
-                      '-p',f'127.0.0.1:{p}:8181',h.state['image']],env=env,text=True).strip()
-        h.state.update(container=container,image_base=origin(p))
-        h.save()
-        wait_http(origin(p))
+        start_image(h)
     return {'local':True,'shared':True,'memory':bool(h.state.get('memory')),
-            'image':bool(h.state.get('container'))}
+            'image':bool(h.state.get('image_base'))}
+
+
+def start_image(h):
+    env = docker_env(sanitized(h.root/'docker'))
+
+    def docker(*args):
+        h.count()
+        return subprocess.run(['docker', *args], env=env, capture_output=True,
+                              text=True, timeout=15)
+
+    tag = h.state['tag']
+    p = port()
+    container = docker('run', '-d', '--pull=never', '--network', 'none',
+                       '--name', tag, '-e', 'PROXY_CONSOLE_TOKEN='+h.keys['image'],
+                       '-e', 'PROXY_CONSOLE_ORIGIN='+origin(p), h.state['image'])
+    if container.returncode:
+        h.calls.append({'name':'image start', 'status':'FAIL', 'observed':'docker run exited unsuccessfully'})
+        h.note('image launch', container.stderr[-1500:])
+        return
+    h.state['container'] = container.stdout.strip()
+    h.save()
+    network = docker('inspect', '--format', '{{.HostConfig.NetworkMode}}', h.state['container'])
+    if network.returncode != 0 or network.stdout.strip() != 'none':
+        raise AssertionError('container egress isolation could not be verified')
+    relay = spawn(h, [sys.executable, '-B', str(Path(__file__)), str(p), h.state['container']],
+                  env, 'image-loopback-relay', h.root)
+    try:
+        wait_http(origin(p), relay)
+        h.state['image_base'] = origin(p)
+        h.save()
+    except AssertionError:
+        h.calls.append({'name':'image health from host', 'status':'FAIL',
+                        'observed':'fixture loopback relay did not reach container health'})
+    finally:
+        identity = docker('inspect', '--format', '{{.State.Status}} {{.State.ExitCode}}', h.state['container'])
+        inside = docker('exec', h.state['container'], 'curl', '--max-time', '3', '-sS', '-o', '/dev/null',
+                        '-w', '%{http_code}', 'http://127.0.0.1:8181/health')
+        logs = docker('logs', '--tail', '60', h.state['container'])
+        h.note('image readiness', {'hostReady':bool(h.state.get('image_base')),
+                                   'transport':'host loopback relay to network-disabled container',
+                                   'state':identity.stdout.strip(), 'insideStatus':inside.stdout.strip(),
+                                   'insideExit':inside.returncode, 'logs':(logs.stdout+logs.stderr)[-5000:]})
+        if inside.returncode or inside.stdout.strip() != '200':
+            h.calls.append({'name':'image health inside container', 'status':'FAIL',
+                            'observed':'container loopback health did not respond successfully'})
 
 
 def stop(h):
@@ -204,3 +244,57 @@ def stop(h):
             object_id=h.state[key] if key!='image' else h.state['tag']
             subprocess.run(argv+[object_id],env=env,stdout=subprocess.DEVNULL,check=True,timeout=30)
     return results
+
+
+# Stdio carries one raw HTTP connection through Docker exec. The container
+# keeps network=none, while the browser sees a loopback-only HTTP origin.
+IMAGE_SOCKET = '''
+import { connect } from 'node:net';
+const target = connect(8181, '127.0.0.1');
+target.on('error', () => process.exit(1));
+process.stdin.pipe(target);
+target.pipe(process.stdout);
+'''
+
+
+def image_relay(port_number, container):
+    if len(container) != 64 or any(ch not in '0123456789abcdef' for ch in container):
+        raise ValueError('expected the fixture container ID')
+
+    class Handler(socketserver.BaseRequestHandler):
+        def handle(self):
+            args = ['docker', 'exec', '-i', container, '/usr/local/bin/bun', '-e', IMAGE_SOCKET]
+            with subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                  stderr=subprocess.DEVNULL, bufsize=-1) as peer:
+                def forward_request():
+                    try:
+                        while data := self.request.recv(65536):
+                            peer.stdin.write(data)
+                            peer.stdin.flush()
+                    except OSError:
+                        pass
+                    finally:
+                        peer.stdin.close()
+
+                writer = threading.Thread(target=forward_request, daemon=True)
+                writer.start()
+                try:
+                    while data := peer.stdout.read1(65536):
+                        self.request.sendall(data)
+                except OSError:
+                    pass
+                finally:
+                    try:
+                        self.request.shutdown(socket.SHUT_RDWR)
+                    except OSError:
+                        pass
+                    if peer.poll() is None:
+                        peer.terminate()
+                    writer.join(timeout=2)
+
+    with socketserver.ThreadingTCPServer(('127.0.0.1', port_number), Handler) as relay:
+        relay.serve_forever()
+
+
+if __name__ == '__main__':
+    image_relay(int(sys.argv[1]), sys.argv[2])

@@ -28,7 +28,7 @@ PHASE_DIR = REPO/'.kbd-orchestrator/phases'/PHASE
 # A repair has its own frozen inputs, attempt pointer and predecessor report.
 # The original B4 packet remains independently addressable.
 repair_arg = os.environ.get('KBD_REPAIR_ATTEMPT', '0')
-if repair_arg not in ('0', '1', '2'):
+if not re.fullmatch(r'0|[1-9][0-9]*', repair_arg):
     raise ValueError('unsupported repair attempt')
 REPAIR = int(repair_arg)
 BOUNDARY = 'B5' if REPAIR else 'B4'
@@ -97,10 +97,12 @@ class Harness:
              env=runtime.docker_env(runtime.sanitized(self.root/'docker')),text=True,timeout=10).strip()
 
     def count(self):
-        self.state['calls']+=1
-        self.save()
-        if self.state['calls'] > 240 or time.time()-self.state['started']>240*60:
+        if self.state['calls'] >= 240 or time.time()-self.state['started'] >= 240*60:
+            self.state['stopReason'] = 'boundary budget reached'
+            self.save()
             raise TimeoutError('boundary budget reached')
+        self.state['calls'] += 1
+        self.save()
 
     def clean(self,value):
         text=json.dumps(value,default=str,ensure_ascii=True)
@@ -241,6 +243,7 @@ def build(h):
         shutil.copy2(h.root/'target/debug/openai-proxy',h.memory_binary)
         h.note('memoryBuild',sha(h.memory_binary))
     engine=runtime.docker_env(env)
+    engine['DOCKER_BUILDKIT'] = '1'
     if not shutil.which('docker',path=env['PATH']):
         h.block('final image','local Docker engine CLI unavailable')
         return
@@ -275,10 +278,18 @@ def verify_authority(contract):
     if REPAIR:
         previous_file = PACKET_DIR/'previous-results.json'
         previous = read(previous_file)
-        if (sha(previous_file) != read(FROZEN)['previousResultsSha256']
-                or previous['budgetConsumption']['values']['repairAttempts']['value'] + 1 != REPAIR
-                or not any(r['status']=='FAIL' for r in previous['scenarios'])):
-            raise RuntimeError('repair does not match the preceding failed attempt')
+        manifest = read(FROZEN)
+        if (REPAIR > contract['budgets']['repairAttempts']
+                or sha(previous_file) != manifest['previousResultsSha256']
+                or previous['budgetConsumption']['values']['repairAttempts']['value'] + 1 != REPAIR):
+            raise RuntimeError('repair exceeds the adopted limit or does not match the preceding attempt')
+        if not any(r['status'] == 'FAIL' for r in previous['scenarios']):
+            path = REPO / previous['evidence'] / 'run.json'
+            if (not path.is_file() or sha(path) != manifest.get('previousStartupReceiptSha256')):
+                raise RuntimeError('repair lacks the preceding startup failure receipt')
+            startup = read(path)
+            if startup['status'] != 'FAIL' or startup['candidate'] != previous['candidateDigest']:
+                raise RuntimeError('preceding startup receipt does not identify a failed candidate')
     if not (latest['boundary']==BOUNDARY and contract['status']['implementationComplete']
             and latest['contractDigest']==contract['identity']['contractDigest']==read(FROZEN)['contractDigest']
             and candidate in latest.get('reason','')):
@@ -339,10 +350,13 @@ def main(argv):
                 if sha(PHASE_DIR/'boundary-results.json') != read(FROZEN)['previousResultsSha256']:
                     raise RuntimeError('newer results already exist for this phase')
                 prior = read(PACKET_DIR/'previous-results.json')['budgetConsumption']['values']
+            diagnostics = read(FROZEN).get('recoveryDiagnosticsBudget', {})
+            calls = prior.get('toolCalls', {}).get('value', 0) + diagnostics.get('toolCalls', 0)
+            minutes = prior.get('timeMinutes', {}).get('value', 0) + diagnostics.get('timeMinutes', 0)
             root=Path(tempfile.mkdtemp(prefix='kbd-console-')).resolve()
             state={'label':secrets_label(),'root':str(root),'next':0,
-                   'calls':prior.get('toolCalls',{}).get('value',0),
-                   'started':time.time()-60*prior.get('timeMinutes',{}).get('value',0),
+                   'calls':calls,
+                   'started':time.time()-60*minutes,
                    'previousNoProgress':prior.get('noProgress',{}).get('value',0),
                    'executor':{'harness':os.environ.get('KBD_EXECUTOR_HARNESS','Bash/Python KBD boundary runner'),
                                'model':os.environ.get('KBD_EXECUTOR_MODEL','none (scripted observations)'),
@@ -382,7 +396,7 @@ def main(argv):
                     h.block('no verified observations','case returned without an executable assertion')
         except (FileNotFoundError,TimeoutError,subprocess.TimeoutExpired) as err:
             h.block(command,str(err)[:300])
-            if command in ('build','run'):
+            if command == 'build' or (command == 'run' and not state.get('hostReady')):
                 state['stopReason']='required dependency or environment unavailable'
                 failed=True
         except Exception as err:
@@ -395,7 +409,7 @@ def main(argv):
             # Abort dependent work if build/start fails or an authority/side-effect control fails.
             observations=' '.join(str(x.get('name',''))+' '+str(x.get('observed','')) for x in h.calls if x.get('status')=='FAIL')
             unsafe=bool(re.search(r'foreign|unauthori[sz]ed|egress|disclos|duplicat.*effect|other.owner|charge',observations,re.I))
-            if command=='run' or (command=='build' and not h.binary.is_file()) or unsafe:
+            if (command=='run' and not state.get('hostReady')) or (command=='build' and not h.binary.is_file()) or unsafe:
                 state['stopReason']='failed prerequisite or isolation control at '+command
             if command=='build' and not h.binary.is_file():
                 state['buildFailed']=True
