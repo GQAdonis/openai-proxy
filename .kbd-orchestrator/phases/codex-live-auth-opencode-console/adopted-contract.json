@@ -6,7 +6,7 @@
     "runId": "codex-live-auth-opencode-console-20261119T193635Z",
     "phaseId": "codex-live-auth-opencode-console",
     "planRevision": 1,
-    "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8"
+    "contractDigest": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f"
   },
   "digestNormalization": {
     "algorithm": "sha256",
@@ -679,9 +679,9 @@
     }
   ],
   "budgets": {
-    "timeMinutes": 240,
-    "toolCalls": 775,
-    "repairAttempts": 6,
+    "timeMinutes": 420,
+    "toolCalls": 1050,
+    "repairAttempts": 8,
     "noProgressLimit": 3,
     "tokenBudget": "UNKNOWN",
     "tokenFallback": "Time, tool-call, repair and no-progress ceilings bound the consolidated verification run; retain historical consumption.",

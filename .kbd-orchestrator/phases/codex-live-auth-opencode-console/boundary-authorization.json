@@ -51,6 +51,13 @@
       "authorizer": "travis@tribehealthsolutions.com",
       "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8",
       "reason": "Owner approved one targeted fixture repair in signed amendment e43825ef. Frozen candidate SHA-256 196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd, source 885a17a. PLUGIN-1, UI-1, SURFACE-1, ADMIN-1 and FEATURE-1 plus negative controls. No genuine account use or deployment."
+    },
+    {
+      "boundary": "B5",
+      "authorizedAt": "2026-11-20T16:16:46.058+00:00",
+      "authorizer": "travis@tribehealthsolutions.com",
+      "contractDigest": "124083a9bb13f5286e8dbb1071558a8ca65246511f47ea3076970fc44b5f471f",
+      "reason": "Authorize a single operator-supervised closeout packet with up to two bounded fixture repair/confirmation attempts for unresolved AUTH-1, AUTH-2, CHAT-1, TOOL-1, ACP-1, MCP-1 and FEATURE-1 subcases and directly affected regression controls. Provision disposable editor profiles, isolated native keyring, Linux file-open observer and isolated synthetic recipient; installation is limited to disposable test environments using available software and licenses. Preserve the 13 scenarios, prior receipts and all consumed budgets. Cumulative ceilings are eight repair attempts, 1050 counted commands and 420 minutes. Any product repair requires a refrozen candidate and evidence invalidation review. No additional subscriber turns, paid embedding requests, personal configuration changes, machine-level installs, privilege escalation, publishing or deployment. If a required collaborator is unavailable, record the specific missing prerequisite and continue independent work."
     }
   ]
 }
