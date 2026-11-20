@@ -6,7 +6,7 @@
     "runId": "codex-live-auth-opencode-console-20261119T193635Z",
     "phaseId": "codex-live-auth-opencode-console",
     "planRevision": 1,
-    "contractDigest": "68d8aad4ac3a015e56d6606d8fc4d0dfb945eecf78b3df63802f21101b33dd28"
+    "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b"
   },
   "digestNormalization": {
     "algorithm": "sha256",
@@ -1116,7 +1116,7 @@
     ]
   },
   "status": {
-    "implementationComplete": false
+    "implementationComplete": true
   },
   "calibration": {
     "examplesPath": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/opencode-v2-a2ui-1/calibration-examples.md",
@@ -1130,7 +1130,7 @@
     "specDeltaDigest": "00a9336a9f55ab96d906bd9220e432ac418d9a5503edf66c27443f673b71cf6e"
   },
   "closure": {
-    "implementationComplete": false,
+    "implementationComplete": true,
     "behaviorAccepted": false,
     "releaseEligible": false,
     "releaseAuthorized": false

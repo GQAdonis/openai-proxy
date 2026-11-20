@@ -1,0 +1,153 @@
+{
+  "command": "build",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "plugin-typecheck",
+      "status": "FAIL",
+      "observed": "plugin-typecheck exited 2; see plugin-typecheck.log"
+    },
+    {
+      "name": "cargo-build",
+      "status": "FAIL",
+      "observed": "cargo-build exited 101; see cargo-build.log"
+    },
+    {
+      "name": "cargo-clippy",
+      "status": "BLOCKED",
+      "observed": "prerequisite build step failed"
+    },
+    {
+      "name": "cargo-unit",
+      "status": "BLOCKED",
+      "observed": "prerequisite build step failed"
+    },
+    {
+      "name": "cargo-release",
+      "status": "BLOCKED",
+      "observed": "prerequisite build step failed"
+    },
+    {
+      "name": "build",
+      "status": "FAIL",
+      "observed": "installed release unavailable; see build receipts"
+    }
+  ],
+  "notes": {
+    "version-rustc": {
+      "argv": [
+        "rustc",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "55cd0529c005d3f62869ea6e2271bfa9d5196f56dc65a8be00a371af114a4a98"
+    },
+    "version-cargo": {
+      "argv": [
+        "cargo",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "c35608815f43d0b8788a9b826fad2bb17384f49fb328dc4fe64da9db5f5ef4d6"
+    },
+    "version-node": {
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "cbed609d6cd010549ef4f6c6804420506719da2c844a68616ad02a4a5ef75b8a"
+    },
+    "version-npm": {
+      "argv": [
+        "npm",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "041fb0a6f23ccf0102a18d4591e1bfa36eebc17d27d348727a5eee18806d1c3c"
+    },
+    "version-bun": {
+      "argv": [
+        "bun",
+        "--version"
+      ],
+      "exit": 0,
+      "sha256": "d03d8b268b4171328ac2458ce8ca82d69a1fde38469d4e4faae4f8fa8d8a5e35"
+    },
+    "frontend-install": {
+      "argv": [
+        "npm",
+        "ci",
+        "--include=dev",
+        "--ignore-scripts"
+      ],
+      "exit": 0,
+      "sha256": "c6d4527a7163d4813e61486d8eca7f1f94360e2942afc4c4b47b345f5efdb5da"
+    },
+    "worker-install": {
+      "argv": [
+        "bun",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "exit": 0,
+      "sha256": "51091a30d38285a57e68607189afbc7d33062a86ac603157947d76357f5e4b5b"
+    },
+    "plugin-install": {
+      "argv": [
+        "bun",
+        "install",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "exit": 0,
+      "sha256": "ad2a6a9b48c1d0baaca9bd9f1da16e5032797c18aa977de7485f0b030c35a7fe"
+    },
+    "plugin-typecheck": {
+      "argv": [
+        "bun",
+        "run",
+        "typecheck"
+      ],
+      "exit": 2,
+      "sha256": "94ac9280f0be6698b5302dc1cb077a88ffbc909e7d2643da18e744e98e11f82e"
+    },
+    "plugin-build": {
+      "argv": [
+        "bun",
+        "run",
+        "build"
+      ],
+      "exit": 0,
+      "sha256": "1329bf1159bd91c4b59ada38effb99c3373333d7fd72c440342f31d645721e37"
+    },
+    "plugin-pack": {
+      "argv": [
+        "npm",
+        "pack",
+        "--ignore-scripts",
+        "--pack-destination",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-s9j2nkf7"
+      ],
+      "exit": 0,
+      "sha256": "1350db85b4ca514d7c2946d824e86ea30a0ee4337e77774893d85645459f00b4"
+    },
+    "cargo-build": {
+      "argv": [
+        "cargo",
+        "build",
+        "--locked"
+      ],
+      "exit": 101,
+      "sha256": "6aa60dcfac6df44f02b5e38fee2ffd6879e885c48b81f034419275614379ea9c"
+    }
+  },
+  "candidate": "55c6f3452da7527f069d5367ac917c43cc015104bfaf413627b6e388e3720778",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795135241.122468
+}

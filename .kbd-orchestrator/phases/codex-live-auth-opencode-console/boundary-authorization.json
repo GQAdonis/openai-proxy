@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "kind": "kbd.boundary-authorization",
+  "phaseId": "codex-live-auth-opencode-console",
+  "events": [
+    {
+      "boundary": "B4",
+      "authorizedAt": "2026-11-20T00:38:38.332Z",
+      "authorizer": "travis@tribehealthsolutions.com",
+      "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
+      "reason": "Explicit user approval to sign and run the fixture-only B4 packet for candidate SHA-256 55c6f3452da7527f069d5367ac917c43cc015104bfaf413627b6e388e3720778 at source cad17b0. Disposable profiles only."
+    }
+  ]
+}

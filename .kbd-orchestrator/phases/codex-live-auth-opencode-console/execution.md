@@ -19,3 +19,11 @@ Independent reviewers prepared positive and negative controls for all 13 scenari
 The production milestone proposes contract `e30eb61f`. Only the two implementation-completion fields change. The canonical binding remains `68d8aad4` until the operator signs the [amendment](amendments/implementation-complete/amend-contract.json). The B4 authority record additionally identifies the exact frozen candidate. Execute remains active pending that decision and verification.
 
 [Candidate 55c6f345](verification-candidate.json) freezes 126 inputs from source commit `cad17b0` and the installed test-tool identities. The manifest SHA-256 is `55c6f3452da7527f069d5367ac917c43cc015104bfaf413627b6e388e3720778`. Its authority scope covers a single fixture-only packet. Local signer preflight verified the enrolled public key against milestone manifest SHA-256 `5d2e345be8e9c0288f7f0c42555f2fea74eea6af19c7a950750dc726268c2842`. The candidate has no runtime verdict yet.
+
+## B4 fixture run
+
+The owner authorized the exact milestone signature and fixture-only verification. The signer verified the detached signature, KBD bound contract `e30eb61f` at revision 3, and readiness reported READY. This [authorization](boundary-authorization.json) identifies the candidate and precedes the original run.
+
+B4 stopped at the build prerequisite. Plugin bundling and npm packing succeeded. The OpenCode plugin typecheck failed because TypeScript 6 did not load the installed Node declarations. The frontend TypeScript check completed. Vite could not resolve the locked Inter package’s `latin.css` import. Cargo’s build script consequently exited before producing the release binary. The browser, SDK and live-auth journeys were unexercised. Cleanup completed successfully. No external login, paid call or client-profile installation occurred. [Build observations](evidence/20261120-003944-05a45aa1/build.json) · [Scenario results](boundary-results.json) · [Cleanup](evidence/20261120-003944-05a45aa1/cleanup.json)
+
+The measured B4 packet used 0.95 minutes, 13 counted commands/probes and zero repair attempts. The original build output is retained. A bounded B5 repair requires fresh operator authority.
