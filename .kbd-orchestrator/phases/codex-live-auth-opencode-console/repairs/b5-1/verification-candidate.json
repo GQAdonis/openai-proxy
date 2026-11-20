@@ -1,0 +1,601 @@
+{
+  "affectedScenarios": [
+    "PLUGIN-1",
+    "UI-1"
+  ],
+  "amendmentSha256": "5d2e345be8e9c0288f7f0c42555f2fea74eea6af19c7a950750dc726268c2842",
+  "budgetHighWater": {
+    "noProgress": {
+      "class": "measured",
+      "value": 0
+    },
+    "repairAttempts": {
+      "class": "measured",
+      "value": 0
+    },
+    "timeMinutes": {
+      "class": "measured",
+      "value": 0.95
+    },
+    "toolCalls": {
+      "class": "measured",
+      "value": 13
+    }
+  },
+  "calibration": {
+    "examplesPath": ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/opencode-v2-a2ui-1/calibration-examples.md",
+    "sha256": "52106be130a0802fc3a78e6f27e6fa3b5fb3e8d7e5f34964eff3596b74b7e5f4"
+  },
+  "changedInputs": {
+    "frontend/src/main.tsx": {
+      "current": "757774adcb2446ace5802e58a657a0db09f4124f7bf2e1984b4013d00734c425",
+      "previous": "ae244d80a645b03ef74c390f47dfc97d65127cc170a1a369620995eb0037ef61"
+    },
+    "plugin/tsconfig.json": {
+      "current": "03eae7b7635639ee06fdac26ddd83d3120ea2c4715a4571d58f1abadfb5043c0",
+      "previous": "85375155799fd8987a1239fc8af2cf4fbbe3f8af5ff9fc0b63ad727fa66ce1da"
+    },
+    "tests/console_boundary/runner.py": {
+      "current": "b35bd0ed60b05f92730ab061c82ad853a219868ed814382fdf28eea005b9d769",
+      "previous": "cbb72d7e26e57b14f3176a9b866a244978d65759d30b526b30c3778308b1860c"
+    }
+  },
+  "changedToolIdentities": [],
+  "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
+  "files": {
+    ".agents/skills/proxy-team/SKILL.md": {
+      "executableBits": 0,
+      "sha256": "772e63c52422dde15a3a28b1e58f40ef615184ab21209da5302ec54fa72cb6f0"
+    },
+    ".dockerignore": {
+      "executableBits": 0,
+      "sha256": "c16160b6bba639b0b9ed07dab5b197c8bd588a7e5f588bb556a856e150c7441f"
+    },
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/implementation-complete/proposed-contract.json": {
+      "executableBits": 0,
+      "sha256": "8e248c7d8062206b18cda089d4795ab6625e856e80a339106ea708e9ccd5619b"
+    },
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/amendments/opencode-v2-a2ui-1/calibration-examples.md": {
+      "executableBits": 0,
+      "sha256": "52106be130a0802fc3a78e6f27e6fa3b5fb3e8d7e5f34964eff3596b74b7e5f4"
+    },
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/fixture-manifest.json": {
+      "executableBits": 0,
+      "sha256": "2cf1435fffc9117147c71693cf87967148c5464c471121ed4faf1e1e240af97b"
+    },
+    ".kbd-orchestrator/phases/codex-live-auth-opencode-console/plan.md": {
+      "executableBits": 0,
+      "sha256": "0056a3be5bcf2989a60b70b8351831ecd856c0274a44bfcb716bc7f17af55ae7"
+    },
+    "Cargo.lock": {
+      "executableBits": 0,
+      "sha256": "b2406464cf7718dfe2d22d2ac3fb01008b2b3cd7861fa048c592114e56bbcd1a"
+    },
+    "Cargo.toml": {
+      "executableBits": 0,
+      "sha256": "fca118edcb0e820a4c99a1f805f27b18982e6bb63911c7e032f325be1c55a80f"
+    },
+    "Dockerfile": {
+      "executableBits": 0,
+      "sha256": "167bb79024d8ce36c97f1f477be4dcc097239fd06cbda5ce5399234fef9752e5"
+    },
+    "README.md": {
+      "executableBits": 0,
+      "sha256": "8173c07a8c5cea0da3d2209432b5f46c3b79241a448e66bf4b6c32fa03771beb"
+    },
+    "build.rs": {
+      "executableBits": 0,
+      "sha256": "0c2581f2515e98ba65771d6a1feafa316825c444038d0b371285110b265a9fd1"
+    },
+    "data/skills/proxy-team": {
+      "symlink": "../../.agents/skills/proxy-team"
+    },
+    "docker-compose.yaml": {
+      "executableBits": 0,
+      "sha256": "b9bc67933499c9810204cc1a206ef45bcda1a96a40891723dc4257ce2fa05885"
+    },
+    "docs/codex-auth.md": {
+      "executableBits": 0,
+      "sha256": "a76b9cb2608a0dce2f84bc2d880710a9f613d3f307ce2851142bd64714b6218c"
+    },
+    "docs/console.md": {
+      "executableBits": 0,
+      "sha256": "50c496a3af22d0350be7587b51f0db714733faa61a9006ab2218cd355a29877b"
+    },
+    "docs/opencode-setup.md": {
+      "executableBits": 0,
+      "sha256": "40bc5576478e334830470c838403dd50ed7bad0c480bbda6592a03ddb85b18e8"
+    },
+    "frontend/.gitignore": {
+      "executableBits": 0,
+      "sha256": "790e3169bc19b046fe55ba1da6d13b976c28363c8c00462a2195fe5faf260910"
+    },
+    "frontend/.node-version": {
+      "executableBits": 0,
+      "sha256": "904636927bbfe077d1a82001e3c09a336737410831611fa294eeeb27babf2c81"
+    },
+    "frontend/README.md": {
+      "executableBits": 0,
+      "sha256": "e1b44c6c66d8c5dd272e140513b28837c5024e3b0d08d4cd4a37b3f40841110c"
+    },
+    "frontend/components.json": {
+      "executableBits": 0,
+      "sha256": "d751b43876aae069f38dc389ec21ff02bde38dbb7ceb508dfb8bc7e570428293"
+    },
+    "frontend/index.html": {
+      "executableBits": 0,
+      "sha256": "607747acc7da8b4852dcc45d80df1547e1684cb2a0816e015c7a8b910b153e40"
+    },
+    "frontend/package-lock.json": {
+      "executableBits": 0,
+      "sha256": "b4ec0205096a47f3dac71ccfa9e5a58b41f30e0568dc195b2c41d8da5d86a8ff"
+    },
+    "frontend/package.json": {
+      "executableBits": 0,
+      "sha256": "8a2c72a7058e273d6424411fd079df413fc933166f547df287a9fee71f89af6b"
+    },
+    "frontend/public/favicon.svg": {
+      "executableBits": 0,
+      "sha256": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720"
+    },
+    "frontend/schema-plugin.mjs": {
+      "executableBits": 0,
+      "sha256": "fbae3deca8f222f4cf833275e862f51787407164d6ba76852f30dfc5cca82e4a"
+    },
+    "frontend/src/Chat.tsx": {
+      "executableBits": 0,
+      "sha256": "98f0f1cc5df4fbc6f2021bad91b3f6257d0a8dbbace6dc4b1154004f1131a901"
+    },
+    "frontend/src/ConfigEditor.tsx": {
+      "executableBits": 0,
+      "sha256": "8d6e6c83ee752336216c6dc058c71f670548b06cd7ac0b0a6143fe31ec9e4b99"
+    },
+    "frontend/src/Settings.tsx": {
+      "executableBits": 0,
+      "sha256": "7982baa5a71ee3c152d7d28aaee116f408f78ce1627bc28c9a5fdb7608805c24"
+    },
+    "frontend/src/Surface.tsx": {
+      "executableBits": 0,
+      "sha256": "302ba8a9f95e1c8e823d921c710e3f3c4454986e13a33d94c76dbae2e9a3689d"
+    },
+    "frontend/src/api.ts": {
+      "executableBits": 0,
+      "sha256": "31b6375d3f724679a400c92c2c371570bd0b173c7005999ae7e63b3a3a70020e"
+    },
+    "frontend/src/components/ui/button.tsx": {
+      "executableBits": 0,
+      "sha256": "9a4a086aafc480f409d2b38a75ce0e61b2697ce3d02248f5c2ca80ff88ad573f"
+    },
+    "frontend/src/main.tsx": {
+      "executableBits": 0,
+      "sha256": "757774adcb2446ace5802e58a657a0db09f4124f7bf2e1984b4013d00734c425"
+    },
+    "frontend/src/projection.ts": {
+      "executableBits": 0,
+      "sha256": "39efad2c6230c0a6c0a28a40410c38958a5296e51b950b2f0c479308b8758b18"
+    },
+    "frontend/src/schemas/LICENSE": {
+      "executableBits": 0,
+      "sha256": "8c8b5b632d56c4c1658296963c693db5396772a33caaddb9a22593c4155c437a"
+    },
+    "frontend/src/schemas/README.md": {
+      "executableBits": 0,
+      "sha256": "a453a5a6bbc8a3c20bae66d473833c79de6afc1abcf584d77bb40603a258f907"
+    },
+    "frontend/src/schemas/agent_to_renderer.json": {
+      "executableBits": 0,
+      "sha256": "2f575f783fdda0e4d175fe5d331661655e4a4901613262322792dae7e823761d"
+    },
+    "frontend/src/schemas/catalog.json": {
+      "executableBits": 0,
+      "sha256": "41aa26957f75ccd9fb9940519b2d7e5548cc9c962d968c35400fc7eefbf8ac79"
+    },
+    "frontend/src/schemas/common_types.json": {
+      "executableBits": 0,
+      "sha256": "c4e78305be1de73eecb37f8179ba169730250611703683af291b18135a6430dc"
+    },
+    "frontend/src/schemas/renderer_to_agent.json": {
+      "executableBits": 0,
+      "sha256": "58ecde02101f0f37566b5e238dc6ef6af628c3ff312fce0e17ab7670b7215465"
+    },
+    "frontend/src/styles.css": {
+      "executableBits": 0,
+      "sha256": "4af8923e21485be3b6110b7f6c65a76181cb222b7d22d6620443805f3867ccbe"
+    },
+    "frontend/src/validators.d.ts": {
+      "executableBits": 0,
+      "sha256": "df6c7916cce07b075533ee41b498f8259ac31d378f7bb5857e1d9d53b7ffd10e"
+    },
+    "frontend/tsconfig.json": {
+      "executableBits": 0,
+      "sha256": "ac35a58c31819d9e9062ee1ee88feac18e1bd304e4124e5ec3d5e3964f6218db"
+    },
+    "frontend/vite.config.ts": {
+      "executableBits": 0,
+      "sha256": "eee367d2c8005fd1cb7b72b6035ee5875a9272fa49796cd099eb8179a814d239"
+    },
+    "opencode.json": {
+      "executableBits": 0,
+      "sha256": "1b4ae2e1253be9d2bce17d214d8122f9e94ef93544e8de3fffcaa441142449b3"
+    },
+    "openspec/changes/administer-proxy-and-local-clients/specs/proxy-administration/spec.md": {
+      "executableBits": 0,
+      "sha256": "f34cf15d5143a0ee2c8bfdf66dc51be8a1232ac513359918338c78cee9306f3f"
+    },
+    "openspec/changes/embed-chat-and-validated-surfaces/specs/embedded-chat-console/spec.md": {
+      "executableBits": 0,
+      "sha256": "79c9eeed8b6ff8a78482c794e5b0db08d7d08daf6407e4cf3f59344c9af66ee4"
+    },
+    "openspec/changes/integrate-opencode-and-sdk-drivers/specs/sdk-chat-drivers/spec.md": {
+      "executableBits": 0,
+      "sha256": "c26c3ef84c34618a1860989dbca0d910cfa416be9e61c3fb387526e61365b5d3"
+    },
+    "openspec/changes/reconcile-codex-login/specs/live-codex-identity/spec.md": {
+      "executableBits": 0,
+      "sha256": "21e1dac9bdc9de51ea802784e4b7be630e84841a6c3af8ef3a5e941b9046f19d"
+    },
+    "plugin/.npmignore": {
+      "executableBits": 0,
+      "sha256": "6bcb662b38345a867f91c88a9a3228d091f02cdedb2876a335e0bd2f423c3e44"
+    },
+    "plugin/LICENSE": {
+      "executableBits": 0,
+      "sha256": "c80a50b8f2630936009ad9cd516ff1ac603a92f78386906afbac044452c5d2a7"
+    },
+    "plugin/bun.lock": {
+      "executableBits": 0,
+      "sha256": "7965b4ca9d1678560d156e91ad865d8ce8787d3a764b581462fe9f59fa6ccfe5"
+    },
+    "plugin/package.json": {
+      "executableBits": 0,
+      "sha256": "a7ebf0476ff3d5d2c5f685d2e65c9b9864c9306bfd494eba975873eca965f4c9"
+    },
+    "plugin/src/config.ts": {
+      "executableBits": 0,
+      "sha256": "e9a71afe05d02395f57e2a886879a248cfd25ceb2e0fac28e93024326ead52f2"
+    },
+    "plugin/src/delegation.ts": {
+      "executableBits": 0,
+      "sha256": "06cbd9278bff22354907b566a8418841c2b838ef732695735c7287d429af09f6"
+    },
+    "plugin/src/index.ts": {
+      "executableBits": 0,
+      "sha256": "c653b20dd75a9e0797cacd08051a27609ecef48b33107147b8350d1d948bec52"
+    },
+    "plugin/src/login.mjs": {
+      "executableBits": 0,
+      "sha256": "5ed460a71cdaa9ac328435fa59a5b1446d01e36683a9b82992e586096010347d"
+    },
+    "plugin/tsconfig.json": {
+      "executableBits": 0,
+      "sha256": "03eae7b7635639ee06fdac26ddd83d3120ea2c4715a4571d58f1abadfb5043c0"
+    },
+    "scripts/verify-codex-console.sh": {
+      "executableBits": 73,
+      "sha256": "9e462b4a30c83b619837edfd0315399e0ba5729445e3bf32956c8474d2a7bde9"
+    },
+    "src/a2a.rs": {
+      "executableBits": 0,
+      "sha256": "e2bfbe92981f5bb5b3541498d7cc5c5319949bd0efb4abb251c96d1cc087c0c2"
+    },
+    "src/acp.rs": {
+      "executableBits": 0,
+      "sha256": "88b51532267a03c70adeb096047cb49738c6ffdfd8dab9ae96d8aeef8d060243"
+    },
+    "src/agui.rs": {
+      "executableBits": 0,
+      "sha256": "f9ac0b8a47847368b82ba8177dd2c738b2022c84c1c27c1cedea9d1531d1cfec"
+    },
+    "src/auth/binding.rs": {
+      "executableBits": 0,
+      "sha256": "8cae5fc61c82957cf30f1e6ff7740f0c414f63939986f1044eb64a5d6409c7df"
+    },
+    "src/auth/mod.rs": {
+      "executableBits": 0,
+      "sha256": "31fb054c0cdd370d4503b3bd8b7b8cdfd322de3a5b2adce968a30d65e3ed1658"
+    },
+    "src/auth/owner.rs": {
+      "executableBits": 0,
+      "sha256": "97c4852988b67c814a4ad84092d2ce671d34b1872098806d140b3f206784fcee"
+    },
+    "src/auth/store.rs": {
+      "executableBits": 0,
+      "sha256": "3c92dacdfa2b0a91311b745c5be6358a8011ab5521d68caeef9fbc95a30c0619"
+    },
+    "src/cli/config.rs": {
+      "executableBits": 0,
+      "sha256": "2151742f11913d42c63bf9f359c4051edb625922a1bb7fbc40b96e1813390d14"
+    },
+    "src/cli/mod.rs": {
+      "executableBits": 0,
+      "sha256": "5518092f388d9ad1b53b5ab7c29f2fb90cf983e58c92004488bdcf037b08a40b"
+    },
+    "src/cli/setup.rs": {
+      "executableBits": 0,
+      "sha256": "da82ae4006f37a6de44ea32f92ed2cdb3fa8c34b937e279bd88ef902c4c04b67"
+    },
+    "src/cli/setup/provision/editor.rs": {
+      "executableBits": 0,
+      "sha256": "d2cd688a7b0284590b2c6d0182de5fda6b863373f276a4976b3d946f0c358b5c"
+    },
+    "src/cli/setup/provision/mod.rs": {
+      "executableBits": 0,
+      "sha256": "2885fd6a2925f9f977c2ee568185b455b15e5c1d8f1f81591b30f6a4c45730ba"
+    },
+    "src/cli/setup/provision/target.rs": {
+      "executableBits": 0,
+      "sha256": "ebdb7e72b8736053f4b8eb88e3a0a958700e0b5f6b98c27783a162f9d16af90c"
+    },
+    "src/cli/skills.rs": {
+      "executableBits": 0,
+      "sha256": "5730276f8514aaa40f60ecffb9455994b882b061fb1f8be87eb48b37f59d3dbd"
+    },
+    "src/codex.rs": {
+      "executableBits": 0,
+      "sha256": "40f6c81b576ef4df9b4802262f85aaff21b1848921ec0c3af468a44cb8d19911"
+    },
+    "src/config.rs": {
+      "executableBits": 0,
+      "sha256": "452d916ae0e83967f304acaa55ff827adf1df8f6f7d1d619cbcd58d7df52bf02"
+    },
+    "src/console/access.rs": {
+      "executableBits": 0,
+      "sha256": "cb0dfa2668faf7a797638d1dba5a406e2e82ebd230c2a5dc9151ab8ec6218fe1"
+    },
+    "src/console/admin.rs": {
+      "executableBits": 0,
+      "sha256": "26a0cc44ee0b58b8ba5f301b5fe02ccac0ce228944e61921d6ff4e5e84e6afe2"
+    },
+    "src/console/admin/configure.rs": {
+      "executableBits": 0,
+      "sha256": "890333aee3f0463c574927de96e329c4880b532e9116c8790cc4ea3facb4d88e"
+    },
+    "src/console/conversations.rs": {
+      "executableBits": 0,
+      "sha256": "3f519c63c284532fffa2dd493728456fcd3b9002b20e6ddc1201c31b6f01c239"
+    },
+    "src/console/mod.rs": {
+      "executableBits": 0,
+      "sha256": "29bcfe95b53e1f1b7f00dbb11e37bee5d00c377513d65b84e95040d701cbe18a"
+    },
+    "src/console/projection.rs": {
+      "executableBits": 0,
+      "sha256": "bb7d18a580f2db09116e897b63306f37bd354b3f8057c2c14a6b1e538c46474c"
+    },
+    "src/console/surfaces.rs": {
+      "executableBits": 0,
+      "sha256": "685286db628bcd571364eab400247e0d1635807eec91bf480790c9fa685b86bf"
+    },
+    "src/console/worker.rs": {
+      "executableBits": 0,
+      "sha256": "a7462c2be751115c8a3078727f01cbc515621f7c2518727f853e0a6e2c2165fb"
+    },
+    "src/error.rs": {
+      "executableBits": 0,
+      "sha256": "6cc30497066c8772072d25dfef88a10713c061b68ee33decc9a885e36df01dd0"
+    },
+    "src/hooks.rs": {
+      "executableBits": 0,
+      "sha256": "a39e20deb2e4efc10ec8f6a2616cb40e2ce6f2d1d4656c83ebdf2c835488f7b1"
+    },
+    "src/lib.rs": {
+      "executableBits": 0,
+      "sha256": "6dfa508fe9984d138517175bb6cfe918b7d52c9e9cb5d420983d4357f27ab842"
+    },
+    "src/main.rs": {
+      "executableBits": 0,
+      "sha256": "963f19006227ef03fa6d95c407a790ab545bdaa0e5441aaa941f27a1edb2f8ea"
+    },
+    "src/mcp.rs": {
+      "executableBits": 0,
+      "sha256": "26a4e5e001649796a85b415eb888f6c327ffce2d42ad54d0ba7060c41e782adf"
+    },
+    "src/mcp_client.rs": {
+      "executableBits": 0,
+      "sha256": "7bb6fb29b98b3804152e494620844c8f958b005aa7c36189189534401604bf3a"
+    },
+    "src/memory.rs": {
+      "executableBits": 0,
+      "sha256": "90de839bfb1da644b0678a311a861ba11eba1f601b6579fcbdeae4f3f8de5a32"
+    },
+    "src/model_catalog.rs": {
+      "executableBits": 0,
+      "sha256": "1637a5bc0ee88b9eeab58fdd566e671bdfb36bc4004df3be39b5a1bc47839cba"
+    },
+    "src/models.rs": {
+      "executableBits": 0,
+      "sha256": "1fd4f68ecd8736a162e733bcd9f166eaa2fadd03999bbe48b238d7bcaac94e9f"
+    },
+    "src/openai.rs": {
+      "executableBits": 0,
+      "sha256": "03ccdc77f3a1fa86fd4d39e5f2c980f1c576b087bcc9b5174baca89b38c99c8c"
+    },
+    "src/proxy.rs": {
+      "executableBits": 0,
+      "sha256": "229ea3094902bfb7e4cfb3b93bff6f848a6296b0ee0f7d2538aa83a6a4bfcf32"
+    },
+    "src/skills.rs": {
+      "executableBits": 0,
+      "sha256": "7b74add8adefeed8ed8f6c830def7a2d845d0295bd5b02e7c4b01b4f69f716bd"
+    },
+    "src/web_assets.rs": {
+      "executableBits": 0,
+      "sha256": "de07a86a7731522563019928fbef34f9e3d72b438844a2782cf4ec494e50acfe"
+    },
+    "tests/console_boundary/admin.py": {
+      "executableBits": 0,
+      "sha256": "442708a8b03e8f0f901b321408a75131930808cd2a98d8ecbfc85696bee64d2e"
+    },
+    "tests/console_boundary/admin_clients.py": {
+      "executableBits": 0,
+      "sha256": "d2bcdfb6ce782103bd40277c8fe1ece295d695a31d1e83670a5de9f1a0f59e6b"
+    },
+    "tests/console_boundary/admin_common.py": {
+      "executableBits": 0,
+      "sha256": "c72b966518a825019ec3e97a507a00e2c4c4029626160ac86bc78115e87f2b40"
+    },
+    "tests/console_boundary/admin_features.py": {
+      "executableBits": 0,
+      "sha256": "058f6bbe5dfce53b316a2bb718e51b28084568a93942c04f14bf876cfa93590d"
+    },
+    "tests/console_boundary/admin_model_peer.py": {
+      "executableBits": 0,
+      "sha256": "dbea4f2a83ab4be707b957b05c0f5617a017040588b7c7e2348354f63b039f08"
+    },
+    "tests/console_boundary/admin_rpc.py": {
+      "executableBits": 0,
+      "sha256": "3f26762b3abd11a1440192dacbfe78847fbd392abffaed2eeedd3369296ede0f"
+    },
+    "tests/console_boundary/admin_setup.py": {
+      "executableBits": 0,
+      "sha256": "7dc4f140c03784baeb06553394674bd346564b7ff23c60ceb59d3946bd6cc9f1"
+    },
+    "tests/console_boundary/admin_vscode.cjs": {
+      "executableBits": 0,
+      "sha256": "8583831208e35b521cb2213cdc9fe389c4550a58a88001b2c7944954dc15028f"
+    },
+    "tests/console_boundary/auth_file_observer.py": {
+      "executableBits": 0,
+      "sha256": "90caae0db614f4aa017c935c00ddf32c3d2d421db161c65ada235fed575e9295"
+    },
+    "tests/console_boundary/auth_fixture.py": {
+      "executableBits": 0,
+      "sha256": "6d9e4f902e8416d9124b97b08807b2ad107bbada7c9a881069293129f7913293"
+    },
+    "tests/console_boundary/auth_native.py": {
+      "executableBits": 0,
+      "sha256": "b27feb3b9029a7f2f50b4e9ee085f4c15905588ff704877bf93a5df44d0f1acc"
+    },
+    "tests/console_boundary/auth_owner.py": {
+      "executableBits": 0,
+      "sha256": "d49d5986a7340b26457265b6e17ca3e4ab077b0152058eda0cf5196f15db5672"
+    },
+    "tests/console_boundary/auth_plugin.py": {
+      "executableBits": 0,
+      "sha256": "1a7724271fd968a6c3ffe14a02d2c59f9a0d04ba00acd52d5dc1ecdffcfd0fb7"
+    },
+    "tests/console_boundary/auth_plugin_host.mjs": {
+      "executableBits": 0,
+      "sha256": "1cc97e020c27a0456aebc1bd53cbd0e71476ba26702b70229a07e19359d6d0fe"
+    },
+    "tests/console_boundary/auth_stdio.py": {
+      "executableBits": 0,
+      "sha256": "e219a8dc58ee8d11acfe967cd43713c0313d2881c6649b5ab625bbce43759341"
+    },
+    "tests/console_boundary/auth_upstream.py": {
+      "executableBits": 0,
+      "sha256": "f120396eece7ae275bf253a5a269e649b6fbc2cac7ca41862942686adb792236"
+    },
+    "tests/console_boundary/identity.py": {
+      "executableBits": 0,
+      "sha256": "7890a179a124e066a463ef480f127bf7a6baa6e201f854771f1fd5e57815d9b8"
+    },
+    "tests/console_boundary/interface.py": {
+      "executableBits": 0,
+      "sha256": "fd7244befa79375ddb493135ea82ae64cdde5f1d5d926d070d3fe267d12a59eb"
+    },
+    "tests/console_boundary/recipient.py": {
+      "executableBits": 0,
+      "sha256": "20bf5c599fe7afe2f3649e67273c51792904aaaabd70b344d1717f3d939af784"
+    },
+    "tests/console_boundary/runner.py": {
+      "executableBits": 0,
+      "sha256": "b35bd0ed60b05f92730ab061c82ad853a219868ed814382fdf28eea005b9d769"
+    },
+    "tests/console_boundary/runtime.py": {
+      "executableBits": 0,
+      "sha256": "3738c3b2880bc1546110f6ff8c98ed626d9db6f030e6767131758186c8947e81"
+    },
+    "tests/console_boundary/ui_browser.py": {
+      "executableBits": 0,
+      "sha256": "fe0fd72fb7dc3d1d29f4a829a46173b7259ae967154eab8d0f47c67be06f55a2"
+    },
+    "tests/console_boundary/ui_build.py": {
+      "executableBits": 0,
+      "sha256": "1c0ce1704b2f2f46c399360caaf6089a13aec54fd0a65df8551f5471a704b5a3"
+    },
+    "tests/console_boundary/ui_upstream.py": {
+      "executableBits": 0,
+      "sha256": "e95c789ce08441305c686b4d0857100c20a0131623993f2d968ae94d50f48403"
+    },
+    "tests/integration.rs": {
+      "executableBits": 0,
+      "sha256": "0c03e6f1871fd0a7de9c4e3261c84b7408fc2fdf174f2868aba34721b258cee3"
+    },
+    "workers/bun.lock": {
+      "executableBits": 0,
+      "sha256": "023cf69105b57675db6475e53aa5c484c356c406fc702c933c0aaec8ef626d08"
+    },
+    "workers/codex-exec": {
+      "executableBits": 73,
+      "sha256": "46b19302533ae44addfd9ecdb89ebb058024458eaa918080eea366d8dc5006a2"
+    },
+    "workers/codex.mjs": {
+      "executableBits": 0,
+      "sha256": "2b73033aa280a2d54af0536b65fccac8a74809a6aedf3f02d6ccf79ecd58348f"
+    },
+    "workers/main.mjs": {
+      "executableBits": 0,
+      "sha256": "fece5aa9428afe31cffbd382389818b99c2ddee51cba1605a7bfd3ddbe4d8200"
+    },
+    "workers/opencode.mjs": {
+      "executableBits": 0,
+      "sha256": "1a4c34edb3b9162f745cef70b17bf97873a764d58ff019b0867e97a59421f964"
+    },
+    "workers/package.json": {
+      "executableBits": 0,
+      "sha256": "414a8b1ac0580102df770a727d56d5d2c29e99bec1f1eddd446c3aa0eb7ccf1a"
+    }
+  },
+  "gitTree": "a1fc91b2848e66e276f09f2ee746b1c60b50a6d8",
+  "host": {
+    "architecture": "arm64",
+    "playwright": "1.51.0",
+    "python": "3.11.3",
+    "system": "Darwin"
+  },
+  "method": {
+    "name": "VLBV",
+    "openspecVersion": "2.1.0",
+    "packVersion": "1.15.0",
+    "referenceSha256": "2377a56733c735e8bf92b3d6fe931da2c1c72ce930fdebd35a87b129065c3c67",
+    "specDeltaDigest": "00a9336a9f55ab96d906bd9220e432ac418d9a5503edf66c27443f673b71cf6e"
+  },
+  "phase": "codex-live-auth-opencode-console",
+  "previousCandidateSha256": "55c6f3452da7527f069d5367ac917c43cc015104bfaf413627b6e388e3720778",
+  "previousContractDigest": "68d8aad4ac3a015e56d6606d8fc4d0dfb945eecf78b3df63802f21101b33dd28",
+  "previousResultsSha256": "fea35cea12d0a16c520c79d2b8a3791f856d8faa26ede183870febd0ce63441e",
+  "repairAttempt": 1,
+  "scenarioDigests": {
+    "ACP-1": "ec428ec5ba993af6767705b72902b3c84b701d677898b1f2cf19fe0a6e14e59b",
+    "ADMIN-1": "3806c61c78dea720aad8531f384cadea7464e30955e5735e21af1db301e6967c",
+    "AUTH-1": "99620b0c1ddc78ca44e34f2ae4da695fb810aa401d56a5ed3510eda066d32b1f",
+    "AUTH-2": "d0bb277b6bb9ab1b565836dbc497ff41e19361b3b0861930c96cf5443e5f0d3e",
+    "AUTH-3": "2b21b55ef395c4bc02fbdf107e3bdc668378fd4ff20a3bf0e7a47576db49ce5f",
+    "CHAT-1": "ec474a7cb584b135eb40f5cbeec2fbd66be46f2ff6df2e36c5284d97873c190a",
+    "FEATURE-1": "c7df583ffff6fb85a87548ecfdd5ce9b7f4d8b24cc6fb7cf800d068bbede3090",
+    "MCP-1": "478a0be0cc0566fc93067a670d344ad78c3828b5a1a762d6e91839edadf322a9",
+    "PLUGIN-1": "9943675270aca3a9c2c4d0770e47d0a1a192967c17b4aa9d2dff67633097d59d",
+    "SETUP-1": "6243b05f66bb906bc446f605068f1715cff539438a301509a781ac837d3c340f",
+    "SURFACE-1": "2eb57992d914cac948fd7d57ab788eb411407c0ee67717a0d61efc4cdfce7817",
+    "TOOL-1": "86536201c07016b7d85297e706071e736ba4e168c045e8086f35654a0261614e",
+    "UI-1": "45fb33d9b997d1e716e70dbbd16e396c8e80b63f5fd5ff768b615866e86f90d3"
+  },
+  "schemaVersion": 1,
+  "scope": "One authorized fixture-only B5 repair of the Inter stylesheet import and plugin Node type discovery. Build the packaged application and run the affected plugin and embedded-interface fixtures in disposable profiles.",
+  "sourceCommit": "8573a9d9d9618b98ec7ae9a3966e792cb4826702",
+  "toolFiles": {
+    "bun": "0a2237cdcfa0d16ef501d9acca9f0026309ef348bea7393a64e8d1e3609565cc",
+    "cargo": "63752a1919a3a4793173ec70f8f212621a7ce38ba6a246095984482f4de20f9f",
+    "claude": "e85547190ef8cd983033ba61b17194045a6fea00035da349efeabed86badacc9",
+    "code": "8ce2bebb778bca2c0724fe5c5c0f894a14c534c64b188ad728928f28393d47e9",
+    "codex": "739cda86e15d30a6e2b40cf8dcbbfb988aaf48b305b27065573bb8e9fd41d002",
+    "docker": "b1ca8cf8e294fd128ef4a5f5fb2531a059dd981548dfa810fe19d5d6c695e486",
+    "node": "cbee2298aee5cc476bf8d5441e7348b627254a39d869743a5b04489028c729d4",
+    "npm": "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+    "opencode": "9f3147cae4ca323827d3ca39451b0d3431b2906e79a08e9b09d1eb34bb703f52",
+    "python3": "e70a6182f1fa6c33cefa83a91127133a0f92657ae96840ff07e6e7ca7fd17b41",
+    "rustc": "63752a1919a3a4793173ec70f8f212621a7ce38ba6a246095984482f4de20f9f",
+    "zed": "85d8cc00f96de8e0ae56d5f528668bcd9033225e24d84d78423ef5f5aa7e968d"
+  }
+}
