@@ -1,0 +1,66 @@
+{
+  "command": "negative AUTH-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "native REST recipient identity and file publication",
+      "status": "PASS",
+      "observed": {
+        "partial_and_unsupported_recipient_calls": 0,
+        "unrelated_generation_unchanged": true
+      },
+      "seconds": 1.587
+    },
+    {
+      "name": "single-file mount refuses credential delivery",
+      "status": "PASS",
+      "observed": {
+        "status": "unsupported_store",
+        "source": "single_file_mount",
+        "recipientCalls": 0,
+        "image": "sha256:0d323c01d33dfe3b76ac7d15f7ab692d6079a22a93329e6ebc4ba5179fd835df",
+        "pid": "1009164",
+        "startedAt": "2026-11-20T13:50:47.87416513Z",
+        "network": "none",
+        "mountTarget": "/tmp/kbd-credential-home/auth.json",
+        "readOnly": true
+      },
+      "seconds": 0.909
+    }
+  ],
+  "notes": {
+    "auth-case-wlp49x56": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58990",
+        "--backend-url",
+        "http://127.0.0.1:58989/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "adbbae9a0c863606140b2ac358febdde51cde839dbb47a05cf3228548f7d5806"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "adbbae9a0c863606140b2ac358febdde51cde839dbb47a05cf3228548f7d5806"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 1.57,
+      "exit": -15
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795182648.676826
+}

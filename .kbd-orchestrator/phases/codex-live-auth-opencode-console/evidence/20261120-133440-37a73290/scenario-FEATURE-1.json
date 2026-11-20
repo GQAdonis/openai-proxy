@@ -1,0 +1,68 @@
+{
+  "command": "scenario FEATURE-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "selected skills, imported schemas, hooks and agent card",
+      "status": "PASS",
+      "observed": {
+        "requests": 2,
+        "observedHooks": 2,
+        "card": "http://127.0.0.1:58738"
+      },
+      "seconds": 0.163
+    },
+    {
+      "name": "two-principal database retrieval and cleanup",
+      "status": "FAIL",
+      "observed": "DELETE /v1/memory/documents/fe137fb3-4d21-4a35-b00a-3b184ea2fb39 returned HTTP 500"
+    },
+    {
+      "name": "actual local packaged memory retrieval, injection and billing configuration",
+      "status": "PASS",
+      "observed": {
+        "ownedMarker": "kbd-rag-0a72ad3776914251bc284e34e47b0681",
+        "recipientSequence": 116,
+        "hookDeliveries": 0,
+        "documentCleanup": true,
+        "embeddingsCredentialProvided": false
+      },
+      "seconds": 0.447
+    },
+    {
+      "name": "authenticated shared upstream memory injection",
+      "status": "BLOCKED",
+      "observed": "Dedicated shared profiles have no live grants or independently routable shared direct-backend recipient"
+    }
+  ],
+  "notes": {
+    "amberorchard recipient": {
+      "modelSequence": 112,
+      "hookSequence": 113,
+      "skill": "kbd-skill-amber",
+      "schemaCount": 1
+    },
+    "blueorchard recipient": {
+      "modelSequence": 115,
+      "hookSequence": 114,
+      "skill": "kbd-skill-blue",
+      "schemaCount": 1
+    },
+    "memory variant (True, False)": {
+      "pid": 9988,
+      "enabled": true,
+      "degraded": false,
+      "port": 49704,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795183319.881325
+}

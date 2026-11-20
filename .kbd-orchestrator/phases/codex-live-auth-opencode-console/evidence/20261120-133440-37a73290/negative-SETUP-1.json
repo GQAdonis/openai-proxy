@@ -1,0 +1,562 @@
+{
+  "command": "negative SETUP-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "project malformed force preserves bytes",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "project"
+      },
+      "seconds": 0.622
+    },
+    {
+      "name": "project legacy force preserves bytes",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "project"
+      },
+      "seconds": 0.615
+    },
+    {
+      "name": "project mixed force preserves bytes",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "project"
+      },
+      "seconds": 0.618
+    },
+    {
+      "name": "global malformed force preserves bytes",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "global"
+      },
+      "seconds": 0.578
+    },
+    {
+      "name": "global legacy force preserves bytes",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "global"
+      },
+      "seconds": 0.542
+    },
+    {
+      "name": "global mixed force preserves bytes",
+      "status": "PASS",
+      "observed": {
+        "writes": 0,
+        "scope": "global"
+      },
+      "seconds": 0.55
+    },
+    {
+      "name": "conflicting apply",
+      "status": "PASS",
+      "observed": {
+        "writesAfterEdit": 0
+      },
+      "seconds": 0.57
+    },
+    {
+      "name": "conflicting undo",
+      "status": "PASS",
+      "observed": {
+        "writesAfterEdit": 0
+      },
+      "seconds": 0.665
+    },
+    {
+      "name": "unsupported version 1.9.0",
+      "status": "PASS",
+      "observed": {
+        "source": "synthetic version respondent",
+        "writes": 0
+      },
+      "seconds": 0.228
+    },
+    {
+      "name": "unsupported version unknown",
+      "status": "PASS",
+      "observed": {
+        "source": "synthetic version respondent",
+        "writes": 0
+      },
+      "seconds": 0.202
+    },
+    {
+      "name": "unapproved destination",
+      "status": "PASS",
+      "observed": {
+        "writes": 0
+      },
+      "seconds": 0.003
+    }
+  ],
+  "notes": {
+    "client process 04e7c5565ce4": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/c846e79ea9f9423d9096d868a0b148fc.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/5be9ed3ef817434f9d0b1e7ecd729f7c.stderr",
+        "redacted": false
+      }
+    },
+    "opencode version": "2.3.0",
+    "project invalid source 704d73eca4e8": {
+      "exists": true,
+      "sha256": "147769916ff56f0ebb9c17c7e63d55b0e07a0b08d9e414258ce7863fa4d93552",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/73dcbb25b4c241ef8594bae8226e937c.bin"
+    },
+    "client process 8532fc475fe3": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--project",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "bcdc69040f83b83f490c53b154d65c511b62bf3822e2ff35170fccd5d6e51d56",
+        "output": "admin-originals/44a55c32ac48440fb5b68f63fe0471a4.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/be93a8279fd64165a098d30dd6b66b70.stderr",
+        "redacted": false
+      }
+    },
+    "after refused setup bd9006241218": {
+      "exists": true,
+      "sha256": "147769916ff56f0ebb9c17c7e63d55b0e07a0b08d9e414258ce7863fa4d93552",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/7f6bc760f5384b30b83e93d8fc5a4b72.bin"
+    },
+    "client process 62d144aa9d01": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/226194bcb8d9462897008510b7ef08b7.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/1acb188eaf7b41eab0e341e124f9824e.stderr",
+        "redacted": false
+      }
+    },
+    "project invalid source f08fd27d156a": {
+      "exists": true,
+      "sha256": "770abf2deb7c646a21b1c956d68a63568dc4ceeeb3bae24c0a54b8b8fdabea9a",
+      "bytes": 28,
+      "mode": 416,
+      "original": "admin-originals/d67361d6d47c4aa78b63311894024e1a.bin"
+    },
+    "client process 2418356a1d7a": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--project",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "45392923962d87612fd2f1bf5793170be470646598ffedff90afad89c90d43a7",
+        "output": "admin-originals/f2e9917623ee4d3096aa497523d24931.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/618ff1fa29334609a6999485b84495c9.stderr",
+        "redacted": false
+      }
+    },
+    "after refused setup e858aacdc27e": {
+      "exists": true,
+      "sha256": "770abf2deb7c646a21b1c956d68a63568dc4ceeeb3bae24c0a54b8b8fdabea9a",
+      "bytes": 28,
+      "mode": 416,
+      "original": "admin-originals/f407bd0ddc954c57a9e11510e0c749e5.bin"
+    },
+    "client process 881795f978e8": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/3b12213667d6407b8f71ce24ff64f22e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/01e214e5038a46578a7cc379b868bcb1.stderr",
+        "redacted": false
+      }
+    },
+    "project invalid source 85493cf13fa6": {
+      "exists": true,
+      "sha256": "edc6ad6dadd4d6a5f6e273215e8ffae3871a40dfa7861d26924e37b542dca4e3",
+      "bytes": 48,
+      "mode": 416,
+      "original": "admin-originals/1ca5e9e6b3374135a8005ef2c0cc35ca.bin"
+    },
+    "client process 807751b7df0f": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--project",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "45392923962d87612fd2f1bf5793170be470646598ffedff90afad89c90d43a7",
+        "output": "admin-originals/d509263f3f44489ab7f44a2ab62dfc1b.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/c1c1c5b521cd47ccae663df6db04cef0.stderr",
+        "redacted": false
+      }
+    },
+    "after refused setup 6efae745eec0": {
+      "exists": true,
+      "sha256": "edc6ad6dadd4d6a5f6e273215e8ffae3871a40dfa7861d26924e37b542dca4e3",
+      "bytes": 48,
+      "mode": 416,
+      "original": "admin-originals/3e98bac3e91f4613b47097e9d8f77072.bin"
+    },
+    "client process c074089aa036": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/1ed3a40c9f564295afe1a79060b3ccf1.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/6cb5afe036ad486792fbbe66d952f83d.stderr",
+        "redacted": false
+      }
+    },
+    "global invalid source 9e4e66c25703": {
+      "exists": true,
+      "sha256": "147769916ff56f0ebb9c17c7e63d55b0e07a0b08d9e414258ce7863fa4d93552",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/53527d1c309343688d62bcd26acdbbc3.bin"
+    },
+    "client process 31ce1d2fe05b": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "53bc0a3a8b3c41088e21e60b5b8ff9034341b5d6f371948b38528539d42a484c",
+        "output": "admin-originals/2d1a2cb7f2674f69a652ef689d08837f.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/4c58ca4eaf1043a4a999e15a2c263206.stderr",
+        "redacted": false
+      }
+    },
+    "after refused setup fe6ff978e92e": {
+      "exists": true,
+      "sha256": "147769916ff56f0ebb9c17c7e63d55b0e07a0b08d9e414258ce7863fa4d93552",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/a428fbbbe2ab468b881f647331371a30.bin"
+    },
+    "client process db551f93e1a7": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/cedd0b1ba9e343b2bff180caa0bb041e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/3bef8bad89e54a50993f1d88b09d9cf1.stderr",
+        "redacted": false
+      }
+    },
+    "global invalid source ef1c1a50476a": {
+      "exists": true,
+      "sha256": "770abf2deb7c646a21b1c956d68a63568dc4ceeeb3bae24c0a54b8b8fdabea9a",
+      "bytes": 28,
+      "mode": 416,
+      "original": "admin-originals/579385c7c87746109bba71f7cf73718e.bin"
+    },
+    "client process b4e7189c0c72": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "565a722477e314d5963a194379846b769db19de071fdd441652d87e0228b1ae5",
+        "output": "admin-originals/9fcac75fc47e4b81897db57affe5bdda.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/e6d67541225a4b8cadcfddd6e04da1b2.stderr",
+        "redacted": false
+      }
+    },
+    "after refused setup da1d476edfe1": {
+      "exists": true,
+      "sha256": "770abf2deb7c646a21b1c956d68a63568dc4ceeeb3bae24c0a54b8b8fdabea9a",
+      "bytes": 28,
+      "mode": 416,
+      "original": "admin-originals/08c926662c474babac832fbfeeaaa9d4.bin"
+    },
+    "client process f9e57db5cd6a": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/5c9c072ec79446e5aeedff08138648fc.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/0d6d64a2d7994b4386175a3742cf6703.stderr",
+        "redacted": false
+      }
+    },
+    "global invalid source b292edcb29da": {
+      "exists": true,
+      "sha256": "edc6ad6dadd4d6a5f6e273215e8ffae3871a40dfa7861d26924e37b542dca4e3",
+      "bytes": 48,
+      "mode": 416,
+      "original": "admin-originals/e979cef26a8049d3a485f37ee1ff7a22.bin"
+    },
+    "client process 43a0e2277fb6": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--global",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "565a722477e314d5963a194379846b769db19de071fdd441652d87e0228b1ae5",
+        "output": "admin-originals/935d28d98fb34b9abd4c080fafdcb753.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/db2da89a96f9412590072412fde44b0d.stderr",
+        "redacted": false
+      }
+    },
+    "after refused setup 5faa093fd709": {
+      "exists": true,
+      "sha256": "edc6ad6dadd4d6a5f6e273215e8ffae3871a40dfa7861d26924e37b542dca4e3",
+      "bytes": 48,
+      "mode": 416,
+      "original": "admin-originals/43a84b417f2a4852aa0f3fafc57ea212.bin"
+    },
+    "client process f41bd6749dae": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/9bafd5e3ed20480dbedf573830431d7e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/a7e9447a1afd4e8aaf6a771578a60b38.stderr",
+        "redacted": false
+      }
+    },
+    "independently edited config 8d0f0e751a1f": {
+      "exists": true,
+      "sha256": "193762f71e37f43237b9e1dec22000ed7f43852855cc9b89f706167c2e6e9267",
+      "bytes": 101,
+      "mode": 416,
+      "original": "admin-originals/9f1fa715ee0f4b3d8c000d8505c60d88.bin"
+    },
+    "after conflict 42c849f0e69c": {
+      "exists": true,
+      "sha256": "193762f71e37f43237b9e1dec22000ed7f43852855cc9b89f706167c2e6e9267",
+      "bytes": 101,
+      "mode": 416,
+      "original": "admin-originals/7904a097b5554942803f80a1b4ed80ee.bin"
+    },
+    "client process 1d03333a7366": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/0b73cf0808094f439202e8e404c26afd.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/a69dfde66a9d4813893ffb028fd3b2ce.stderr",
+        "redacted": false
+      }
+    },
+    "independently edited config da32be86ae90": {
+      "exists": true,
+      "sha256": "d83f4b10a6df0eb4676bccc4f4b9f29b4ef09b4a2e120f0069367eb9393934a1",
+      "bytes": 1490,
+      "mode": 416,
+      "original": "admin-originals/51b1cbd10c44443d8161a3caa9e52b91.bin"
+    },
+    "after conflict 9642410ba9f1": {
+      "exists": true,
+      "sha256": "d83f4b10a6df0eb4676bccc4f4b9f29b4ef09b4a2e120f0069367eb9393934a1",
+      "bytes": 1490,
+      "mode": 416,
+      "original": "admin-originals/8635fb84bc3a4ee5aa2075be1a50ad80.bin"
+    },
+    "unverified host source 2efec5ef9b36": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/6fb14ea94997442b8f0678038c78c169.bin"
+    },
+    "client process 0b19ade43e5c": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--project",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "2796181997d4d26a8887d32f3e75d63fab3751656d5f0720623e3ba0f5878297",
+        "output": "admin-originals/5569a0b8d6354cc8a4133db08e620e0e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/02a7f53233664a0ba424688411f94348.stderr",
+        "redacted": false
+      }
+    },
+    "after refused host 899b8058ac23": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/8515b16b240441a3aa7c23e6c9792d0f.bin"
+    },
+    "unverified host source 10a025746e35": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/100df8baca624ac3b8e319a0a3ae4e75.bin"
+    },
+    "client process 81428b23b339": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "opencode",
+        "--project",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "ae57cc60bdbe8e6c4f5168416d432fb618133aea823fe018e8a27600fe48189d",
+        "output": "admin-originals/78175c773dd94dd1acd4af1c34760136.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "51b86f7a679b239fbd52923f314b1ca0bd62188da86b6f13266558d889519901",
+        "output": "admin-originals/c3ff3a312c094eaf8c970f14239b688f.stderr",
+        "redacted": false
+      }
+    },
+    "after refused host 1a32d2be67a4": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/5943792993c44803828ff7088178c6ad.bin"
+    },
+    "approved destination before aa40b1fe8ab0": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/28cfe0803646423a873c4b6c5a8d9547.bin"
+    },
+    "approved destination after 400f3343c89d": {
+      "exists": true,
+      "sha256": "d5639d9f29e2afea752418259d67e4636b813b7b67068edc4e727e3c6d003a71",
+      "bytes": 76,
+      "mode": 416,
+      "original": "admin-originals/6ed7c3ffca7f4f688201567f1cc69cf4.bin"
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795183301.800704
+}

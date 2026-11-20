@@ -80,3 +80,27 @@ Candidate `03c7c31f` at source `1742c3f` built successfully. The SDK image answe
 All 13 rows and their negative controls ran. ADMIN-1 passed, including both deployment modes and all six denial controls. File replacement reached the native recipient in 95, 93 and 93 milliseconds on the same process. Both SDK session journeys passed with controlled peers. All eight invalid-surface controls passed. UI-1, SURFACE-1, SETUP-1, MCP-1 and FEATURE-1 failed. The remaining seven rows have unavailable observations, including the genuine login and independently attributed Pro turn. Cleanup passed. Cumulative consumption is four attempts, 91.08 minutes and 402 counted commands or probes. [Results](repairs/b5-4/boundary-results.json) · [Cleanup](evidence/20261120-130430-56c3e83e/cleanup.json)
 
 The fifth fixture attempt can repair the recorded behavior and missing observations within the signed budget. Staging requires accepted behavior, the target and the owner's deployment decision. [Staging and rollback](handoffs/staging-runbook.md)
+
+## Fifth fixture verification and release decision
+
+**Release blocked.** All 13 scenarios and their negative controls ran on candidate `f6f595e5`, source `3dda940`. Three passed, four failed and six remain blocked. The Linux/arm64 SDK image is retained on the owner's OrbStack engine as `openai-proxy:kbd-f6f595e5141d` with local image ID `sha256:0d323c01d33dfe3b76ac7d15f7ab692d6079a22a93329e6ebc4ba5179fd835df`. Both native and packaged startup passed. The build passed strict Clippy, all 26 library tests, plugin typechecking and packaging, and optimized and memory-enabled compilation. Cleanup passed and the private scratch directory was removed. Cumulative use is 118.45 of 240 minutes, 597 of 650 counted commands, and five of five authorized repair attempts. [Exact image](repairs/b5-5/retained-image.json) · [Results](repairs/b5-5/boundary-results.json) · [Cleanup](evidence/20261120-133440-37a73290/cleanup.json)
+
+| Scenario | Verdict | Observation or remaining requirement |
+| --- | --- | --- |
+| AUTH-1 | BLOCKED | The same native process picked up three file replacements in 92–138 ms. The same Linux process delivered three replacements from a mounted directory in 149–154 ms. The missing-parent fallback delivered in 690 ms. A single-file mount produced zero recipient calls. Genuine login, isolated keyring and a fresh setup comparison remain. |
+| AUTH-2 | BLOCKED | Proactive and challenged refresh coalesced with manual requests in the fixture. Real managed renewal and evidence for the billing boundary remain. |
+| AUTH-3 | PASS | Sign-out and identity switches fenced obsolete refreshes and denied old-owner resume in the controlled race. |
+| PLUGIN-1 | FAIL | Actual OpenCode 2.3.0 loaded the packaged and project plugin and preserved overrides. The native 1.15.13 refusal probe timed out after 35 seconds. Real Pro usage attribution remains. |
+| CHAT-1 | BLOCKED | Both SDKs exercised sessions, replay, cancellation and durable identity with fixture peers. The genuine Codex CLI journey remains. |
+| TOOL-1 | BLOCKED | Permission, replay and denial controls passed. The native macOS run lacked an independent kernel file-open counter. |
+| UI-1 | FAIL | Native keyboard Stop passed on the host. The SDK image streamed the expected text, but its pre-click counter assertion failed before Stop. The partial-text browser journey reached its terminal error; the receiver counted the auxiliary and main model call together. |
+| SURFACE-1 | FAIL | The validated surface rendered and replayed, and all nine negative controls passed. The trusted keyboard action carried an unresolved data path and received HTTP 403. The custom button must resolve the action context before dispatch. |
+| ADMIN-1 | PASS | Both deployments exposed all 16 settings areas with the expected access boundaries. All six direct denial checks passed. |
+| SETUP-1 | PASS | The real OpenCode 2.x client discovered project and global providers and plugins. Reapply and undo preserved operator configuration. |
+| ACP-1 | BLOCKED | Packaged stdio streamed a correlated session update. A controlled Zed session and JetBrains AI Assistant session remain. |
+| MCP-1 | BLOCKED | Codex, Claude and OpenCode observed the tools in disposable client profiles. Zed and an MCP-enabled VS Code session remain. |
+| FEATURE-1 | FAIL | Skills, schema injection, hooks, discovery and local memory retrieval passed. Shared document deletion returned HTTP 500. Source inspection traced a second match of the document route through the shared router, giving the single-ID Axum extractor two captures. Authenticated shared memory injection also needs an isolated upstream recipient. |
+
+The staged release has no running Compose service or smoke receipt. The selected target is OrbStack. The proposed project is `openai-proxy-staging` at `http://127.0.0.1:18181`. The rollback procedure is ready. [Deployment and rollback](handoffs/staging-runbook.md)
+
+The owner can authorize one targeted fixture repair against the four failed rows. The unsigned proposal adds one repair attempt and 125 counted commands. Prior evidence and the 240-minute ceiling carry forward. Provision the required editor and keyring peers for their outstanding observations, obtain separate consent for genuine login, managed renewal and the Pro turn, and obtain deployment approval after acceptance. [Unsigned amendment](amendments/targeted-release-repair/amend-contract.json)

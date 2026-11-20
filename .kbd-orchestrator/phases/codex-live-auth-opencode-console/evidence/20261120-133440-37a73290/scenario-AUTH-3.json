@@ -1,0 +1,83 @@
+{
+  "command": "scenario AUTH-3",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "account switch during held exchange",
+      "status": "PASS",
+      "observed": {
+        "old_exchanges": 1,
+        "post_commit_owner": "b",
+        "old_turn_recipient_calls": 1
+      },
+      "seconds": 0.838
+    },
+    {
+      "name": "logout during held exchange",
+      "status": "PASS",
+      "observed": {
+        "old_exchanges": 1,
+        "post_commit_owner": "signed-out",
+        "old_turn_recipient_calls": 1
+      },
+      "seconds": 0.758
+    }
+  ],
+  "notes": {
+    "auth-case-720fm6bg": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "59174",
+        "--backend-url",
+        "http://127.0.0.1:59173/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "5cfd4e24893b1f454118718ea5f8bc5664b60cb2e0c0cced7483c7aab908e2d6"
+        },
+        {
+          "account": "owner-b",
+          "bearerSha256": "34a2d39283d6ae9aef7b241b78cb53546bdea55e08b9f2f91e860d0df9d25805"
+        }
+      ],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.828,
+      "exit": -15
+    },
+    "auth-case-k_azo35q": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "59187",
+        "--backend-url",
+        "http://127.0.0.1:59186/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "bba2ddcc5ca09d40b216335bec024678a48dafdd29b3ceb25a041da0be318757"
+        }
+      ],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.75,
+      "exit": -15
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795182657.687742
+}

@@ -8,6 +8,17 @@ On the build host, keep a local candidate tag pointing to the image ID recorded 
 
 After acceptance and authorization to publish to the designated staging registry, push the retained image. Resolve the registry manifest for the staging platform and verify its configuration digest equals the image ID in the build receipt. Use that manifest digest for the deployment. If staging needs another platform, that platform's image needs its own verification.
 
+## Live account evidence before acceptance
+
+Obtain the account owner's explicit consent for a dedicated Codex profile, one genuine login, managed renewal, and the bounded ChatGPT Pro verification turn. Agree on the account, model and independent usage evidence before sending the turn. The operator completes the provider sign-in directly. Keep API billing credentials out of the subscription run.
+
+1. Record the candidate image or native binary identity, proxy process identity, selected SDK and host versions, starting connection generation and independent account usage baseline. Use a pseudonym for the account in the report.
+2. Leave the proxy running. Execute the supported login against the dedicated Codex home. Mount the whole directory when exercising the image. Measure the elapsed time from the store commit to the first successful authenticated observation, correlate the new generation with the same process, and retain only the timing, process identity and redacted result.
+3. Exercise the managed renewal with the account owner's approved profile. Record the resulting freshness and the independent authenticated observation. If completion is uncertain, reconcile with the provider before retrying.
+4. Submit the agreed turn from the certified OpenCode 2.x plugin through the Codex SDK. Correlate the native turn and its time window with independent evidence that the same subscriber's Pro allowance served it. If the account's usage view cannot attribute the turn, keep the Pro row blocked and retain the redacted observation.
+
+Keep token files, authorization headers, device codes and full provider responses out of release evidence. Record disposition per scenario and obtain separate deployment consent after acceptance.
+
 ## Record before the change
 
 The owner selected the local `orbstack` Docker context. For this target the proposed Compose project is `openai-proxy-staging` with dedicated project volumes and browser origin `http://127.0.0.1:18181`. The pre-deployment inventory found no containers for this project and no listener on port 18181. Repeat both checks immediately before deployment. Do not substitute an existing service bound to a different port.

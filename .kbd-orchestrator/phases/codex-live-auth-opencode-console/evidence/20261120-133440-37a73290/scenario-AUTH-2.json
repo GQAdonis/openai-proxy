@@ -1,0 +1,183 @@
+{
+  "command": "scenario AUTH-2",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "proactive overlaps authorized manual rotation",
+      "status": "PASS",
+      "observed": {
+        "trigger": "proactive",
+        "managed_exchange_count": 1,
+        "committed_freshness": true
+      },
+      "seconds": 0.873
+    },
+    {
+      "name": "challenge overlaps authorized manual rotation",
+      "status": "PASS",
+      "observed": {
+        "trigger": "challenge",
+        "managed_exchange_count": 1,
+        "committed_freshness": true
+      },
+      "seconds": 0.858
+    },
+    {
+      "name": "external token retains its owner",
+      "status": "PASS",
+      "observed": {
+        "mode": "external",
+        "managed_exchanges": 0
+      },
+      "seconds": 0.543
+    },
+    {
+      "name": "ordinary API key uses its own recipient class",
+      "status": "PASS",
+      "observed": {
+        "source": "environment",
+        "key_owner_confirmed": true,
+        "managed_exchanges": 0
+      },
+      "seconds": 0.644
+    },
+    {
+      "name": "real account managed renewal and embedding billing",
+      "status": "BLOCKED",
+      "observed": "no consented provider session or billing evidence"
+    }
+  ],
+  "notes": {
+    "auth-case-5sbeysx0": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "59041",
+        "--backend-url",
+        "http://127.0.0.1:59040/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "49606bc21fa496dd22fbf3e29502feab834143c94f2966907bf0fc38aeaeaf5b"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "49606bc21fa496dd22fbf3e29502feab834143c94f2966907bf0fc38aeaeaf5b"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "49606bc21fa496dd22fbf3e29502feab834143c94f2966907bf0fc38aeaeaf5b"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "49606bc21fa496dd22fbf3e29502feab834143c94f2966907bf0fc38aeaeaf5b"
+        }
+      ],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.858,
+      "exit": -15
+    },
+    "auth-case-sdbf6evw": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "59069",
+        "--backend-url",
+        "http://127.0.0.1:59068/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "d639a5a32d74139019b0e43b918534a673bd26fe8d47b57748a1314a2ba8f30f"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "d639a5a32d74139019b0e43b918534a673bd26fe8d47b57748a1314a2ba8f30f"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "d639a5a32d74139019b0e43b918534a673bd26fe8d47b57748a1314a2ba8f30f"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "dfe54c7d6b791f19ebb37d04ccfcc7018f16a38212e8e97c5ab0f4f75317783d"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "dfe54c7d6b791f19ebb37d04ccfcc7018f16a38212e8e97c5ab0f4f75317783d"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "dfe54c7d6b791f19ebb37d04ccfcc7018f16a38212e8e97c5ab0f4f75317783d"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "dfe54c7d6b791f19ebb37d04ccfcc7018f16a38212e8e97c5ab0f4f75317783d"
+        }
+      ],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.85,
+      "exit": -15
+    },
+    "auth-case-u_u3a55l": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "59090",
+        "--backend-url",
+        "http://127.0.0.1:59089/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "d64020ca732abf1e5b09ed0eac896f28d52bcf3f4c3025604af40d60f33d1731"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.536,
+      "exit": -15
+    },
+    "auth-case-c7l9hbnc": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "59101",
+        "--backend-url",
+        "http://127.0.0.1:59099/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": null,
+          "bearerSha256": "63567e9c0486643e532a63dcd9b10f6ecdffa03570f03b4605e95ff960be1698"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.637,
+      "exit": -15
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795182652.311917
+}

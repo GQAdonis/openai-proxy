@@ -1,0 +1,243 @@
+{
+  "command": "scenario UI-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "local packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.007
+    },
+    {
+      "name": "local keyboard settings and driver capabilities",
+      "status": "PASS",
+      "observed": {
+        "deployment": "local",
+        "urls": [
+          "/ui/",
+          "/ui/settings"
+        ],
+        "drivers": {
+          "codex": false,
+          "opencode": true
+        }
+      },
+      "seconds": 1.539
+    },
+    {
+      "name": "local native stop",
+      "status": "PASS",
+      "observed": {
+        "actor": "local",
+        "terminal": "cancelled",
+        "preserved": true,
+        "turn": "d69ddc86-b85c-4a27-ba89-64ea0b376c2f"
+      },
+      "seconds": 2.283
+    },
+    {
+      "name": "chat packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.005
+    },
+    {
+      "name": "chat keyboard settings and driver capabilities",
+      "status": "PASS",
+      "observed": {
+        "deployment": "chat",
+        "urls": [
+          "/ui/",
+          "/ui/settings"
+        ],
+        "drivers": {
+          "codex": false,
+          "opencode": true
+        }
+      },
+      "seconds": 1.06
+    },
+    {
+      "name": "chat native stop",
+      "status": "PASS",
+      "observed": {
+        "actor": "chat",
+        "terminal": "cancelled",
+        "preserved": true,
+        "turn": "9e34b866-b7c6-4afb-abfc-cc710256b50e"
+      },
+      "seconds": 2.774
+    },
+    {
+      "name": "final image packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.299
+    },
+    {
+      "name": "final image keyboard settings and driver capabilities",
+      "status": "PASS",
+      "observed": {
+        "deployment": "image",
+        "urls": [
+          "/ui/",
+          "/ui/settings"
+        ],
+        "drivers": {
+          "codex": false,
+          "opencode": true
+        }
+      },
+      "seconds": 1.282
+    },
+    {
+      "name": "final image native stop",
+      "status": "FAIL",
+      "observed": "in-container model stream was not active immediately before Stop"
+    },
+    {
+      "name": "standalone release without worker runtime",
+      "status": "PASS",
+      "observed": {
+        "binary": "b661176de0a2dcc5391992985454878b4f6175a567e9dc01dc7fb0dbf2d2ffa5",
+        "disabledDrivers": [
+          "codex",
+          "opencode"
+        ]
+      },
+      "seconds": 1.24
+    },
+    {
+      "name": "incremental embedded asset replacement",
+      "status": "PASS",
+      "observed": {
+        "originalSource": "f43ab52dd168ff6dc9ac7c3a876a77a132404e9ec5061bca49d963f31709173b",
+        "derivativeSource": "bb849e5df727f58e0aa79a4eda09bc02c02320355b7f2b324303656fa59e65a2",
+        "originalHtml": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "baselineBinary": "161b6ea1869447b8871d287fd4828c4bdd810e3a047fe6edad87af430fb3dd41",
+        "resultBinary": "680264dd1842027acb57ab0358f708b7db0fcfd7a150e47bf71a5e6a3c39fdd3",
+        "resultHtml": "62ebe9636aeddf161824e226cd2b050baf497cdedaa4694eeb4b717933395cb6",
+        "resultExit": 0,
+        "log": "ui-derivative-incremental-mutated.log"
+      },
+      "seconds": 308.145
+    }
+  ],
+  "notes": {
+    "browser runtime local": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime image": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser failure image 45e8faefcfa4": {
+      "stage": "exercise authenticated browser journey",
+      "category": "AssertionError",
+      "recentTransport": [
+        [
+          "index",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "asset",
+          200
+        ],
+        [
+          "session",
+          401
+        ],
+        [
+          "session",
+          200
+        ],
+        [
+          "connection",
+          200
+        ],
+        [
+          "conversation",
+          201
+        ],
+        [
+          "conversation",
+          202
+        ],
+        [
+          "conversation",
+          200
+        ],
+        [
+          "AG-UI",
+          200
+        ]
+      ]
+    },
+    "browser runtime web-only": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795183063.5317829
+}

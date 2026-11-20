@@ -1,0 +1,68 @@
+{
+  "command": "negative FEATURE-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "two-user scoped list, search and delete preservation",
+      "status": "FAIL",
+      "observed": "DELETE /v1/memory/documents/4acbfb2c-fb79-4f60-8c8f-d9a458c6449e returned HTTP 500"
+    },
+    {
+      "name": "signed-out request cannot inject a foreign document",
+      "status": "FAIL",
+      "observed": "DELETE /v1/memory/documents/08a4660a-175c-498a-b924-60b69dee0059 returned HTTP 500"
+    },
+    {
+      "name": "disabled DB, disabled hooks and unregistered egress",
+      "status": "PASS",
+      "observed": {
+        "database": "disabled",
+        "hookDeliveries": 0,
+        "modelCalls": 1
+      },
+      "seconds": 0.509
+    },
+    {
+      "name": "degraded DB, disabled hooks and unregistered egress",
+      "status": "PASS",
+      "observed": {
+        "database": "database_unavailable",
+        "hookDeliveries": 0,
+        "modelCalls": 1
+      },
+      "seconds": 0.504
+    },
+    {
+      "name": "authenticated shared upstream memory injection",
+      "status": "BLOCKED",
+      "observed": "Dedicated shared profiles have no live grants or independently routable shared direct-backend recipient"
+    }
+  ],
+  "notes": {
+    "memory variant (False, False)": {
+      "pid": 9996,
+      "enabled": false,
+      "degraded": false,
+      "port": 49736,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    },
+    "memory variant (True, True)": {
+      "pid": 9997,
+      "enabled": true,
+      "degraded": true,
+      "port": 49746,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795183321.740386
+}

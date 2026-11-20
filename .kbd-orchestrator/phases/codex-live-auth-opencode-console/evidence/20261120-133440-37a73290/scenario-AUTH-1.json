@@ -1,0 +1,340 @@
+{
+  "command": "scenario AUTH-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "native REST recipient identity and file publication",
+      "status": "PASS",
+      "observed": {
+        "same_process": true,
+        "recipient_commit_ms": [
+          138,
+          92,
+          103
+        ],
+        "ordered_owners": [
+          "a",
+          "a",
+          "b"
+        ]
+      },
+      "seconds": 0.867
+    },
+    {
+      "name": "directory mount follows external login",
+      "status": "PASS",
+      "observed": {
+        "deliveries": [
+          {
+            "owner": "owner-a",
+            "bearerSha256": "de76090fe2019d75ab442f4c5e94bd1495427a17a1b47d64e4bec7149888e1a7",
+            "generation": 1,
+            "elapsedMs": 149
+          },
+          {
+            "owner": "owner-a",
+            "bearerSha256": "2e96341e5dbd93d9e09431f99ca415f7365dc3338e24b40a26993d4f1f92171c",
+            "generation": 2,
+            "elapsedMs": 151
+          },
+          {
+            "owner": "owner-b",
+            "bearerSha256": "68351155184b6a49613132d6ed17ecffb2be6c1846be1139a614ba3cac492695",
+            "generation": 3,
+            "elapsedMs": 154
+          }
+        ],
+        "recipientCalls": 5,
+        "image": "sha256:0d323c01d33dfe3b76ac7d15f7ab692d6079a22a93329e6ebc4ba5179fd835df",
+        "pid": "1008418",
+        "startedAt": "2026-11-20T13:50:39.290646334Z",
+        "network": "none",
+        "mountTarget": "/tmp/kbd-credential-home",
+        "readOnly": false
+      },
+      "seconds": 1.425
+    },
+    {
+      "name": "recover a store created after initial watch registration",
+      "status": "PASS",
+      "observed": {
+        "initialWatchParentAbsent": true,
+        "sameProcess": true,
+        "recipientMs": 690
+      },
+      "seconds": 1.529
+    },
+    {
+      "name": "native keyring",
+      "status": "BLOCKED",
+      "observed": "no isolated platform keyring provisioned"
+    },
+    {
+      "name": "mcp stdio owner switch",
+      "status": "PASS",
+      "observed": {
+        "transport": "mcp",
+        "unchangedPid": 90656,
+        "ms": 7
+      },
+      "seconds": 0.606
+    },
+    {
+      "name": "acp stdio owner switch",
+      "status": "PASS",
+      "observed": {
+        "transport": "acp",
+        "unchangedPid": 90660,
+        "ms": 120
+      },
+      "seconds": 2.671
+    },
+    {
+      "name": "fresh setup CLI after owner replacement",
+      "status": "BLOCKED",
+      "observed": "current CLI inventory has not been independently compared after replacement"
+    },
+    {
+      "name": "genuine Codex login",
+      "status": "BLOCKED",
+      "observed": "no separately authorized subscription login"
+    }
+  ],
+  "notes": {
+    "auth-case-5xhr6_e4": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58864",
+        "--backend-url",
+        "http://127.0.0.1:58863/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "3f6a0734f81baa74e6c1a1a396fde2a7b230947edee158c95ced88b014cc1512"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "3f6a0734f81baa74e6c1a1a396fde2a7b230947edee158c95ced88b014cc1512"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "3f6a0734f81baa74e6c1a1a396fde2a7b230947edee158c95ced88b014cc1512"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "3a9dd2bf3029432091bdbd61fec0ddb7483136358420eab979c70cb7da6b25d0"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "3a9dd2bf3029432091bdbd61fec0ddb7483136358420eab979c70cb7da6b25d0"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "3a9dd2bf3029432091bdbd61fec0ddb7483136358420eab979c70cb7da6b25d0"
+        },
+        {
+          "account": "owner-b",
+          "bearerSha256": "34262918798a396c7e2159a4bf30bf96dad439ecdf7a9c5952391a4f8c8ecfe0"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.855,
+      "exit": -15
+    },
+    "auth-case-sw53sibp": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58907",
+        "--backend-url",
+        "http://127.0.0.1:58906/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "24990c671e1b37b5d4ffb4468408546fc0f88723b9e84c61f3b1a21b172121e9"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 1.515,
+      "exit": -15
+    },
+    "isolated protocol child c18df940f168": {
+      "pid": 90656,
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--mcp-stdio",
+        "--backend-url",
+        "http://127.0.0.1:58941/responses"
+      ]
+    },
+    "protocol reply a220bedb3dbb": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "900f266a2dbcc6923660089f4b1b34bae792b7e4ed05fefce8880765b92f058d",
+      "error": false
+    },
+    "protocol reply c60ec37786d1": {
+      "method": "tools/call",
+      "id": 2,
+      "sha256": "15cfc45bf1518f3cc7caf2fb625f6c52d29940ec5b1fd305694cdd9e21c67231",
+      "error": false
+    },
+    "protocol reply d1caa247a0cd": {
+      "method": "tools/call",
+      "id": 3,
+      "sha256": "0e63753f8b9a5ca14cdfbe6932f0008a6bb7d583881105936f2856db9d2981ff",
+      "error": false
+    },
+    "protocol child exit a6096c2bccae": {
+      "pid": 90656,
+      "code": 0
+    },
+    "auth-case-0zq1ax4o": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58942",
+        "--backend-url",
+        "http://127.0.0.1:58941/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "b66d3a171ff428452a17d4cca9dc11ecf22947a1ef1cc3fc5b0a0b36eb2629f8"
+        },
+        {
+          "account": "owner-b",
+          "bearerSha256": "cbefc52b9b9f4c182fdd582d0de2fd7c440fc29a863d19478f1a0caa3e85a1a1"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.595,
+      "exit": -15
+    },
+    "isolated protocol child e35d13de8eed": {
+      "pid": 90660,
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--acp-stdio",
+        "--backend-url",
+        "http://127.0.0.1:58951/responses"
+      ]
+    },
+    "protocol reply 492a6f2201b9": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "ba56c9ac53283ca8d28396b03d0afa7af4838c2f0ab2cfbe97b720bd6603a899",
+      "error": false
+    },
+    "protocol reply 60b3014cec8e": {
+      "method": "session/new",
+      "id": 2,
+      "sha256": "e111701811ddae88a8a88a1408727e97ebc136f018b871ab075fce45ed2b89a3",
+      "error": false
+    },
+    "protocol reply 89682e34713a": {
+      "method": "session/prompt",
+      "id": 3,
+      "sha256": "948fb41b08b58c5a256dea8199102f1cd66de7412c30a0a9c95866a50703bd74",
+      "error": false
+    },
+    "protocol reply 052120009d7e": {
+      "method": "session/new",
+      "id": 4,
+      "sha256": "8fe65b2882b1b9ac7d7425380d661d7e2972e396bb4e96930c855a1336d92017",
+      "error": false
+    },
+    "protocol reply 70dac6998edf": {
+      "method": "session/prompt",
+      "id": 5,
+      "sha256": "7dde89cfdda92ef67d0495307b0cb4af4599abec3055ac648e233c14670724cf",
+      "error": false
+    },
+    "protocol reply 162fccedd0a7": {
+      "method": "session/new",
+      "id": 6,
+      "sha256": "3f69316bfaacf3317e88b74a66832175adeec45762c1c2a917fe9aed90dedfc2",
+      "error": false
+    },
+    "protocol reply 11430e59b2a5": {
+      "method": "session/prompt",
+      "id": 7,
+      "sha256": "b45e48a2c6f9ef2c27c27b7cf36b86a82ff5227ddceeb5f0840ffb0ad2e664af",
+      "error": false
+    },
+    "protocol reply 2e4ef1fd3b30": {
+      "method": "session/new",
+      "id": 8,
+      "sha256": "75cb0c2066a31d5ac33655e3a439e215938252463f8cb227b84a8084a0b9691c",
+      "error": false
+    },
+    "protocol reply d6dcbb13da6a": {
+      "method": "session/prompt",
+      "id": 9,
+      "sha256": "1ddced12bed706e788faec6467380400a4d27d009f7200271642ea0cc14386ad",
+      "error": false
+    },
+    "protocol child exit e58fd1999a71": {
+      "pid": 90660,
+      "code": -15
+    },
+    "auth-case-g8wnkyvg": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "58952",
+        "--backend-url",
+        "http://127.0.0.1:58951/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "9b347b32874c53acce8bd36523991f34af72c773d78566e10fa34008c4386e96"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "9b347b32874c53acce8bd36523991f34af72c773d78566e10fa34008c4386e96"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "9b347b32874c53acce8bd36523991f34af72c773d78566e10fa34008c4386e96"
+        },
+        {
+          "account": "owner-b",
+          "bearerSha256": "be384b0274e426383e0502c2cc5296f17bf97ec3aaaa4047bf701de1e39ddec6"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.666,
+      "exit": -15
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795182645.425785
+}

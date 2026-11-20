@@ -1,0 +1,1083 @@
+{
+  "command": "scenario MCP-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "standalone MCP stdio negotiation and scoped calls",
+      "status": "PASS",
+      "observed": {
+        "tools": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "calls": [
+          "list_models",
+          "check_auth",
+          "set_model"
+        ],
+        "defaultUnchanged": true
+      },
+      "seconds": 0.019
+    },
+    {
+      "name": "standalone MCP http negotiation and scoped calls",
+      "status": "PASS",
+      "observed": {
+        "tools": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "calls": [
+          "list_models",
+          "check_auth",
+          "set_model"
+        ],
+        "defaultUnchanged": true
+      },
+      "seconds": 0.005
+    },
+    {
+      "name": "codex real MCP client stdio",
+      "status": "PASS",
+      "observed": {
+        "client": "Codex 0.169.0",
+        "transport": "stdio",
+        "tools": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "tool": "set_model"
+      },
+      "seconds": 0.588
+    },
+    {
+      "name": "codex real MCP client http",
+      "status": "PASS",
+      "observed": {
+        "client": "Codex 0.169.0",
+        "transport": "http",
+        "tools": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "tool": "set_model"
+      },
+      "seconds": 0.502
+    },
+    {
+      "name": "claude real MCP client stdio",
+      "status": "PASS",
+      "observed": {
+        "tools": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "nativeToolCalls": 1,
+        "nativeToolResults": 1,
+        "marker": "kbd-client-0457a8d9b67b4cdb9c2980543013a54f",
+        "client": "claude",
+        "transport": "stdio"
+      },
+      "seconds": 1.482
+    },
+    {
+      "name": "opencode real MCP client http",
+      "status": "PASS",
+      "observed": {
+        "tools": [
+          "chat_completion",
+          "check_auth",
+          "list_models",
+          "set_model"
+        ],
+        "nativeToolCalls": 1,
+        "nativeToolResults": 1,
+        "marker": "kbd-client-3e542c40719b444c9f11475aafbbbabc",
+        "client": "opencode",
+        "transport": "http"
+      },
+      "seconds": 3.063
+    },
+    {
+      "name": "zed real MCP client stdio",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: This GUI client needs an isolated, controllable editor session with an enabled MCP integration"
+    },
+    {
+      "name": "code real MCP client http",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: Isolated VS Code extension host or active Copilot/MCP session unavailable"
+    }
+  ],
+  "notes": {
+    "isolated protocol child a9b603ad33ea": {
+      "pid": 9724,
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--mcp-stdio"
+      ]
+    },
+    "protocol reply f354f38cfecc": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "900f266a2dbcc6923660089f4b1b34bae792b7e4ed05fefce8880765b92f058d",
+      "error": false
+    },
+    "protocol reply ad52c787c3b0": {
+      "method": "tools/list",
+      "id": 2,
+      "sha256": "78c1c2f2146a83f448e1f62f9d6958253d3cae5497b4c35c86a00c37649d7646",
+      "error": false
+    },
+    "protocol reply 1aef36f66f85": {
+      "method": "tools/call",
+      "id": 3,
+      "sha256": "f6ad278df725b15eca6439bd400fbd0de72897fe5a3e9e7b2215462d6b10617b",
+      "error": false
+    },
+    "protocol reply e86ce9099e90": {
+      "method": "tools/call",
+      "id": 4,
+      "sha256": "8ab477ba7dade6b608cf73a744812fb2bd1450caa312718b9075213cc002eb8b",
+      "error": false
+    },
+    "protocol reply 8f2c09b369c9": {
+      "method": "tools/call",
+      "id": 5,
+      "sha256": "6e9581eb0ab68355b41ce49eb1d74047fad7e8e837644644ae9316c15af76e28",
+      "error": false
+    },
+    "protocol child exit a577e2ef8679": {
+      "pid": 9724,
+      "code": 0
+    },
+    "client process af0e736332a6": {
+      "argv": [
+        "/opt/homebrew/bin/codex",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "f3807264176de3c20897352ed66cf258503bb4d52bf8428b5e8a3ac21c22cdcb",
+        "output": "admin-originals/5f177a59c5cb471bafb8b81606612568.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/5532a197e75543ca8ba10f299b7a5a78.stderr",
+        "redacted": false
+      }
+    },
+    "codex version": "0.169.0",
+    "codex previous settings 83a8b0d56e20": {
+      "exists": true,
+      "sha256": "2da1c0985fdf272bdde641a7327630c8279c70fb77edaddf38627e427a063ad7",
+      "bytes": 90,
+      "mode": 416,
+      "original": "admin-originals/73f239b205944acda2a8fa3590409ae2.bin"
+    },
+    "client process e2f0e954fd10": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--codex",
+        "--global",
+        "--port",
+        "58739",
+        "--stdio"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "13d44567c05bcc062c7e3995f7a788503b52ce2d0e73fdc0cb2064991040c936",
+        "output": "admin-originals/a3f426d1435d456e999e4e6927a60925.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/bccb30c6b82145c883cb87dd4ddbd14a.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 71be050c5ab9": {
+      "exists": true,
+      "sha256": "5093ff24af0e48d8ba3d41f32338ba0e2f147f5a0c2a4f5b3dfaaf43adc726d2",
+      "bytes": 265,
+      "mode": 416,
+      "original": "admin-originals/a26483b1b6cc4b4abc5f0d20c917bdbb.bin"
+    },
+    "client process 327f0c6b6cdb": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--codex",
+        "--global",
+        "--port",
+        "58739",
+        "--stdio"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "b5d487bea5c7b5b2dbc39cf8c8e8db0fdcbf3835a64583a72d3cafa949161984",
+        "output": "admin-originals/cbfe37c7e32a4c878e8795d8956a7696.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/c810f19a5fd94cb189405fa453848b74.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply 532cb82e077b": {
+      "exists": true,
+      "sha256": "5093ff24af0e48d8ba3d41f32338ba0e2f147f5a0c2a4f5b3dfaaf43adc726d2",
+      "bytes": 265,
+      "mode": 416,
+      "original": "admin-originals/213d35d6b5004463a4ba19653237f5a2.bin"
+    },
+    "client process bc0caf24790d": {
+      "argv": [
+        "/opt/homebrew/bin/codex",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "f3807264176de3c20897352ed66cf258503bb4d52bf8428b5e8a3ac21c22cdcb",
+        "output": "admin-originals/3a27511c9cee44f0aaeb04e35147f1f1.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/3d2efd2f04284f2e87a711e8688987f9.stderr",
+        "redacted": false
+      }
+    },
+    "isolated protocol child c51d2ad408c1": {
+      "pid": 9733,
+      "argv": [
+        "/opt/homebrew/bin/codex",
+        "app-server"
+      ]
+    },
+    "protocol reply 258d4ab2e5d8": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "13b1796670c054ecb03d1af48c31d5c78e3e2d338f83c2afa910599c1c47a694",
+      "error": false
+    },
+    "protocol reply ce7a903db88e": {
+      "method": "thread/start",
+      "id": 2,
+      "sha256": "293215f3c032a315d9f01e23ee26337cd5e52299462567faa979424e728293df",
+      "error": false
+    },
+    "protocol reply bc5277b11a97": {
+      "method": "mcpServerStatus/list",
+      "id": 3,
+      "sha256": "7c3e40ecb57ccb4d80617919a9d17d0e8581b5f37933e0a6c3a3261e7656c0f6",
+      "error": false
+    },
+    "protocol reply c09ddb5b7c8d": {
+      "method": "mcpServer/tool/call",
+      "id": 4,
+      "sha256": "f67a06094259a92619abf9dd3ddce1658bcc6419cdb3a985eac5df0c50461d97",
+      "error": false
+    },
+    "protocol child exit dd85f277131b": {
+      "pid": 9733,
+      "code": 0
+    },
+    "client process e876c88893b1": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--codex",
+        "--global",
+        "--port",
+        "58739",
+        "--stdio",
+        "--undo",
+        "5d5f81eb-5a3e-4022-a975-10971384cc80"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "3e743e4d2994d9883e403a180ed9418c91f570640a0e8dec192e9d863643c657",
+        "output": "admin-originals/cc1cb924ac37454c97d74f67c3d13b98.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/5cbf8f07cd6843f28ba5d16247949f9b.stderr",
+        "redacted": false
+      }
+    },
+    "client restored 54a481c37e0d": {
+      "exists": true,
+      "sha256": "2da1c0985fdf272bdde641a7327630c8279c70fb77edaddf38627e427a063ad7",
+      "bytes": 90,
+      "mode": 416,
+      "original": "admin-originals/d726eb2548b246ed835bf1d6b61eee04.bin"
+    },
+    "client process 5c1997571021": {
+      "argv": [
+        "/opt/homebrew/bin/codex",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "f3807264176de3c20897352ed66cf258503bb4d52bf8428b5e8a3ac21c22cdcb",
+        "output": "admin-originals/0d6299f9c7804f4e9813e89590a574f4.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/7a1f559c75ef4966be7b770a5b5400f8.stderr",
+        "redacted": false
+      }
+    },
+    "codex previous settings b242a588d52d": {
+      "exists": true,
+      "sha256": "2da1c0985fdf272bdde641a7327630c8279c70fb77edaddf38627e427a063ad7",
+      "bytes": 90,
+      "mode": 416,
+      "original": "admin-originals/1d3e7426564947449f4ffbca36ef2a5d.bin"
+    },
+    "client process b43385348257": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--codex",
+        "--global",
+        "--port",
+        "58739"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "30827bd1144a35571f5c412c47e90d59ecef7f18cf9e51d1d9d61d949ae1c6cb",
+        "output": "admin-originals/bde64f4914504d2b8bf50bcc25908065.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/34cc0a3d82f54b5c8d531733c4484720.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 302a9345ffee": {
+      "exists": true,
+      "sha256": "8d91574ee0a0a54c2bbc5456e002d49476931aa3266b463c4af1580fc5870a10",
+      "bytes": 194,
+      "mode": 416,
+      "original": "admin-originals/72abe0df344c428ba5df3ef5a4654c24.bin"
+    },
+    "client process 9d56cd0141e9": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--codex",
+        "--global",
+        "--port",
+        "58739"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "a1cc31fa838b092236d48cec3032debe874bb537492a292868cf0c94cb970642",
+        "output": "admin-originals/2e8d098d682a4e87834a78bfd6e3c1df.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/9d74ccf37c134329acda6675613c909b.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply 764f10b1636c": {
+      "exists": true,
+      "sha256": "8d91574ee0a0a54c2bbc5456e002d49476931aa3266b463c4af1580fc5870a10",
+      "bytes": 194,
+      "mode": 416,
+      "original": "admin-originals/fcaf0d6fa5944685986239397646c7d7.bin"
+    },
+    "client process 4132649c4c83": {
+      "argv": [
+        "/opt/homebrew/bin/codex",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "f3807264176de3c20897352ed66cf258503bb4d52bf8428b5e8a3ac21c22cdcb",
+        "output": "admin-originals/dc9d401782964e2e980200c844e807c8.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/8849c15c29444236a60ac06a1abd91e7.stderr",
+        "redacted": false
+      }
+    },
+    "isolated protocol child 4b38ad45a50a": {
+      "pid": 9770,
+      "argv": [
+        "/opt/homebrew/bin/codex",
+        "app-server"
+      ]
+    },
+    "protocol reply d498a1d97a5d": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "3414d07609a34c4668383d832b3e7b6519a1e4c1a7d5d160e1dad76421c1f744",
+      "error": false
+    },
+    "protocol reply 1a042bacc0dc": {
+      "method": "thread/start",
+      "id": 2,
+      "sha256": "5c3bf5f6e99b43369af3b2ce4e1bcf8dd108ea1f52e13c78b784d6c1e332e00a",
+      "error": false
+    },
+    "protocol reply 58d622829d02": {
+      "method": "mcpServerStatus/list",
+      "id": 3,
+      "sha256": "615889dd7bf5b93ec12eac05fadcdcbfce621de058714a5242fee6f6998fb95a",
+      "error": false
+    },
+    "protocol reply 1e7c585e31c2": {
+      "method": "mcpServer/tool/call",
+      "id": 4,
+      "sha256": "f67a06094259a92619abf9dd3ddce1658bcc6419cdb3a985eac5df0c50461d97",
+      "error": false
+    },
+    "protocol child exit eaae0ece14c8": {
+      "pid": 9770,
+      "code": 0
+    },
+    "client process ac84c98ed451": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--codex",
+        "--global",
+        "--port",
+        "58739",
+        "--undo",
+        "47b8eef8-f9df-4239-aa3a-8e90fa48d4e3"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "0db5ee1cf3d78c208d5464b21a5a190bf37e48e86e667d21454bc1753328dc51",
+        "output": "admin-originals/3ed2bdb1b164409d956777dd276079b5.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/1676bb3ecd6b4a36801d64849ec0de66.stderr",
+        "redacted": false
+      }
+    },
+    "client restored 1cdc2611e94e": {
+      "exists": true,
+      "sha256": "2da1c0985fdf272bdde641a7327630c8279c70fb77edaddf38627e427a063ad7",
+      "bytes": 90,
+      "mode": 416,
+      "original": "admin-originals/2430918e79714dc4ae4f19bef9e6aa5c.bin"
+    },
+    "client process 8c91e4c44619": {
+      "argv": [
+        "/Users/gqadonis/.local/bin/claude",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "45ab6b1662ded70d38e47a5306b6dcaff6065784f6880c836425476afd9055d4",
+        "output": "admin-originals/8fee11f59ae74556b357d946c82731c0.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/6479306f242d483eaadae10a207bf4e3.stderr",
+        "redacted": false
+      }
+    },
+    "claude version": "2.1.328",
+    "claude previous settings 4623981b174f": {
+      "exists": true,
+      "sha256": "372a7f8c1e988f58480012e741582e13bb1c9c2b2611432f365ae132f519cfe5",
+      "bytes": 19,
+      "mode": 416,
+      "original": "admin-originals/4313e85e42584b9d9f2aad811669e403.bin"
+    },
+    "client process 122ae8e87a6b": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--claude",
+        "--project",
+        "--port",
+        "58739",
+        "--stdio"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "23deeba01d988edfb8cfc9a974487d8805e96e600afdba556c94bf8c6c9479b1",
+        "output": "admin-originals/efcc65a7641b4f789a03464ad12d9e4d.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/c4311566734042829586e5141fb69896.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 43aa18aff76b": {
+      "exists": true,
+      "sha256": "bb96338b8e3537460da63aeedb5af9ede3720ac73f55cafdb776d508a420feda",
+      "bytes": 197,
+      "mode": 416,
+      "original": "admin-originals/d0f83c5dbb14468288ba8c1bc0c3f574.bin"
+    },
+    "client process 5fb8c4393b22": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--claude",
+        "--project",
+        "--port",
+        "58739",
+        "--stdio"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "eaa20f343409f6fd0bdeb491943494a97f472a5446ac44f563b4f264eae4912d",
+        "output": "admin-originals/d8406ef8823b4ee8b88094069232b3f1.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/d373bb724b284d72bf73f6e2b63df853.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply 75f95fb29252": {
+      "exists": true,
+      "sha256": "bb96338b8e3537460da63aeedb5af9ede3720ac73f55cafdb776d508a420feda",
+      "bytes": 197,
+      "mode": 416,
+      "original": "admin-originals/2b15acf8f9624c26a7707b8cc17ac89e.bin"
+    },
+    "client process 5c73a8f4d3c1": {
+      "argv": [
+        "claude",
+        "--print",
+        "--strict-mcp-config",
+        "--mcp-config",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/client-s0f1u0ao/.mcp.json",
+        "--output-format",
+        "json",
+        "--max-turns",
+        "3",
+        "--model",
+        "claude-sonnet-4-6",
+        "--allowedTools",
+        "mcp__openai-proxy__set_model",
+        "--",
+        "Use the configured proxy's advisory model-selection tool once."
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "5a19a516cc7d1f67cad369e42426f8f17a9c9dd672dd7a4cc49e49ee379e4e5b",
+        "output": "admin-originals/3c1368326c4041febee6807b8e3006d2.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/c73272f3f2544d73aab43f9b28c548ce.stderr",
+        "redacted": false
+      }
+    },
+    "claude independent MCP model observations": {
+      "requestCount": 2,
+      "offeredProxyTools": [
+        "chat_completion",
+        "check_auth",
+        "list_models",
+        "set_model"
+      ],
+      "advisoryCallsRequested": 1,
+      "correlatedResults": 1
+    },
+    "client process a3031ba2b97d": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--claude",
+        "--project",
+        "--port",
+        "58739",
+        "--stdio",
+        "--undo",
+        "43b37cbd-f1f8-4c1b-a556-9b0025f4431c"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "6e13e719688b27e4707f0c1e6ba3e1097e1f25251d49bf8fd970532393206c98",
+        "output": "admin-originals/3a613e4fb8b24dfd9f2b3e38f9357fd3.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/cca0cf0118f34a6abfc44f5333486188.stderr",
+        "redacted": false
+      }
+    },
+    "client restored fe60b8238a79": {
+      "exists": true,
+      "sha256": "372a7f8c1e988f58480012e741582e13bb1c9c2b2611432f365ae132f519cfe5",
+      "bytes": 19,
+      "mode": 416,
+      "original": "admin-originals/92a2aaab34d24894b823098d233be3ea.bin"
+    },
+    "client process 0622378df5b9": {
+      "argv": [
+        "/Users/gqadonis/.opencode/bin/opencode",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa9e9d30829a2a18c9707b75215b2203170679a2a03d6681a89e6b015c8750e7",
+        "output": "admin-originals/71d75e523221430db3fd5a7c2974fc9d.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/0173cd4c7b644ac9a00d09f9cc189306.stderr",
+        "redacted": false
+      }
+    },
+    "opencode version": "2.3.0",
+    "opencode previous settings 827283734474": {
+      "exists": true,
+      "sha256": "ca8512f0edf75c7cf36a8e7ee3a30a9955c5559c7cae87a7aa12727416083e55",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/f5ea29b319524b32b16d06822dbfb365.bin"
+    },
+    "client process 83a08e05b8a1": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--opencode",
+        "--project",
+        "--port",
+        "58739"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "bb45edf033616b0da2fb16825ee221c46777764678e0b01f6e37ac6d2da171da",
+        "output": "admin-originals/4ab66761ac6e4a3dac22f19462605cad.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/53f977448259449d8f3754205355a0e9.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 99f8586b68fa": {
+      "exists": true,
+      "sha256": "1900b4d58c3208f5c3230b711ea21e1ac43e21f534178b4d784ec573f14252eb",
+      "bytes": 179,
+      "mode": 416,
+      "original": "admin-originals/396e0e2815a4499b80a147fec7ee7295.bin"
+    },
+    "client process 628cd555133a": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--opencode",
+        "--project",
+        "--port",
+        "58739"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "8878fd9fe4745d60fe85c4ab332f9d44e563d7eb9761f678259e2eae5e313772",
+        "output": "admin-originals/ffc9a320b04f4816bfa9e17c1d048fa5.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/0a3a3611c5064fe8bdb8d2001761ca83.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply 0d35f72f44cf": {
+      "exists": true,
+      "sha256": "1900b4d58c3208f5c3230b711ea21e1ac43e21f534178b4d784ec573f14252eb",
+      "bytes": 179,
+      "mode": 416,
+      "original": "admin-originals/123b64aa241649bfb565f3533aeb4db4.bin"
+    },
+    "client process f243fe2ac966": {
+      "argv": [
+        "opencode",
+        "run",
+        "--standalone",
+        "--model",
+        "boundary/boundary-chat",
+        "Use the configured proxy's advisory model-selection tool once."
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "21307d33d57aa8f82f5c63751d6e61645557579fc865bc5877ec253a026e20d5",
+        "output": "admin-originals/b6d11ade82064ddf96edfd38b6ec7fdf.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "a69a6073c505e2dbbdbfcbb99be53de48f5a3db0d900f066a105f4cbbfb73fa2",
+        "output": "admin-originals/5096cb81782944028caf0bf016c268ee.stderr",
+        "redacted": false
+      }
+    },
+    "opencode independent MCP model observations": {
+      "requestCount": 3,
+      "offeredProxyTools": [
+        "chat_completion",
+        "check_auth",
+        "list_models",
+        "set_model"
+      ],
+      "advisoryCallsRequested": 1,
+      "correlatedResults": 1
+    },
+    "client process 596c94c6d0af": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--opencode",
+        "--project",
+        "--port",
+        "58739",
+        "--undo",
+        "25702f95-14ff-4fd1-a4f8-1b5f793237b8"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "fa050e540cba80c09c77b06b72ad8cce5af3c7b71f4fc8b3f77a822fa8093c00",
+        "output": "admin-originals/7b0e0fdd4df045189f36a291430e3b61.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/81cd48eec61e41a9b2be29d838d8a66d.stderr",
+        "redacted": false
+      }
+    },
+    "client restored a2f38a612d8e": {
+      "exists": true,
+      "sha256": "ca8512f0edf75c7cf36a8e7ee3a30a9955c5559c7cae87a7aa12727416083e55",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/95caf0b0391c46dd85b76db6ea015694.bin"
+    },
+    "client process 1ee9f9b88628": {
+      "argv": [
+        "/opt/homebrew/bin/zed",
+        "--version"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/fa41d0f9b038405c8fc1ed078695a24d.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "604763f0ce3227ae9105e8b1df93ee13d8fba29c88b4cbf76ac1e67c27b0fc4d",
+        "output": "admin-originals/ec8549ad11c7460eb3013242a24a41d6.stderr",
+        "redacted": false
+      }
+    },
+    "client process 9b3d1662c25c": {
+      "argv": [
+        "/Applications/Zed.app/Contents/MacOS/cli",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "1d2e70671dbca0a2becb54b200298060163afa45337ea4189b9727ec44b00cba",
+        "output": "admin-originals/98a740f608c14793aad16a043aa9f8ab.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/1dad79fa4f5341c386ea851770634688.stderr",
+        "redacted": false
+      }
+    },
+    "zed version": "1.28.1",
+    "zed previous settings 1d323b9d9924": {
+      "exists": true,
+      "sha256": "c39308e3bded462804baa8ce21d6549efe0bd53952578603f0514dc8f0370686",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/95da07fe29d4452298f33ab1fc411c28.bin"
+    },
+    "client process 83c13bb3d0d9": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--zed",
+        "--project",
+        "--port",
+        "58739",
+        "--stdio"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "10feea076f4c31924f75c57d574127790fb03b1ccb35301ae9af143f281f2428",
+        "output": "admin-originals/dbc4247796d247fa8b423c20809d9999.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/419816a672ad47f28c972e6de996957e.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 84c067df948d": {
+      "exists": true,
+      "sha256": "87b0d5ce8ff71500f551e486edb877129efefd3ac7d10273d85295c40a53a9c0",
+      "bytes": 201,
+      "mode": 416,
+      "original": "admin-originals/b42b6b7006eb48fc92c227a9938424e8.bin"
+    },
+    "client process 31dcedee47e4": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--zed",
+        "--project",
+        "--port",
+        "58739",
+        "--stdio"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "ce84cc786d49668bcd7c68d3851979c6b9dcc2483c326decf9d97d2211af5a26",
+        "output": "admin-originals/6d7eb359b0664b23bd53f8d9c0dd411b.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/06f5bedc3c684a3abd63778d45ade7cd.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply 7bc0fa4f5661": {
+      "exists": true,
+      "sha256": "87b0d5ce8ff71500f551e486edb877129efefd3ac7d10273d85295c40a53a9c0",
+      "bytes": 201,
+      "mode": 416,
+      "original": "admin-originals/96a3ce1e137d49548ecb96a42de0c161.bin"
+    },
+    "client process 150910b9fd46": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--zed",
+        "--project",
+        "--port",
+        "58739",
+        "--stdio",
+        "--undo",
+        "aaed8f3d-7784-4de1-ae96-f98db2009c0c"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "edf687843f28ba1e3125ff49ab829a5501f6ddfe90a8fd206d71db3412c5b82a",
+        "output": "admin-originals/827d19bdbfb54068876baedef3a5632e.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/caae499b2aff4513bf4b074ce381e2ea.stderr",
+        "redacted": false
+      }
+    },
+    "client restored 421541f3eba1": {
+      "exists": true,
+      "sha256": "c39308e3bded462804baa8ce21d6549efe0bd53952578603f0514dc8f0370686",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/b187c5016705439f8eb1988a5c7b8a78.bin"
+    },
+    "client process 848799e25960": {
+      "argv": [
+        "/usr/local/bin/code",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "934a69300c6bbdfcc8be3045a1a0c618c6bbea76b725df249018c552989935d7",
+        "output": "admin-originals/610ab47c8b284f309eca5abdd0192d9b.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/20ba2da489b24e818e43da7a2bcba245.stderr",
+        "redacted": false
+      }
+    },
+    "code version": "1.122.1",
+    "code previous settings 3f98556e75e3": {
+      "exists": true,
+      "sha256": "2b277c164a6bef053048356f941e98532428afa42afb32113ac56943f21f2442",
+      "bytes": 15,
+      "mode": 416,
+      "original": "admin-originals/d198cc54c75a4241bddb52e1dc378195.bin"
+    },
+    "client process 5c5312d6b19e": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--vscode",
+        "--project",
+        "--port",
+        "58739"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "571f8d640f12a40dc0c06fb4cce6f9573a27cabacb92b48b306aafa77e8af61a",
+        "output": "admin-originals/2ed5b8150be44f54adf6bbb60d16fd21.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/42fa5c1e34db49298fc489e8af947897.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 2ee9d4ac3f1f": {
+      "exists": true,
+      "sha256": "b588882db145261baf7ec8e019dd91597713ecde8947cebb07a109f9d0e50db0",
+      "bytes": 155,
+      "mode": 416,
+      "original": "admin-originals/bdf1a61be1f540f98151635adb73cb59.bin"
+    },
+    "client process ce4b9f864b40": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--vscode",
+        "--project",
+        "--port",
+        "58739"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "a9b04e5f98cdec9ea8e55ed509f028cbb1ceaaeb846d2a89e74364e423fac7e5",
+        "output": "admin-originals/c0b3e98fe4014fa0ad643aa4136f7f69.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/efb3e0583fed4d9a9b3cc7c2ef991885.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply 9f6d1e3d20aa": {
+      "exists": true,
+      "sha256": "b588882db145261baf7ec8e019dd91597713ecde8947cebb07a109f9d0e50db0",
+      "bytes": 155,
+      "mode": 416,
+      "original": "admin-originals/a9a6c286f8394031ab4a9ab0dce74a8d.bin"
+    },
+    "client process 2b0d5a35486d": {
+      "argv": [
+        "code",
+        "--new-window",
+        "--user-data-dir",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/client-yctelmqb/code-data",
+        "--extensions-dir",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/client-yctelmqb/extensions",
+        "--extensionDevelopmentPath=/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/client-yctelmqb/test-extension",
+        "--extensionTestsPath=/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/client-yctelmqb/test-extension/observe.cjs",
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/client-yctelmqb"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/eebdcdb0f53c4262bbb1ea4e7cbe4e89.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/78324125f51a4cbd88e88eaf056fdaf6.stderr",
+        "redacted": false
+      }
+    },
+    "client process 1e7372567cdf": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "mcp",
+        "--vscode",
+        "--project",
+        "--port",
+        "58739",
+        "--undo",
+        "099dccc8-b540-439d-8ed8-27be4b528ab2"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "e03ee637d9a3d08d28e4e29a64033a4872e97e0bed724595174f848a96f4d378",
+        "output": "admin-originals/8f33e7f18cbd4e038466dbadf37f9f12.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/3d4edd93b3a94d5b877f3289dff6950e.stderr",
+        "redacted": false
+      }
+    },
+    "client restored 6fef49303950": {
+      "exists": true,
+      "sha256": "2b277c164a6bef053048356f941e98532428afa42afb32113ac56943f21f2442",
+      "bytes": 15,
+      "mode": 416,
+      "original": "admin-originals/c99a886e256e4387ad2b3b6bfce8f116.bin"
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795183317.409466
+}

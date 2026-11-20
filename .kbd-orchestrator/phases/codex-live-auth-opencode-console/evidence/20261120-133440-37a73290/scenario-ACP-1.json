@@ -1,0 +1,190 @@
+{
+  "command": "scenario ACP-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "ACP packaged stdio stream and session",
+      "status": "PASS",
+      "observed": {
+        "session": "42b4fa86-160a-47c7-9fc9-18eb0a146502",
+        "streamed": "kbd-fixture-reply",
+        "stopReason": "end_turn"
+      },
+      "seconds": 2.093
+    },
+    {
+      "name": "zed actual ACP editor prompt and terminal error",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: Registered editor requires an independently controlled disposable UI session to observe child argv, stream and terminal error"
+    },
+    {
+      "name": "idea actual ACP editor prompt and terminal error",
+      "status": "BLOCKED",
+      "observed": "MissingPeer: idea is absent from the isolated client PATH"
+    }
+  ],
+  "notes": {
+    "isolated protocol child 9bb224adcd03": {
+      "pid": 9686,
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "serve",
+        "--acp-stdio"
+      ]
+    },
+    "protocol reply 5b1d1193c1aa": {
+      "method": "initialize",
+      "id": 1,
+      "sha256": "ba56c9ac53283ca8d28396b03d0afa7af4838c2f0ab2cfbe97b720bd6603a899",
+      "error": false
+    },
+    "protocol reply b3c4fdbd7f4c": {
+      "method": "session/new",
+      "id": 2,
+      "sha256": "5f986ce1e3a15e92d54ba663668a5c4b5f196ce6bc1af33169e9923c519b63b6",
+      "error": false
+    },
+    "protocol reply c65d83ddfc21": {
+      "method": "session/prompt",
+      "id": 3,
+      "sha256": "948fb41b08b58c5a256dea8199102f1cd66de7412c30a0a9c95866a50703bd74",
+      "error": false
+    },
+    "protocol child exit 945244c7d2e6": {
+      "pid": 9686,
+      "code": -15
+    },
+    "client process b8f3fd3f47c1": {
+      "argv": [
+        "/opt/homebrew/bin/zed",
+        "--version"
+      ],
+      "exit": 1,
+      "stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/0424b3a5492246e7a58ef6ba897a1e65.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "604763f0ce3227ae9105e8b1df93ee13d8fba29c88b4cbf76ac1e67c27b0fc4d",
+        "output": "admin-originals/288d93cfbe37481192069993d125df33.stderr",
+        "redacted": false
+      }
+    },
+    "client process 7a4604be0189": {
+      "argv": [
+        "/Applications/Zed.app/Contents/MacOS/cli",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "1d2e70671dbca0a2becb54b200298060163afa45337ea4189b9727ec44b00cba",
+        "output": "admin-originals/aefee01ef66f4bda9a96820e45469bcb.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/f902a459fbb44467b96b69f83bb0ab96.stderr",
+        "redacted": false
+      }
+    },
+    "zed version": "1.28.1",
+    "zed previous settings 5ab483059a35": {
+      "exists": true,
+      "sha256": "c39308e3bded462804baa8ce21d6549efe0bd53952578603f0514dc8f0370686",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/3ec7bb756c8e47e38c1ca1c3cf4f2c49.bin"
+    },
+    "client process 52aaf9753d26": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "acp",
+        "--zed",
+        "--project"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "cd8cca12082e423d3216c3a16905e126f35b93ba5ba92dcab623dba69637e256",
+        "output": "admin-originals/b141e829d2c3454ca8cdb7c93683ddc3.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/fc9ec9b65c2949639b40844c9cf669ce.stderr",
+        "redacted": false
+      }
+    },
+    "client configured 7eeb17eaba14": {
+      "exists": true,
+      "sha256": "867971f1c4d6b04ca47a9375501ad9d2fc2c4038153db3d47ad9a2a24c160b79",
+      "bytes": 215,
+      "mode": 416,
+      "original": "admin-originals/2b1733d657634d7a9f8e1452aaee2383.bin"
+    },
+    "client process e23199113df6": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "acp",
+        "--zed",
+        "--project"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "0eaca5ff0e9057421c423dd482b4b4e3613ae1cac82d7a977b79074d37192563",
+        "output": "admin-originals/428426eae4d745688e4304e6b288d103.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/3d38118e0aeb4a71ac55e2ba58fd7760.stderr",
+        "redacted": false
+      }
+    },
+    "client reapply fa05c2113ad2": {
+      "exists": true,
+      "sha256": "867971f1c4d6b04ca47a9375501ad9d2fc2c4038153db3d47ad9a2a24c160b79",
+      "bytes": 215,
+      "mode": 416,
+      "original": "admin-originals/98e07fe995ab4c7f9580c7a09c7b1209.bin"
+    },
+    "client process 37478c7ec1a7": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-54s4dpv1/install/bin/openai-proxy",
+        "setup",
+        "acp",
+        "--zed",
+        "--project",
+        "--undo",
+        "3bb7acde-883c-4673-b4cc-774293fa8cfb"
+      ],
+      "exit": 0,
+      "stdout": {
+        "sha256": "f49c6a63fea9c9eb39a3e586ed689967b3bbd0a77cca3cf873969f458113441f",
+        "output": "admin-originals/f489e239b5bc4a8bba8877c9b0c5bd35.stdout",
+        "redacted": false
+      },
+      "stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "output": "admin-originals/ddc4694e3ad3410e8cc89fb5b127a1d7.stderr",
+        "redacted": false
+      }
+    },
+    "client restored 1ad265fbac29": {
+      "exists": true,
+      "sha256": "c39308e3bded462804baa8ce21d6549efe0bd53952578603f0514dc8f0370686",
+      "bytes": 16,
+      "mode": 416,
+      "original": "admin-originals/ffe3b2c85f5240f296ab591124ab4e08.bin"
+    }
+  },
+  "candidate": "f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795183305.222572
+}
