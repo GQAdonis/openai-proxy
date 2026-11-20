@@ -16,7 +16,7 @@ from admin import TOOLS
 @contextlib.contextmanager
 def model_peer():
     marker = "kbd-client-" + uuid.uuid4().hex
-    observations = {"marker":marker,"names":set(),"requested":0,"completed":0}
+    observations = {"marker":marker,"names":set(),"requested":0,"completed":0,"modelRequests":0}
     lock = threading.Lock()
 
     class Handler(BaseHTTPRequestHandler):
@@ -47,6 +47,7 @@ def model_peer():
                 if any(marker in json.dumps(v) and "codex-mini" in json.dumps(v) for v in results):
                     answered=True
             with lock:
+                observations["modelRequests"] += 1
                 observations["names"].update(public)
                 ask=bool(selected) and not answered and observations["requested"]==0
                 if ask:

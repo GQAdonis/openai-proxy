@@ -13,6 +13,17 @@ MARKER = re.compile(r'\bkbd-[a-z0-9_-]{1,80}', re.I)
 SEQUENCE = 0
 
 
+def payload_markers(value):
+    if isinstance(value, str):
+        yield from (match.lower() for match in MARKER.findall(value))
+    elif isinstance(value, dict):
+        for child in value.values():
+            yield from payload_markers(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from payload_markers(child)
+
+
 def observe(root, fields):
     global SEQUENCE
     with LOCK:
@@ -49,7 +60,7 @@ class Handler(BaseHTTPRequestHandler):
         if not re.fullmatch(r'(?:owner-|kbd-)[a-zA-Z0-9_-]{1,80}', account):
             account = 'other' if account else None
         fields = dict(path=self.path, account=account,
-                      markers=sorted(set(x.lower() for x in MARKER.findall(json.dumps(data))))[:128],
+                      markers=sorted(set(payload_markers(data)))[:128],
                       lastRole=messages[-1].get('role') if messages else None,
                       toolNames=[t.get('function', t).get('name') for t in data.get('tools', []) if isinstance(t, dict)],
                       surfaceAction=any('The user activated a control in this conversation' in str(m.get('content', ''))
@@ -97,6 +108,12 @@ class Handler(BaseHTTPRequestHandler):
         count = 0
         try:
             for event in answer:
+                if "kbd-ui-partial-chat" in fields["markers"] and "error" in event:
+                    deadline = time.monotonic() + 20
+                    gate = self.server.root / "ui-partial-visible"
+                    while not gate.exists() and time.monotonic() < deadline:
+                        time.sleep(.05)
+                    observe(self.server.root, dict(fields, partialVisibleBeforeError=gate.exists()))
                 self.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
                 self.wfile.flush()
                 count += 1

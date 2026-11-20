@@ -112,7 +112,8 @@ def plugin(h, negative):
                     return call_host(h, f, mode)
             h.check("installed plugin " + mode, test)
     if negative:
-        h.block("actual V1-host registration denial", "version-guard fixture provides no independent V1 host")
+        from auth_legacy_host import host_refusal
+        h.check("actual V1-host registration denial", lambda: host_refusal(h))
         if installed(h, "codex"):
             for word, expected in (("KBD_DENIED", 403), ("KBD_QUOTA", 429)):
                 def deny(word=word, expected=expected):
@@ -126,7 +127,6 @@ def plugin(h, negative):
                 h.check("synthetic subscription projection " + word, deny)
         else:
             h.block("synthetic model denial", "Codex SDK worker unavailable")
-        h.block("actual subscriber quota or denied entitlement", "requires separately consented controlled subscriber")
     else:
         h.block("real highest-tier subscription turn and independent allowance attribution",
                 "requires current consent and correlated provider usage evidence")

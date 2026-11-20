@@ -86,8 +86,10 @@ def completion(payload, text="", arguments=(), parts=None, fail=False):
     if calls:
         result.append(chunk({"tool_calls": calls}))
     if fail:
-        result.append({"error": {"message": "Synthetic stream interruption", "type": "fixture_error",
-                                 "code": "fixture_stream_failure"}})
+        # The installed OpenCode provider classifies numeric 400 as InvalidRequest.
+        # Unknown string codes ask it to retry and never prove a terminal partial failure.
+        result.append({"error": {"message": "Synthetic reply rejected after partial output",
+                                 "type": "invalid_request_error", "code": 400}})
     else:
         result.append(chunk({}, stop))
     return result

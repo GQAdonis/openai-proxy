@@ -179,8 +179,10 @@ def disabled(h,degraded):
         rows=trace(h)[start:]
         require(len([r for r in rows if marker in r["markers"]])==1 and all(r["path"]!="/hook" for r in rows),
                 "Independent observer could not distinguish disabled hook from a missing model call")
-        http(h,"/api/v1/admin/config/preview","POST",{"field":"hooks.destination","value":"unregistered-fixture"},
-             base=base,statuses=(400,))
+        refusal = http(h,"/api/v1/admin/config/preview","POST",{"field":"hooks.destination","value":"unregistered-fixture"},
+                       base=base,statuses=(422,))
+        require(refusal.get("error", {}).get("code") == "unsupported_or_invalid_input",
+                "Unregistered hook destination lacked the expected validation error")
         require(cfg["webhooks"]==inventory(h,base=base)["webhooks"],"Unapproved hook alias changed effective settings")
     return {"database":expected,"hookDeliveries":0,"modelCalls":1}
 

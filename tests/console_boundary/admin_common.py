@@ -9,6 +9,7 @@ import shutil
 import signal
 import stat
 import subprocess
+import sys
 import uuid
 
 
@@ -134,6 +135,11 @@ def client(h, name, cwd, expected=None):
     if not binary:
         raise MissingPeer(f"{name} is absent from the isolated client PATH")
     result = command(h, [binary, "--version"], cwd)
+    bundle_cli = Path("/Applications/Zed.app/Contents/MacOS/cli")
+    if (name == "zed" and sys.platform == "darwin" and bundle_cli.is_file()
+            and (result.returncode or not result.stdout.lstrip().startswith(b"Zed "))):
+        binary = str(bundle_cli)
+        result = command(h, [binary, "--version"], cwd)
     version = re.search(rb"(?<![.\d])v?(\d+\.\d+\.\d+(?:-[\w.-]+)?)(?![.\d])", result.stdout)
     if not version or result.returncode:
         raise MissingPeer(f"{name} version unavailable from the isolated profile")

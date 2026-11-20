@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from auth_fixture import credential, fixture
+from identity import install
 from admin_common import MissingPeer, case, client, command, http, outputs, private, require, seed, snapshot
 
 
@@ -68,7 +70,7 @@ def lifecycle(h, scope, kind, through_cli=False):
                 record = parsed["providers"]["openai-proxy"]
                 require(record["settings"]["baseURL"] == f"http://127.0.0.1:{port}/api/v1/drivers/codex/v1" and
                         bool(record["models"]), "Static provider endpoint or model inventory mismatch")
-                models = command(h, [binary, "models", "openai-proxy"], cwd)
+                models = command(h, [binary, "models", "--standalone"], cwd)
                 registered = set(re.findall(rb"openai-proxy/([\w.-]+)", models.stdout))
                 require(models.returncode == 0 and
                         registered.intersection(key.encode() for key in record["models"]),
@@ -76,9 +78,14 @@ def lifecycle(h, scope, kind, through_cli=False):
             else:
                 expected = private(h, parsed["plugins"][0])
                 require(expected.is_dir() and (expected / "package.json").is_file(), "Packaged plugin absent")
-                models = command(h, [binary, "models", "codex"], cwd)
-                require(models.returncode == 0 and re.search(rb"codex/[\w.-]+", models.stdout),
-                        "Installed host did not discover a Codex plugin model")
+                # The plugin exposes the service's actual Codex SDK catalogue. Use
+                # the installed service with a disposable Codex catalogue peer.
+                with fixture(h, workers=True) as auth:
+                    install(auth, credential("owner-a", managed=True))
+                    env = {**h.env, "PROXY_CONSOLE_URL": auth.base}
+                    models = command(h, [binary, "models", "--standalone"], cwd, env)
+                    require(models.returncode == 0 and b"codex/gpt-5.5" in models.stdout,
+                            "Installed host did not discover the fixture Codex plugin model")
             if through_cli:
                 again = command(h, args, workspace)
                 require(again.returncode == 0 and not outputs(again)[0]["changes"], "Reapply claimed another edit")
@@ -163,8 +170,10 @@ def run(h, negative):
                 before = snapshot(h, path, "approved destination before")
                 outside = h.root / "out-of-project.json"
                 require(not outside.exists(), "Unexpected fixture collision")
-                req(h, "preview", {"integration": "opencode_provider", "scope": "project",
-                                   "path": str(outside)}, statuses=(400, 409))
+                reply = req(h, "preview", {"integration": "opencode_provider", "scope": "project",
+                                           "path": str(outside)}, statuses=(422,))
+                require(reply.get("error", {}).get("code") == "unsupported_or_invalid_input",
+                        "Refused path did not receive the typed input rejection")
                 require(not outside.exists() and snapshot(h,path,"approved destination after") == before,
                         "An unapproved destination or source changed")
             return {"writes": 0}

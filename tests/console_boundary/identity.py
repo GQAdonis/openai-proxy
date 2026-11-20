@@ -36,6 +36,28 @@ def switching(f, doc):
 
 
 def auth_one(h, negative):
+    def missing_watch_parent():
+        with fixture(h) as f:
+            f.stop_service()
+            parent = f.root / "late-volume"
+            store = parent / "auth.json"
+            f.env["CODEX_AUTH_PATH"] = str(store)
+            f.start_service()
+            pid = f.proc.pid
+            assert f.connection()["status"] == "signed_out" and not parent.exists()
+            # The initial watch cannot attach to a directory that does not exist.
+            # Publish into it after startup without calling the reload endpoint.
+            time.sleep(.25)
+            parent.mkdir(mode=0o700)
+            doc = credential("owner-a")
+            started = time.monotonic()
+            atomic(store, doc)
+            wait_for(lambda: f.connection()["status"] == "ready", 30)
+            f.expect(doc)
+            elapsed = time.monotonic() - started
+            assert f.proc.poll() is None and f.proc.pid == pid and elapsed <= 30
+            return {"initialWatchParentAbsent": True, "sameProcess": True, "recipientMs": round(elapsed * 1000)}
+
     def exercise():
         with fixture(h) as f:
             pid = f.proc.pid
@@ -63,14 +85,15 @@ def auth_one(h, negative):
             assert f.proc.poll() is None and f.proc.pid == pid
             return {"same_process": True, "recipient_commit_ms": timings, "ordered_owners": ["a", "a", "b"]}
     h.check("native REST recipient identity and file publication", exercise)
-    if negative:
-        h.block("replaced single-file container mount", "requires a separately mounted container fixture")
-    else:
-        h.block("native keyring and missed watcher event", "requires an isolated platform keyring and controlled watcher loss")
+    from auth_mount import mounted_store
+    mounted_store(h, negative)
+    if not negative:
+        h.check("recover a store created after initial watch registration", missing_watch_parent)
+        h.block("native keyring", "no isolated platform keyring provisioned")
         from auth_stdio import transport
         for kind in ("mcp", "acp"):
             h.check(kind + " stdio owner switch", lambda kind=kind: transport(h, kind))
-        h.block("container credential publication and fresh setup CLI", "native stdio/REST evidence lacks a mounted auth store and client discovery comparison")
+        h.block("fresh setup CLI after owner replacement", "current CLI inventory has not been independently compared after replacement")
         h.block("genuine Codex login", "no separately authorized subscription login")
 
 
@@ -205,8 +228,6 @@ def auth_three(h, negative):
                     "old_turn_recipient_calls": mark}
     for logout in (False, True):
         h.check(("logout" if logout else "account switch") + " during held exchange", lambda logout=logout: race(logout))
-    if negative:
-        h.block("genuine obsolete grant publication", "synthetic delayed issuer cannot establish provider-side save semantics")
 
 
 def run(h, row, negative):

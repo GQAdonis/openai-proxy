@@ -365,24 +365,49 @@ def rendered(page):
     return control
 
 
+def browser_wire(page, response, index):
+    require(response.status == 200 and "text/event-stream" in response.headers.get("content-type", ""),
+            "browser did not receive a successful AG-UI SSE response")
+    page.wait_for_function("index => window.__kbdProjection.streams[index]?.done === true", arg=index, timeout=35000)
+    raw = page.evaluate("index => window.__kbdProjection.streams[index].text", index)
+    require(isinstance(raw, str) and len(raw) <= 2_000_000, "could not capture browser AG-UI response")
+    return [json.loads(line[5:].strip()) for line in raw.splitlines() if line.startswith("data:")]
+
+
 def surface(h, page, base, marker):
     prepare(page)
-    # Hold only the redundant REST replay until the AG-UI client first renders the
-    # component. Both responses originate in the packaged service.
-    held = []
-    path = base + "/api/v1/conversations/*/turns/*/events"
-    page.route(path, lambda route: held.append(route))
+    # The AG-UI client owns its response reader. Observe a clone of that same
+    # browser response and hold REST until the visible caption comes from AG-UI.
+    # BrowserContext's normal same-origin network guard remains in place.
+    page.evaluate(r"""() => {
+        const original = window.fetch.bind(window);
+        const observation = {streams: [], held: false, release: null};
+        const gate = new Promise(resolve => {observation.release = resolve});
+        window.__kbdProjection = observation;
+        window.fetch = async (input, init) => {
+            const target = new URL(input instanceof Request ? input.url : input, location.href);
+            if (target.origin === location.origin && /^\/api\/v1\/conversations\/[^/]+\/turns\/[^/]+\/events$/.test(target.pathname)) {
+                observation.held = true;
+                await gate;
+            }
+            const response = await original(input, init);
+            if (target.origin === location.origin && target.pathname === "/api/v1/ag-ui/stream" && response.ok) {
+                const stream = {done: false, text: null};
+                observation.streams.push(stream);
+                response.clone().text().then(text => {stream.text = text}, () => {}).finally(() => {stream.done = true});
+            }
+            return response;
+        };
+    }""")
     try:
         with page.expect_response(lambda r: r.url == base + STREAM, timeout=30000) as stream:
             cid, tid = send(page, marker)
-        first = sse(stream.value)
+        first = browser_wire(page, stream.value, 0)
         mid = project_trace(first, cid, tid, marker)
         page.get_by_text("Final choice", exact=True).wait_for(timeout=30000)
-        require(held, "REST replay was not held while exercising AG-UI")
+        require(page.evaluate("window.__kbdProjection.held"), "REST replay was not held while exercising AG-UI")
     finally:
-        page.unroute(path)
-        for route in held:
-            route.continue_()
+        page.evaluate("window.__kbdProjection.release()")
     observed_text(page, fixture.PLAIN)
     observed_text(page, "Complete")
     control = rendered(page)
@@ -397,16 +422,34 @@ def surface(h, page, base, marker):
 
 def model_turn(h, base, actor, partial=False):
     marker = ("kbd-ui-partial-" if partial else "kbd-ui-stop-") + actor
+    image_stop = actor == "image" and not partial
+    if image_stop:
+        from image_model_fixture import observations
+        baseline = observations(h)
+        require(baseline["active"] == 0, "in-container model stream unexpectedly active before admission")
     with browser(h, base, actor) as page:
         prepare(page)
         cid, tid = send(page, marker)
         if partial:
             page.get_by_text(re.compile(re.escape(fixture.PARTIAL))).first.wait_for(timeout=30000)
-            page.get_by_text(re.compile("Reply interrupted after partial output")).wait_for(timeout=35000)
+            # The independent model sends its terminal error only after the real
+            # browser has received partial text while the turn is still active.
+            require(page.get_by_role("button", name="Stop reply").is_visible(), "partial reply was not live")
+            (h.root / "ui-partial-visible").touch(exist_ok=False)
+            page.get_by_text("Reply interrupted after partial output", exact=True).wait_for(timeout=35000)
+            observed = [r for r in rows(h) if marker in r.get("markers", [])]
+            delivered = [r for r in observed if "partialVisibleBeforeError" in r]
+            requests = [r for r in observed if "partialVisibleBeforeError" not in r and not r.get("disconnected")]
+            require(len(requests) == 1 and [r["partialVisibleBeforeError"] for r in delivered] == [True],
+                    "partial reply or terminal error was retried or delivered out of order")
         else:
             page.get_by_text(re.compile(re.escape(fixture.STOP))).first.wait_for(timeout=30000)
             stop = page.get_by_role("button", name="Stop reply")
             tab_to(page, stop)
+            if image_stop:
+                active = observations(h)
+                require(active == dict(baseline, started=baseline["started"] + 1, active=1),
+                        "in-container model stream was not active immediately before Stop")
             page.keyboard.press("Enter")
             observed_text(page, "Stopped")
         turn = page.request.get(base + f"/api/v1/conversations/{cid}/turns/{tid}").json()
@@ -415,7 +458,12 @@ def model_turn(h, base, actor, partial=False):
                 "native terminal or saved partial text differs from browser outcome")
         require(page.get_by_label("Message", exact=True).evaluate("el => el === document.activeElement"),
                 "composer focus was lost after terminal")
-        if not partial:
+        if image_stop:
+            final = observations(h, after_stop=True)
+            require(final == dict(active, active=0, disconnected=baseline["disconnected"] + 1),
+                    "native Stop failed to close the active in-container model socket")
+            h.note("image native stop recipient", {"before": baseline, "active": active, "after": final})
+        elif not partial:
             deadline = time.monotonic() + 5
             while time.monotonic() < deadline:
                 if any(r.get("disconnected") and marker in r.get("markers", []) for r in rows(h)):
@@ -471,7 +519,7 @@ def action_journey(h, negative):
                 "renderer sent an unzoned action timestamp")
         require(dict(live, timestamp=action["timestamp"]) == action and
                 (req["threadId"], req["runId"]) == (cid, tid), "action lost scoped data or control identity")
-        events = sse(response)
+        events = browser_wire(page, response, 1)
         observed_text(page, fixture.ACTION_ACK)
         require(events[-1]["type"] == "RUN_FINISHED" and events[0]["runId"] != tid, "action run did not complete")
         count = action_count(h, marker)

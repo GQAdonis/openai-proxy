@@ -1,64 +1,54 @@
 use anyhow::{Result, anyhow, bail, ensure};
 use jsonc_parser::{
-    ParseOptions,
-    cst::{CstInputValue, CstNode, CstObject, CstRootNode},
+    ast::{Object, Value as JsoncValue},
+    common::Ranged,
+    parse_to_ast,
 };
-use serde_json::Value;
+use serde_json::{Value, json};
 use std::collections::HashSet;
 use toml_edit::{DocumentMut, Item, Table};
 
-fn check_node(node: CstNode) -> Result<()> {
+fn check_keys(node: &JsoncValue<'_>) -> Result<()> {
     if let Some(obj) = node.as_object() {
         let mut names = HashSet::new();
-        for prop in obj.properties() {
-            let name = prop
-                .decoded_name()
-                .ok_or_else(|| anyhow!("invalid property name"))?;
-            ensure!(names.insert(name), "duplicate property in configuration");
-            check_node(
-                prop.value()
-                    .ok_or_else(|| anyhow!("missing property value"))?,
-            )?;
+        for prop in &obj.properties {
+            ensure!(
+                names.insert(prop.name.as_str()),
+                "duplicate property in configuration"
+            );
+            check_keys(&prop.value)?;
         }
     } else if let Some(array) = node.as_array() {
-        for value in array.elements() {
-            check_node(value)?;
+        for value in &array.elements {
+            check_keys(value)?;
         }
     }
     Ok(())
 }
 
-fn parse(raw: &str) -> Result<(CstRootNode, CstObject)> {
-    let root =
-        CstRootNode::parse(raw, &ParseOptions::default()).map_err(|_| anyhow!("invalid JSONC"))?;
-    check_node(
-        root.value()
-            .ok_or_else(|| anyhow!("empty JSONC document"))?,
-    )?;
-    let obj = root
-        .object_value()
-        .ok_or_else(|| anyhow!("configuration must be an object"))?;
-    Ok((root, obj))
+fn parse(raw: &str) -> Result<Object<'_>> {
+    let node = parse_to_ast(raw, &Default::default(), &Default::default())
+        .map_err(|_| anyhow!("invalid JSONC"))?
+        .value
+        .ok_or_else(|| anyhow!("empty JSONC document"))?;
+    check_keys(&node)?;
+    match node {
+        JsoncValue::Object(object) => Ok(object),
+        _ => bail!("configuration must be an object"),
+    }
 }
 
 pub(super) fn read(raw: &str) -> Result<Value> {
-    let (_, object) = parse(raw)?;
-    object
-        .to_serde_value()
-        .ok_or_else(|| anyhow!("invalid JSONC document"))
+    Ok(JsoncValue::Object(parse(raw)?).into())
 }
 
-fn input(value: &Value) -> CstInputValue {
-    match value {
-        Value::Null => CstInputValue::Null,
-        Value::Bool(b) => CstInputValue::Bool(*b),
-        Value::Number(n) => CstInputValue::Number(n.to_string()),
-        Value::String(s) => CstInputValue::String(s.clone()),
-        Value::Array(items) => CstInputValue::Array(items.iter().map(input).collect()),
-        Value::Object(map) => {
-            CstInputValue::Object(map.iter().map(|(k, v)| (k.clone(), input(v))).collect())
-        }
-    }
+// Insert immediately after the last member (or opening delimiter). Keeping every
+// input byte lets undo remove one span without storing any existing settings.
+fn insert(raw: &str, opening: usize, last: Option<usize>, member: &str) -> String {
+    let mut after = raw.to_owned();
+    let (offset, separator) = last.map_or((opening + 1, ""), |end| (end, ", "));
+    after.insert_str(offset, &format!("{separator}{member}"));
+    after
 }
 
 pub(super) fn json(
@@ -67,34 +57,60 @@ pub(super) fn json(
     entry: &Value,
     append: bool,
 ) -> Result<String> {
-    let (root, mut object) = parse(raw.unwrap_or("{}\n"))?;
-    let (key, parents) = keys
-        .split_last()
-        .ok_or_else(|| anyhow!("missing owned key"))?;
-    for parent in parents {
-        object = object
-            .object_value_or_create(parent)
-            .ok_or_else(|| anyhow!("existing setting is not an object"))?;
-    }
-    if append {
-        let array = object
-            .array_value_or_create(key)
-            .ok_or_else(|| anyhow!("plugins must be an array"))?;
-        let value = array
-            .to_serde_value()
-            .ok_or_else(|| anyhow!("invalid plugin array"))?;
-        if !value.as_array().is_some_and(|items| items.contains(entry)) {
-            array.append(input(entry));
+    ensure!(!keys.is_empty(), "missing owned key");
+    let raw = raw.unwrap_or("{}\n");
+    let root = parse(raw)?;
+    let mut object = &root;
+    for (index, key) in keys.iter().enumerate() {
+        let Some(prop) = object.get(key) else {
+            let mut value = if append {
+                json!([entry])
+            } else {
+                entry.clone()
+            };
+            for child in keys[index + 1..].iter().rev() {
+                value = json!({(*child): value});
+            }
+            let member = format!("{}: {}", serde_json::to_string(key)?, value);
+            return Ok(insert(
+                raw,
+                object.start(),
+                object.properties.last().map(Ranged::end),
+                &member,
+            ));
+        };
+        if index + 1 < keys.len() {
+            object = prop
+                .value
+                .as_object()
+                .ok_or_else(|| anyhow!("existing setting is not an object"))?;
+        } else if append {
+            let items = prop
+                .value
+                .as_array()
+                .ok_or_else(|| anyhow!("plugins must be an array"))?;
+            if items
+                .elements
+                .iter()
+                .any(|item| Value::from(item.clone()) == *entry)
+            {
+                return Ok(raw.to_owned());
+            }
+            return Ok(insert(
+                raw,
+                items.start(),
+                items.elements.last().map(Ranged::end),
+                &entry.to_string(),
+            ));
+        } else {
+            ensure!(
+                Value::from(prop.value.clone()) == *entry,
+                "existing user setting differs from proposed entry"
+            );
+            return Ok(raw.to_owned());
         }
-    } else if let Some(prop) = object.get(key) {
-        ensure!(
-            prop.to_serde_value().as_ref() == Some(entry),
-            "existing user setting differs from proposed entry"
-        );
-    } else {
-        object.append(key, input(entry));
     }
-    Ok(root.to_string())
+    unreachable!("a nonempty property path always resolves at its final key")
 }
 
 pub(super) fn toml(raw: Option<&str>, entry: &Value) -> Result<String> {

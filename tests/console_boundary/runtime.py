@@ -182,6 +182,7 @@ def start(h):
 
 
 def start_image(h):
+    import image_model_fixture
     env = docker_env(sanitized(h.root/'docker'))
 
     def docker(*args):
@@ -193,7 +194,8 @@ def start_image(h):
     p = port()
     container = docker('run', '-d', '--pull=never', '--network', 'none',
                        '--name', tag, '-e', 'PROXY_CONSOLE_TOKEN='+h.keys['image'],
-                       '-e', 'PROXY_CONSOLE_ORIGIN='+origin(p), h.state['image'])
+                       '-e', 'PROXY_CONSOLE_ORIGIN='+origin(p), '-e', image_model_fixture.provider_env(),
+                       h.state['image'])
     if container.returncode:
         h.calls.append({'name':'image start', 'status':'FAIL', 'observed':'docker run exited unsuccessfully'})
         h.note('image launch', container.stderr[-1500:])
@@ -203,6 +205,7 @@ def start_image(h):
     network = docker('inspect', '--format', '{{.HostConfig.NetworkMode}}', h.state['container'])
     if network.returncode != 0 or network.stdout.strip() != 'none':
         raise AssertionError('container egress isolation could not be verified')
+    h.check('in-container synthetic model recipient', lambda: image_model_fixture.start(h, docker))
     relay = spawn(h, [sys.executable, '-B', str(Path(__file__)), str(p), h.state['container']],
                   env, 'image-loopback-relay', h.root)
     try:

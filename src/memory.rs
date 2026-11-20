@@ -104,7 +104,7 @@ mod memory_impl {
                 "DEFINE TABLE IF NOT EXISTS document SCHEMAFULL;
                  DEFINE FIELD IF NOT EXISTS scope        ON document TYPE string;
                  DEFINE FIELD IF NOT EXISTS text         ON document TYPE string;
-                 DEFINE FIELD IF NOT EXISTS embedding    ON document TYPE array<float>;
+                 DEFINE FIELD OVERWRITE embedding        ON document TYPE option<array<float>>;
                  DEFINE FIELD IF NOT EXISTS metadata     ON document TYPE object;
                  DEFINE FIELD IF NOT EXISTS created_at   ON document TYPE datetime;
                  DEFINE INDEX IF NOT EXISTS hnsw_embed   ON document FIELDS embedding
@@ -169,16 +169,17 @@ mod memory_impl {
             let id_for_query = id.clone();
             let scope_owned = scope.to_string();
             let text_owned = text.to_string();
-            let metadata_owned = metadata.clone();
             let now = chrono::Utc::now().to_rfc3339();
             let embedding = self.embed_text(text).await;
             self.db
-                .query("CREATE type::record('document', $id) SET scope = $scope, text = $text, embedding = $embedding, metadata = $metadata, created_at = <datetime>$now")
+                .query("CREATE type::record('document', $id) SET
+                    scope = $scope, text = $text, metadata = $metadata, created_at = <datetime>$now,
+                    embedding = IF array::len($embedding) > 0 { $embedding } ELSE { NONE }")
                 .bind(("id", id_for_query))
                 .bind(("scope", scope_owned))
                 .bind(("text", text_owned))
                 .bind(("embedding", embedding))
-                .bind(("metadata", metadata_owned))
+                .bind(("metadata", metadata))
                 .bind(("now", now))
                 .await?.check()?;
             Ok(id)
@@ -187,7 +188,7 @@ mod memory_impl {
         pub async fn delete_document(&self, id: &str, scope: Option<&str>) -> anyhow::Result<()> {
             let id_owned = id.to_string();
             self.db
-                .query("DELETE type::record('document', $id) WHERE $owner = NONE OR scope = $owner")
+                .query("DELETE type::record('document', $id) WHERE $owner IS NULL OR $owner IS NONE OR scope = $owner")
                 .bind(("id", id_owned))
                 .bind(("owner", scope.map(str::to_owned)))
                 .await?
@@ -287,7 +288,7 @@ pub mod handlers {
         pub scope: String,
         pub text: String,
         #[serde(default)]
-        pub metadata: serde_json::Value,
+        pub metadata: Option<serde_json::Map<String, serde_json::Value>>,
     }
 
     #[derive(Deserialize)]
@@ -321,7 +322,7 @@ pub mod handlers {
             .store_document(
                 state.runtime.memory_scope.as_deref().unwrap_or(&body.scope),
                 &body.text,
-                body.metadata,
+                serde_json::Value::Object(body.metadata.unwrap_or_default()),
             )
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;

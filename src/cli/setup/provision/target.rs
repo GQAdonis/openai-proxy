@@ -237,7 +237,21 @@ pub(super) fn host_version(client: &str) -> Result<String> {
         .map(|dir| dir.join(client))
         .find(|p| p.is_file())
         .ok_or_else(|| anyhow!("client executable is unavailable"))?;
-    let output = command_output(&binary, &["--version"])?;
+    let preferred = command_output(&binary, &["--version"]);
+    // The unrelated AuthZed command also installs as "zed". On macOS the
+    // editor ships its own CLI, which can identify it even when PATH collides.
+    let bundle_cli = Path::new("/Applications/Zed.app/Contents/MacOS/cli");
+    let output = if cfg!(target_os = "macos")
+        && client == "zed"
+        && bundle_cli.is_file()
+        && !preferred
+            .as_ref()
+            .is_ok_and(|s| s.trim_start().starts_with("Zed "))
+    {
+        command_output(bundle_cli, &["--version"])?
+    } else {
+        preferred?
+    };
     let version = output
         .split_whitespace()
         .map(|s| {

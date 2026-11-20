@@ -215,6 +215,7 @@ def named_mcp(h,name,transport):
             with admin_model_peer.model_peer() as (origin,observed):
                 if name=="claude":
                     env.update(ANTHROPIC_BASE_URL=origin,ANTHROPIC_API_KEY="synthetic-local-only",
+                               ENABLE_TOOL_SEARCH="false",
                                CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1",DISABLE_TELEMETRY="1",
                                CLAUDE_CONFIG_DIR=str(cwd/"claude-profile"))
                     args=[name,"--print","--strict-mcp-config","--mcp-config",str(path),
@@ -226,10 +227,21 @@ def named_mcp(h,name,transport):
                            "limit":{"context":32768,"output":1024}}
                     provider={"name":"Fixture","package":"@opencode/ai/providers/openai-compatible",
                               "models":{"boundary-chat":model},"settings":{"baseURL":origin+"/v1","apiKey":"fixture"}}
-                    env["OPENCODE_CONFIG_CONTENT"]=json.dumps({"providers":{"boundary":provider}})
-                    args=[name,"run","--format","json","--model","boundary/boundary-chat",
+                    # The registered MCP server stays in the project file. A
+                    # disposable global V2 config supplies this client's model
+                    # and requires direct tools instead of the Code Mode wrapper.
+                    user_config = private(h, Path(env["XDG_CONFIG_HOME"]) / "opencode/opencode.json")
+                    user_config.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+                    rules = [{"action": "execute", "resource": "*", "effect": "deny"},
+                             {"action": "openai-proxy_set_model", "resource": "*", "effect": "allow"}]
+                    with user_config.open("x") as output:
+                        json.dump({"providers": {"boundary": provider}, "permissions": rules}, output)
+                    args=[name,"run","--standalone","--model","boundary/boundary-chat",
                           "Use the configured proxy's advisory model-selection tool once."]
                 report=command(h,args,cwd,env)
+                h.note(name + " independent MCP model observations", {
+                    "requestCount": observed["modelRequests"], "offeredProxyTools": sorted(observed["names"]),
+                    "advisoryCallsRequested": observed["requested"], "correlatedResults": observed["completed"]})
                 require(report.returncode==0,"The isolated real MCP-client turn failed")
                 return dict(admin_model_peer.result(observed),client=name,transport=transport)
         if name=="code":
