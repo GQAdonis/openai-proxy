@@ -73,12 +73,21 @@ impl Default for BackendConfig {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Default)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(default)]
 pub struct SkillsConfig {
     pub dirs: Vec<String>,
     #[serde(default = "default_max_injected")]
     pub max_injected: usize,
+}
+
+impl Default for SkillsConfig {
+    fn default() -> Self {
+        Self {
+            dirs: Vec::new(),
+            max_injected: default_max_injected(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Default)]
@@ -91,6 +100,7 @@ pub struct McpConfig {
 #[serde(default)]
 pub struct HooksConfig {
     pub config_path: Option<String>,
+    pub destination: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -190,6 +200,55 @@ impl ProxyConfig {
             self.hooks.config_path = Some(p);
         }
     }
+}
+
+/// Record the startup source while CLI and environment overrides are still known.
+pub fn setting_sources(path: Option<&Path>) -> std::collections::HashMap<String, String> {
+    let file = path
+        .map(Path::to_owned)
+        .unwrap_or_else(|| config_dir().join("config.toml"));
+    let document = std::fs::read_to_string(file)
+        .ok()
+        .and_then(|s| toml::from_str::<toml::Table>(&s).ok())
+        .unwrap_or_default();
+    let args: Vec<_> = std::env::args_os().collect();
+    let mut result = std::collections::HashMap::new();
+    for (field, flag, environment) in [
+        ("server.host", "--host", "HOST"),
+        ("server.port", "--port", "PORT"),
+        ("backend.wire_api", "--wire-api", "CODEX_WIRE_API"),
+        ("skills.dirs", "", "PROXY_SKILLS_DIRS"),
+        ("skills.max_injected", "", "PROXY_SKILLS_MAX"),
+        ("hooks.config_path", "--hooks-config", "PROXY_HOOKS_CONFIG"),
+        ("modes.a2a", "--a2a", ""),
+        ("memory.enabled", "", ""),
+        ("hooks.destination", "", ""),
+        ("mcp.config_path", "", ""),
+        ("memory.embedding_model", "", ""),
+        ("memory.db_path", "", ""),
+    ] {
+        let cli = !flag.is_empty()
+            && args
+                .iter()
+                .filter_map(|s| s.to_str())
+                .any(|s| s == flag || s.strip_prefix(flag).is_some_and(|v| v.starts_with('=')));
+        let env = !environment.is_empty() && std::env::var_os(environment).is_some();
+        let (section, key) = field.split_once('.').expect("static field");
+        let configured = document.get(section).and_then(|s| s.get(key)).is_some();
+        let source = if cli {
+            "cli"
+        } else if env && field == "skills.dirs" && configured {
+            "file + environment"
+        } else if env {
+            "environment"
+        } else if configured {
+            "file"
+        } else {
+            "default"
+        };
+        result.insert(field.into(), source.into());
+    }
+    result
 }
 
 /// Expand a leading `~` to the user's home directory.

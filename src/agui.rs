@@ -66,6 +66,16 @@ pub struct AguiRequest {
 /// Accepts an AG-UI request body and returns an SSE stream of AG-UI events.
 /// The stream is compatible with the CopilotKit `useCoAgent` hook.
 pub async fn agui_stream(State(state): State<AppState>, Json(body): Json<AguiRequest>) -> Response {
+    let state = match state.for_request().await {
+        Ok(state) if state.backend_profile != codex::BackendProfile::OpenAiChatCompletions => state,
+        Ok(_) => {
+            return crate::error::ProxyError::BadRequest(
+                "AG-UI requires a Responses API route".into(),
+            )
+            .into_response();
+        }
+        Err(error) => return error.into_response(),
+    };
     let run_id = uuid::Uuid::new_v4().to_string();
     let message_id = uuid::Uuid::new_v4().to_string();
 
@@ -124,7 +134,16 @@ async fn build_agui_stream(
         }
     };
 
-    let resp = match http_req.send().await {
+    let resp = match state
+        .send_upstream(
+            http_req,
+            chat_req
+                .messages
+                .iter()
+                .all(|m| m.role != "tool" && m.tool_calls.is_none()),
+        )
+        .await
+    {
         Ok(r) if r.status().is_success() => r,
         Ok(r) => {
             let status = r.status();

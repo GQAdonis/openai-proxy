@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "2",
+  "generatedBy": "kbd-runtime",
+  "projectionContractVersion": 2,
+  "sourceRevision": 132,
+  "derivedRevision": 132,
+  "frontier": {
+    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 132
+  },
+  "conflictCount": 0,
+  "phase": "codex-live-auth-opencode-console",
+  "phaseId": "codex-live-auth-opencode-console",
+  "parentPhase": null,
+  "last_updated": "2026-11-20T00:21:30.389512Z",
+  "last_updated_by": "kbd-runtime",
+  "changes_total": 4,
+  "changes_completed": 4,
+  "implementation_total": 4,
+  "implementation_completed": 4,
+  "completion": {
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 4,
+      "total": 4,
+      "status": "COMPLETE"
+    },
+    "evidence": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "NOT_TRACKED",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "completionScopes": {
+    "completion": "phase",
+    "runCompletion": "run"
+  },
+  "runCompletion": {
+    "scope": "run",
+    "runId": "codex-live-auth-opencode-console-20261119T193635Z",
+    "primaryCounter": "implementation",
+    "implementation": {
+      "completed": 33,
+      "total": 34,
+      "status": "IN_PROGRESS"
+    },
+    "evidence": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    },
+    "certification": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    },
+    "publication": {
+      "status": "PENDING",
+      "summary": null,
+      "blockers": []
+    }
+  },
+  "changes": [
+    {
+      "id": "reconcile-codex-login",
+      "title": "Reconcile live Codex credentials",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 3,
+      "tasks_done": 3,
+      "last_task_completed": "AUTH-3 Invalidate stale helpers and generations on logout, revocation and account switch. Enforce principal/workspace checks on resume and bounded safe retries. Document and expose unsupported store/transport combinations.",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "integrate-opencode-and-sdk-drivers",
+      "title": "Integrate OpenCode and chat SDK drivers",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 3,
+      "tasks_done": 3,
+      "last_task_completed": "TOOL-1 Implement capability validation, cycle detection, explicit Codex delegation, native permission enforcement and single execution ownership. Bind decision and delegation IDs to owner, workspace and turn.",
+      "next_task_pending": null,
+      "blockers": []
+    },
+    {
+      "id": "embed-chat-and-validated-surfaces",
+      "title": "Embed chat and validated surfaces",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 11,
+      "tasks_done": 7,
+      "last_task_completed": "SURFACE-1 — Validate the stable A2UI 1.0 renderer-to-agent action before the middleware projection and implement its round trip to a correlated run with server-derived identity, active component/operation authorization, CSRF/origin checks, deduplication and privilege separation.",
+      "next_task_pending": "UI-1 — Run `bash scripts/verify-codex-console.sh scenario UI-1` on a clean release binary outside the checkout and the final image. Capture artifact ID, HTTP MIME/cache, rendered keyboard journey, both deployment modes and SDK availability separately from asset availability.",
+      "blockers": []
+    },
+    {
+      "id": "administer-proxy-and-local-clients",
+      "title": "Administer proxy settings and local clients",
+      "status": "DONE",
+      "implementation_status": "COMPLETE",
+      "tasks_total": 6,
+      "tasks_done": 5,
+      "last_task_completed": "FEATURE-1 Connect effective skills, tool import, hook, discovery, memory and packaging settings to their real consumers with per-owner authorization and correct activation status.",
+      "next_task_pending": "After production implementation of all four changes, contribute the settings/client cases to the single phase boundary runner. Exercise both deployment modes and frozen positive and negative controls, retaining originals and cleanup receipts.",
+      "blockers": []
+    }
+  ],
+  "children": {},
+  "migrationStatus": null
+}

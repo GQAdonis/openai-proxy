@@ -31,12 +31,30 @@ pub struct AgentSkill {
     pub description: String,
 }
 
+pub fn advertised(state: &AppState) -> String {
+    if let Some(origin) = std::env::var("PROXY_CONSOLE_ORIGIN")
+        .ok()
+        .and_then(|raw| reqwest::Url::parse(&raw).ok())
+        && origin.username().is_empty()
+        && origin.password().is_none()
+        && (origin.scheme() == "https"
+            || (origin.scheme() == "http"
+                && matches!(origin.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"))))
+    {
+        return origin.origin().ascii_serialization();
+    }
+    match state.bind_addr.parse::<std::net::SocketAddr>() {
+        Ok(addr) if addr.ip().is_unspecified() => format!("http://127.0.0.1:{}", addr.port()),
+        _ => format!("http://{}", state.bind_addr),
+    }
+}
+
 /// Axum handler — constructs and returns the Agent Card JSON.
 pub async fn agent_card_handler(State(state): State<AppState>) -> Json<AgentCard> {
     let card = AgentCard {
         name: "openai-proxy".to_string(),
         description: "OpenAI Chat Completions proxy backed by Codex/Responses API".to_string(),
-        url: format!("http://{}", state.bind_addr),
+        url: advertised(&state),
         version: env!("CARGO_PKG_VERSION").to_string(),
         capabilities: AgentCapabilities {
             streaming: true,

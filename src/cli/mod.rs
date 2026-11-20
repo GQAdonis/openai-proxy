@@ -31,6 +31,8 @@ pub enum SetupAction {
     Opencode(setup::SetupOpencodeArgs),
     /// Write MCP server config
     Mcp(setup::SetupMcpArgs),
+    /// Register an ACP stdio agent in an editor
+    Acp(setup::SetupAcpArgs),
     /// Scaffold ~/.config/oproxy/config.toml with defaults
     Config,
 }

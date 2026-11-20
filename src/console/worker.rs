@@ -1,0 +1,496 @@
+use super::{
+    Console, Error, Result,
+    access::{self, Actor},
+    conversations::{self, Conversation},
+};
+use futures::StreamExt;
+use serde_json::{Value, json};
+use std::{
+    path::{Path, PathBuf},
+    process::Stdio,
+    time::Duration,
+};
+use tokio::{
+    io::AsyncWriteExt,
+    process::{ChildStdin, Command},
+    sync::mpsc,
+    time::{Instant, timeout},
+};
+use tokio_util::codec::{FramedRead, LinesCodec};
+
+fn binary(env: &str, name: &str) -> Option<PathBuf> {
+    if let Some(given) = std::env::var_os(env) {
+        let path = PathBuf::from(given);
+        return (path.is_absolute() && path.is_file()).then_some(path);
+    }
+    std::env::split_paths(&std::env::var_os("PATH")?)
+        .filter(|p| p.is_absolute())
+        .map(|p| p.join(name))
+        .find(|p| p.is_file())
+}
+fn entry() -> Option<PathBuf> {
+    if let Some(p) = std::env::var_os("PROXY_SDK_WORKER") {
+        let p = PathBuf::from(p);
+        return (p.is_absolute() && p.is_file()).then_some(p);
+    }
+    let bin = std::env::current_exe().ok()?;
+    let p = bin.parent()?.join("../lib/openai-proxy/workers/main.mjs");
+    p.is_file().then_some(p)
+}
+pub fn valid_model(model: &str) -> bool {
+    !model.is_empty()
+        && model.len() <= 256
+        && model
+            .bytes()
+            .all(|c| c.is_ascii_alphanumeric() || b"-_./:".contains(&c))
+        && !model.contains("..")
+}
+fn provider_target(a: &Actor) -> Option<reqwest::Url> {
+    let p = a.provider.as_ref()?;
+    let id = p["id"].as_str()?;
+    if id.is_empty()
+        || !id.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-')
+        || matches!(id, "codex" | "openai-proxy")
+    {
+        return None;
+    }
+    let url = reqwest::Url::parse(p["baseURL"].as_str()?).ok()?;
+    if !url.username().is_empty()
+        || url.password().is_some()
+        || url.query().is_some()
+        || url.fragment().is_some()
+    {
+        return None;
+    }
+    if url.scheme() != "https"
+        && !(url.scheme() == "http"
+            && matches!(url.host_str(), Some("localhost" | "127.0.0.1" | "[::1]")))
+    {
+        return None;
+    }
+    Some(url)
+}
+pub async fn availability(a: &Actor, driver: &str) -> (bool, &'static str) {
+    let Some(main) = entry() else {
+        return (false, "worker_not_installed");
+    };
+    if binary("PROXY_SDK_BUN", "bun").is_none() {
+        return (false, "bun_unavailable");
+    }
+    let (package, version) = match driver {
+        "codex" => {
+            if binary("PROXY_CODEX_BINARY", "codex").is_none()
+                || a.credentials.codex_home().is_none()
+                || !a.credentials.native_cli_compatible().await
+            {
+                return (false, "codex_runtime_or_home_unavailable");
+            }
+            ("@openai/codex-sdk", "0.169.0")
+        }
+        "opencode" => {
+            if provider_target(a).is_none() {
+                return (false, "scoped_provider_required");
+            }
+            ("@opencode/sdk", "2.3.0")
+        }
+        _ => return (false, "unsupported_driver"),
+    };
+    let manifest = main
+        .parent()
+        .unwrap_or(Path::new(""))
+        .join("node_modules")
+        .join(package)
+        .join("package.json");
+    let meta = std::fs::read(manifest)
+        .ok()
+        .and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+    if !meta.is_some_and(|m| m["name"] == package && m["version"] == version) {
+        return (false, "sdk_missing_or_incompatible");
+    }
+    (true, "installed")
+}
+async fn send(w: &mut ChildStdin, value: &Value) -> Result<()> {
+    let mut bytes = serde_json::to_vec(value).map_err(|_| Error::bad())?;
+    bytes.push(b'\n');
+    timeout(Duration::from_secs(3), w.write_all(&bytes))
+        .await
+        .map_err(|_| Error::unavailable())?
+        .map_err(|_| Error::unavailable())
+}
+async fn endpoint_safe(url: &reqwest::Url, s: &Console) -> Result<()> {
+    let port = url.port_or_known_default().ok_or_else(Error::bad)?;
+    let name = url
+        .host_str()
+        .ok_or_else(Error::bad)?
+        .trim_matches(['[', ']']);
+    let addresses = timeout(
+        Duration::from_secs(3),
+        tokio::net::lookup_host((name, port)),
+    )
+    .await
+    .map_err(|_| Error::unavailable())?
+    .map_err(|_| Error::unavailable())?;
+    let same_port = port == s.app.runtime.config.server.port;
+    let advertised = s.app.bind_addr.parse::<std::net::SocketAddr>().ok();
+    let public_origin = std::env::var("PROXY_CONSOLE_ORIGIN")
+        .ok()
+        .and_then(|u| reqwest::Url::parse(&u).ok());
+    if public_origin.is_some_and(|u| u.origin() == url.origin()) {
+        return Err(Error::conflict());
+    }
+    for addr in addresses {
+        if same_port
+            && (addr.ip().is_loopback()
+                || advertised.is_some_and(|server| server.ip() == addr.ip())
+                || std::net::TcpListener::bind((addr.ip(), 0)).is_ok())
+        {
+            return Err(Error::conflict());
+        }
+    }
+    Ok(())
+}
+struct ProcessGroup(Option<u32>);
+impl Drop for ProcessGroup {
+    fn drop(&mut self) {
+        // The child has its own group. Stop SDK descendants if cancellation cannot drain IPC.
+        #[cfg(unix)]
+        if let Some(pid) = self.0.take() {
+            unsafe {
+                libc::kill(-(pid as i32), libc::SIGKILL);
+            }
+        }
+    }
+}
+async fn supervise(
+    s: &Console,
+    a: &Actor,
+    c: &Conversation,
+    id: &str,
+    prompt: String,
+    mut control: mpsc::Receiver<Value>,
+) -> Result<bool> {
+    if !availability(a, &c.driver).await.0 {
+        return Err(Error::unavailable());
+    }
+    if conversations::binding(a, &c.driver).await.as_deref() != Some(&c.binding) {
+        return Err(Error::forbidden());
+    }
+    let main = entry().ok_or_else(Error::unavailable)?;
+    let root = s
+        .root
+        .join("workers")
+        .join(access::digest(a.id.as_bytes()))
+        .join(&c.id);
+    access::private_dir(&root).map_err(|_| Error::storage())?;
+    let mut start = json!({"v":1,"type":"start","workspace":c.workspace,"nativeId":c.native_id,"prompt":prompt,"model":c.model,"database":root.join("sessions.sqlite")});
+    if c.driver == "codex" {
+        let snap = a
+            .credentials
+            .snapshot()
+            .await
+            .map_err(|_| Error::unauthorized())?;
+        if snap.backend_profile != crate::codex::BackendProfile::ChatGptCodex {
+            return Err(Error::forbidden());
+        }
+        let status = a.credentials.status().await;
+        if status.generation != snap.generation || !matches!(status.source, "file" | "keyring") {
+            return Err(Error::conflict());
+        }
+        start["credentialStore"] = json!(status.source);
+        start["accountId"] = json!(
+            snap.auth
+                .account_id
+                .filter(|id| !id.is_empty())
+                .ok_or_else(Error::forbidden)?
+        );
+        start["codexHome"] = json!(a.credentials.codex_home().ok_or_else(Error::unavailable)?);
+        start["codexPath"] =
+            json!(binary("PROXY_CODEX_BINARY", "codex").ok_or_else(Error::unavailable)?);
+    } else {
+        let url = provider_target(a).ok_or_else(Error::unavailable)?;
+        endpoint_safe(&url, s).await?;
+        start["provider"] = a.provider.clone().ok_or_else(Error::unavailable)?;
+        if a.credentials.codex_home().is_some() {
+            let capability = access::secret();
+            s.turns
+                .install_delegate(id, &capability, a.clone(), &c.id)?;
+            start["delegateToken"] = capability.into();
+            start["delegateURL"] = format!(
+                "http://127.0.0.1:{}/api/v1/drivers/codex/delegate",
+                s.app.runtime.config.server.port
+            )
+            .into();
+        }
+    }
+    let mut command = Command::new(binary("PROXY_SDK_BUN", "bun").ok_or_else(Error::unavailable)?);
+    command
+        .arg(&main)
+        .arg(&c.driver)
+        .current_dir(&root)
+        .env_clear()
+        .env("PATH", "/usr/local/bin:/usr/bin:/bin")
+        .env("HOME", &root)
+        .env("XDG_CONFIG_HOME", root.join("config"))
+        .env("XDG_DATA_HOME", root.join("data"))
+        .env("LANG", "C")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .kill_on_drop(true);
+    #[cfg(unix)]
+    command.process_group(0);
+    let mut child = command.spawn().map_err(|_| Error::unavailable())?;
+    let group = ProcessGroup(child.id());
+    let mut stdin = child.stdin.take().ok_or_else(Error::unavailable)?;
+    let mut frames = FramedRead::new(
+        child.stdout.take().ok_or_else(Error::unavailable)?,
+        LinesCodec::new_with_max_length(262144),
+    );
+    let line = timeout(Duration::from_secs(10), frames.next())
+        .await
+        .map_err(|_| Error::unavailable())?
+        .and_then(|x| x.ok())
+        .ok_or_else(Error::unavailable)?;
+    let ready: Value = serde_json::from_str(&line).map_err(|_| Error::unavailable())?;
+    let version = if c.driver == "codex" {
+        "0.169.0"
+    } else {
+        "2.3.0"
+    };
+    if ready["v"] != 1
+        || ready["type"] != "ready"
+        || ready["driver"] != c.driver
+        || ready["version"] != version
+    {
+        return Err(Error::unavailable());
+    }
+    if send(&mut stdin, &start).await.is_err() {
+        return Ok(false);
+    }
+    // After start, a lost worker can have performed an effect. Never replay its input.
+    let mut deadline = Instant::now() + Duration::from_secs(900);
+    let mut watch = tokio::time::interval(Duration::from_millis(750));
+    let result = loop {
+        tokio::select! {
+            _=watch.tick()=>{
+                if Instant::now()>deadline||conversations::binding(a,&c.driver).await.as_deref()!=Some(&c.binding){
+                    let _=send(&mut stdin,&json!({"v":1,"type":"cancel"})).await;
+                    break false;
+                }
+            }
+            cmd=control.recv()=>{
+                let Some(v)=cmd else{break false};
+                if v["type"]=="cancel"{deadline=deadline.min(Instant::now()+Duration::from_secs(8));}
+                if send(&mut stdin,&v).await.is_err(){break false;}
+            }
+            frame=frames.next()=>{
+                let Some(Ok(line))=frame else{break false};
+                let Ok(v)=serde_json::from_str::<Value>(&line) else{break false};
+                if v["v"]!=1{break false;}
+                let done=v["type"]=="terminal";
+                if conversations::record(s,&c.id,id,v).is_err(){break false;}
+                if done{break true;}
+            }
+        }
+    };
+    drop(stdin);
+    drop(group);
+    let _ = child.wait().await;
+    Ok(result)
+}
+pub(super) async fn run(
+    s: Console,
+    a: Actor,
+    c: Conversation,
+    id: String,
+    prompt: String,
+    rx: mpsc::Receiver<Value>,
+) {
+    let done = supervise(&s, &a, &c, &id, prompt, rx).await;
+    if !matches!(done, Ok(true)) {
+        let (status, code) = if done.is_err() {
+            ("failed", "pre_dispatch_unavailable")
+        } else {
+            ("indeterminate", "native_worker_interrupted")
+        };
+        let _ = conversations::record(
+            &s,
+            &c.id,
+            &id,
+            json!({"type":"terminal","status":status,"code":code}),
+        );
+    }
+    s.turns.detach(&id);
+}
+
+#[derive(Default)]
+pub(super) struct ModelCache {
+    owners: tokio::sync::Mutex<
+        std::collections::HashMap<String, std::sync::Arc<tokio::sync::Mutex<Option<CachedModels>>>>,
+    >,
+}
+struct CachedModels {
+    generation: u64,
+    epoch: u64,
+    expires: Instant,
+    models: Vec<Value>,
+}
+pub(super) async fn catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
+    let slot = s
+        .models
+        .owners
+        .lock()
+        .await
+        .entry(a.id.clone())
+        .or_default()
+        .clone();
+    let mut value = slot.lock().await;
+    let status = a.credentials.status().await;
+    let epoch = a.credentials.owner_epoch().await;
+    if let Some(v) = value.as_ref().filter(|v| {
+        v.generation == status.generation
+            && v.epoch == epoch
+            && Instant::now() < v.expires
+            && status.state == "ready"
+    }) {
+        return Ok(v.models.clone());
+    }
+    let models = native_catalog(s, a).await?;
+    *value = Some(CachedModels {
+        generation: status.generation,
+        epoch,
+        expires: Instant::now() + Duration::from_secs(25),
+        models: models.clone(),
+    });
+    Ok(models)
+}
+/// Read the native picker for this credential owner. No session or turn is created.
+async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
+    use std::collections::HashSet;
+    use tokio::process::ChildStdout;
+
+    static ACTIVE: tokio::sync::Semaphore = tokio::sync::Semaphore::const_new(4);
+    let _slot = ACTIVE.try_acquire().map_err(|_| Error::busy())?;
+    const MAX_LINE: usize = 512 * 1024;
+    const MAX_TOTAL: usize = 2 * 1024 * 1024;
+    const PAGE: u64 = 32;
+
+    async fn rpc(
+        input: &mut ChildStdin,
+        output: &mut FramedRead<ChildStdout, LinesCodec>,
+        budget: &mut usize,
+        id: u64,
+        method: &str,
+        params: Value,
+    ) -> Result<Value> {
+        send(input, &json!({"id":id,"method":method,"params":params})).await?;
+        for _ in 0..32 {
+            let line = output
+                .next()
+                .await
+                .and_then(|item| item.ok())
+                .ok_or_else(Error::unavailable)?;
+            *budget = budget
+                .checked_sub(line.len() + 1)
+                .ok_or_else(Error::unavailable)?;
+            let mut reply: Value = serde_json::from_str(&line).map_err(|_| Error::unavailable())?;
+            if reply.get("id").is_none() && reply["method"].is_string() {
+                continue;
+            }
+            if reply["id"].as_u64() != Some(id)
+                || reply.get("error").is_some()
+                || !reply["result"].is_object()
+            {
+                return Err(Error::unavailable());
+            }
+            return Ok(reply["result"].take());
+        }
+        Err(Error::unavailable())
+    }
+
+    timeout(Duration::from_secs(12), async {
+        let snap = a.credentials.snapshot().await.map_err(|_| Error::unauthorized())?;
+        if snap.backend_profile != crate::codex::BackendProfile::ChatGptCodex { return Err(Error::forbidden()); }
+        let account = snap.auth.account_id.as_deref().filter(|id| !id.is_empty() && id.len() <= 256)
+            .ok_or_else(Error::forbidden)?;
+        let home = a.credentials.codex_home().ok_or_else(Error::unavailable)?
+            .canonicalize().map_err(|_| Error::unavailable())?;
+        let status = a.credentials.status().await;
+        let store = match status.source {
+            "file" => "file",
+            "keyring" => "keyring",
+            _ => return Err(Error::unavailable()),
+        };
+        if status.generation != snap.generation { return Err(Error::conflict()); }
+        let bin = binary("PROXY_CODEX_BINARY", "codex").ok_or_else(Error::unavailable)?;
+        let cwd = s.root.join("workers").join(access::digest(a.id.as_bytes())).join("catalog");
+        access::private_dir(&cwd).map_err(|_| Error::storage())?;
+        let mut version_child = Command::new(&bin).arg("--version")
+            .current_dir(&cwd).env_clear().env("HOME",&cwd).env("CODEX_HOME",&home).env("PATH","/usr/bin:/bin")
+            .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::null()).kill_on_drop(true)
+            .spawn().map_err(|_| Error::unavailable())?;
+        let stdout = version_child.stdout.take().ok_or_else(Error::unavailable)?;
+        let version = FramedRead::new(stdout, LinesCodec::new_with_max_length(200)).next().await;
+        if !matches!(version,Some(Ok(ref line)) if line.trim()=="codex-cli 0.169.0") ||
+            !version_child.wait().await.map_err(|_| Error::unavailable())?.success() {
+            return Err(Error::unavailable());
+        }
+        // Pin the native authentication mode and expected workspace. The model/list selector is
+        // explicit even when the owner's Codex configuration has a different default provider.
+        let mut cmd = Command::new(bin);
+        cmd.args(["-c", "model_provider=\"openai\"", "-c", "forced_login_method=\"chatgpt\""])
+            .arg("-c").arg(format!("forced_chatgpt_workspace_id={}",toml::Value::String(account.to_owned())))
+            .arg("-c").arg(format!("cli_auth_credentials_store=\"{store}\""))
+            .args(["-c","analytics.enabled=false","-c","features.plugins=false","-c","features.hooks=false",
+                "app-server","--stdio"])
+            .current_dir(&cwd).env_clear().env("PATH","/usr/bin:/bin").env("LANG","C")
+            .env("HOME",&cwd).env("CODEX_HOME",&home)
+            .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).kill_on_drop(true);
+        #[cfg(unix)] cmd.process_group(0);
+        let mut child = cmd.spawn().map_err(|_| Error::unavailable())?;
+        let _group = ProcessGroup(child.id());
+        let mut input = child.stdin.take().ok_or_else(Error::unavailable)?;
+        let mut output = FramedRead::new(child.stdout.take().ok_or_else(Error::unavailable)?, LinesCodec::new_with_max_length(MAX_LINE));
+        let mut budget = MAX_TOTAL;
+        let initialized = rpc(&mut input,&mut output,&mut budget,1,"initialize",
+            json!({"clientInfo":{"name":"openai_proxy","version":env!("CARGO_PKG_VERSION")},"capabilities":null})).await?;
+        if initialized["codexHome"].as_str().map(Path::new) != Some(home.as_path()) { return Err(Error::forbidden()); }
+        send(&mut input,&json!({"method":"initialized","params":{}})).await?;
+        let identity = rpc(&mut input,&mut output,&mut budget,2,"account/read",json!({"refreshToken":false})).await?;
+        if identity["account"]["type"] != "chatgpt" {return Err(Error::forbidden());}
+
+        let mut cursor: Option<String> = None;
+        let mut cursors = HashSet::new();
+        let mut ids = HashSet::new();
+        let mut models = Vec::new();
+        for page in 0..16_u64 {
+            let result = rpc(&mut input,&mut output,&mut budget,page+3,"model/list",
+                json!({"modelProvider":"openai","cursor":cursor,"limit":PAGE,"includeHidden":false})).await?;
+            let entries = result["data"].as_array().ok_or_else(Error::unavailable)?;
+            if entries.len() > PAGE as usize { return Err(Error::unavailable()); }
+            for entry in entries {
+                if entry["hidden"] == true {continue;}
+                let id = entry["model"].as_str().filter(|id|valid_model(id)).ok_or_else(Error::unavailable)?;
+                if !ids.insert(id.to_owned()) {continue;}
+                let mut row = json!({"id":id,"object":"model","owned_by":"openai"});
+                if let Some(metadata) = crate::model_catalog::CATALOG.iter().find(|record|record.model_id==id) {
+                    row["context_length"] = metadata.context_length_for(snap.backend_profile).into();
+                    row["max_output_tokens"] = metadata.max_output_tokens.into();
+                }
+                models.push(row);
+            }
+            if result["nextCursor"].is_null() {
+                let current = a.credentials.reconcile_now().await;
+                if current.generation != snap.generation || a.credentials.owner_epoch().await != snap.owner_epoch ||
+                    a.credentials.codex_home().is_none() {
+                    return Err(Error::conflict());
+                }
+                return Ok(models);
+            }
+            let next = result["nextCursor"].as_str().filter(|s| !s.is_empty() && s.len()<=4096).ok_or_else(Error::unavailable)?;
+            if !cursors.insert(next.to_owned()) {return Err(Error::unavailable());}
+            cursor = Some(next.to_owned());
+        }
+        Err(Error::unavailable())
+    }).await.map_err(|_|Error::unavailable())?
+}

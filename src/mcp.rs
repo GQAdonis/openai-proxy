@@ -153,6 +153,7 @@ fn tool_definitions() -> Value {
 // ---------------------------------------------------------------------------
 
 async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String, String> {
+    let state = state.for_request().await.map_err(|e| e.to_string())?;
     let messages_val = params
         .get("messages")
         .ok_or("missing required field: messages")?;
@@ -201,23 +202,28 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
         parallel_tool_calls: None,
     };
 
+    let retry_safe = chat_req
+        .messages
+        .iter()
+        .all(|m| m.role != "tool" && m.tool_calls.is_none());
     let raw = match state.backend_profile {
         BackendProfile::OpenAiChatCompletions => {
             let outbound =
                 build_chat_completions_request(&chat_req, state.default_model.as_deref());
             let (auth_header, _) = state.auth.bearer().map_err(|e| e.to_string())?;
-            let resp = state
+            let builder = state
                 .http_client
                 .post(&state.backend_url)
                 .header("authorization", &auth_header)
                 .header("content-type", "application/json")
-                .json(&outbound)
-                .send()
+                .json(&outbound);
+            let resp = state
+                .send_upstream(builder, retry_safe)
                 .await
                 .map_err(|e| format!("request failed: {e}"))?;
             let status = resp.status();
             if !status.is_success() {
-                let body = resp.text().await.unwrap_or_default();
+                let body = crate::upstream_error(resp.status());
                 return Err(format!("upstream error {status}: {body}"));
             }
             let body: serde_json::Value =
@@ -229,32 +235,15 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
         }
         profile => {
             let codex_req = convert_request(&chat_req, state.default_model.as_deref(), profile);
-            let (auth_header, account_id) = state.auth.bearer().map_err(|e| e.to_string())?;
-            let mut req_builder = state
-                .http_client
-                .post(&state.backend_url)
-                .header("authorization", &auth_header)
-                .header("content-type", "application/json")
-                .header("accept", "application/json")
-                .header("accept-language", "en-US,en;q=0.9")
-                .header("origin", "https://chatgpt.com")
-                .header("referer", "https://chatgpt.com/")
-                .header("sec-fetch-dest", "empty")
-                .header("sec-fetch-mode", "cors")
-                .header("sec-fetch-site", "same-origin")
-                .header("openai-beta", "responses=experimental")
-                .header("originator", "codex_cli_rs")
-                .json(&codex_req);
-            if let Some(id) = account_id {
-                req_builder = req_builder.header("chatgpt-account-id", id);
-            }
-            let resp = req_builder
-                .send()
+            let request = crate::proxy::build_responses_request(&state, &codex_req)
+                .map_err(|e| e.to_string())?;
+            let resp = state
+                .send_upstream(request, retry_safe)
                 .await
                 .map_err(|e| format!("request failed: {e}"))?;
             let status = resp.status();
             if !status.is_success() {
-                let body = resp.text().await.unwrap_or_default();
+                let body = crate::upstream_error(resp.status());
                 return Err(format!("upstream error {status}: {body}"));
             }
             resp.text().await.map_err(|e| format!("read error: {e}"))?
@@ -280,57 +269,28 @@ async fn chat_completion_tool(state: &AppState, params: &Value) -> Result<String
     Ok(parts.join(""))
 }
 
-fn list_models_tool(state: &AppState) -> String {
-    match state.backend_profile {
-        BackendProfile::ChatGptCodex => {
-            "Available models (ChatGPT subscription):\n\
-             • gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna — GPT-5.6 tiers (1.05M context)\n\
-             • gpt-5.5 — GPT-5.5 (400K context)\n\
-             • gpt-5.4 — GPT-5.4 (400K context)\n\
-             \n\
-             Aliases: gpt-4o, gpt-4, gpt-4-turbo, gpt-3.5-turbo → gpt-5.4. gpt-5.3-codex/gpt-5.3-chat/gpt-5.2-chat are not available on this backend."
-        }
-        BackendProfile::OpenAiResponses => {
-            "Available models (OpenAI Responses API):\n\
-             • gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna — GPT-5.6 tiers (1.05M context)\n\
-             • gpt-5.5 — GPT-5.5 (1M context)\n\
-             • gpt-5.5-pro — GPT-5.5 Pro (Pro/Business/Enterprise only)\n\
-             • gpt-5.4 — GPT-5.4\n\
-             • gpt-5.3-codex — Codex model\n\
-             • codex-mini — Faster, lighter Codex model"
-        }
-        BackendProfile::OpenAiChatCompletions => {
-            "Available models (OpenAI Chat Completions):\n\
-             • gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna — GPT-5.6 tiers (1.05M context)\n\
-             • gpt-5.5 — GPT-5.5\n\
-             • gpt-5.4 — GPT-5.4\n\
-             • gpt-5.3-codex — Codex model\n\
-             • codex-mini — Faster, lighter Codex model\n\
-             • gpt-4o — GPT-4o\n\
-             • gpt-4o-mini — GPT-4o Mini\n\
-             • gpt-3.5-turbo — GPT-3.5 Turbo"
-        }
-    }
-    .to_string()
+async fn list_models_tool(state: &AppState) -> Result<String, String> {
+    let profile = state
+        .credentials
+        .snapshot()
+        .await
+        .map_err(|e| e.to_string())?
+        .backend_profile;
+    let names = crate::model_catalog::CATALOG
+        .iter()
+        .filter(|e| e.supports(profile))
+        .map(|e| e.model_id)
+        .collect::<Vec<_>>()
+        .join(", ");
+    Ok(format!("Available models ({}): {names}", profile.name()))
 }
 
-fn check_auth_tool(state: &AppState) -> String {
-    if state.auth.access_token.is_some() {
-        format!(
-            "✓ Authenticated via ChatGPT OAuth token (ChatGPT Plus/Pro subscription)\n\
-             Backend: {}\n\
-             Account ID: {}",
-            state.backend_url,
-            state.auth.account_id.as_deref().unwrap_or("(not set)")
-        )
-    } else if state.auth.api_key.is_some() {
-        format!(
-            "✓ Authenticated via OpenAI API key\n\
-             Backend: {}",
-            state.backend_url
-        )
+async fn check_auth_tool(state: &AppState) -> String {
+    let status = state.credentials.status().await;
+    if matches!(status.state, "ready" | "reused") {
+        format!("✓ Authenticated ({})", status.mode)
     } else {
-        "✗ No credentials loaded. Run `codex login` or set OPENAI_API_KEY.".to_string()
+        format!("Connection {} ({})", status.state, status.mode)
     }
 }
 
@@ -406,8 +366,11 @@ pub async fn dispatch(state: &AppState, req: JsonRpcRequest) -> Option<JsonRpcRe
                     Ok(t) => (t, false),
                     Err(e) => (e, true),
                 },
-                "list_models" => (list_models_tool(state), false),
-                "check_auth" => (check_auth_tool(state), false),
+                "list_models" => match list_models_tool(state).await {
+                    Ok(text) => (text, false),
+                    Err(error) => (error, true),
+                },
+                "check_auth" => (check_auth_tool(state).await, false),
                 "set_model" => (set_model_tool(&args), false),
                 other => (format!("Unknown tool: {other}"), true),
             };
@@ -432,6 +395,10 @@ pub async fn dispatch(state: &AppState, req: JsonRpcRequest) -> Option<JsonRpcRe
 // ---------------------------------------------------------------------------
 
 pub async fn run_stdio(state: AppState) -> anyhow::Result<()> {
+    anyhow::ensure!(
+        std::env::var_os("PROXY_CONSOLE_PRINCIPALS").is_none(),
+        "MCP stdio requires a dedicated credential owner"
+    );
     tracing::info!("MCP stdio transport started — reading JSON-RPC from stdin");
 
     let stdin = std::io::stdin();
@@ -490,18 +457,21 @@ use axum::{
     response::{IntoResponse, Response as AxumResponse},
     routing::post,
 };
-use tower_http::cors::CorsLayer;
 
 pub async fn run_http(state: AppState, port: u16) -> anyhow::Result<()> {
-    let addr = format!("0.0.0.0:{port}");
+    let addr = format!("127.0.0.1:{port}");
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     run_http_on(state, listener).await
 }
 
 pub async fn run_http_on(state: AppState, listener: tokio::net::TcpListener) -> anyhow::Result<()> {
+    anyhow::ensure!(
+        std::env::var_os("PROXY_CONSOLE_PRINCIPALS").is_none()
+            && listener.local_addr()?.ip().is_loopback(),
+        "standalone MCP requires a dedicated loopback owner"
+    );
     let app = Router::new()
         .route("/mcp", post(mcp_http_handler))
-        .layer(CorsLayer::permissive())
         .with_state(state);
 
     let addr = listener.local_addr()?;
@@ -513,8 +483,38 @@ pub async fn run_http_on(state: AppState, listener: tokio::net::TcpListener) -> 
 
 async fn mcp_http_handler(
     AxumState(state): AxumState<AppState>,
+    headers: axum::http::HeaderMap,
     body: axum::body::Bytes,
 ) -> Result<AxumResponse, (StatusCode, String)> {
+    if let Some(secret) = std::env::var_os("PROXY_MCP_TOKEN") {
+        use sha2::{Digest, Sha256};
+        use subtle::ConstantTimeEq;
+        let candidate = headers
+            .get(axum::http::header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("Bearer "));
+        let Some(expected) = secret.to_str().filter(|s| s.len() >= 32 && s.len() <= 512) else {
+            return Err((
+                StatusCode::SERVICE_UNAVAILABLE,
+                "local MCP credential configuration invalid".into(),
+            ));
+        };
+        if !candidate.filter(|s| s.len() <= 512).is_some_and(|s| {
+            bool::from(
+                Sha256::digest(s.as_bytes())
+                    .as_slice()
+                    .ct_eq(Sha256::digest(expected.as_bytes()).as_slice()),
+            )
+        }) {
+            return Err((StatusCode::UNAUTHORIZED, "MCP bearer required".into()));
+        }
+    }
+    if headers.contains_key(axum::http::header::ORIGIN) {
+        return Err((
+            StatusCode::FORBIDDEN,
+            "browser origins are not authorized on this local client transport".into(),
+        ));
+    }
     let req: JsonRpcRequest = serde_json::from_slice(&body)
         .map_err(|e| (StatusCode::BAD_REQUEST, format!("Parse error: {e}")))?;
 

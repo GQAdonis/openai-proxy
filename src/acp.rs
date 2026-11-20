@@ -22,11 +22,12 @@ use crate::{
 ///
 /// All logging goes to stderr — stdout is reserved for JSON-RPC only.
 pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
-    tracing::info!(
-        profile = state.backend_profile.name(),
-        "starting ACP stdio server"
+    anyhow::ensure!(
+        std::env::var_os("PROXY_CONSOLE_PRINCIPALS").is_none(),
+        "ACP requires a dedicated credential owner"
     );
-
+    tracing::info!("starting ACP stdio server");
+    let sessions = std::sync::Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new()));
     Agent
         .builder()
         .name("openai-proxy")
@@ -43,14 +44,30 @@ pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
             agent_client_protocol::on_receive_request!(),
         )
         .on_receive_request(
-            async move |req: NewSessionRequest, responder, _cx: ConnectionTo<Client>| {
-                let session_id = SessionId::new(uuid::Uuid::new_v4().to_string());
-                tracing::debug!(
-                    session = %session_id,
-                    cwd = %req.cwd.display(),
-                    "new ACP session"
-                );
-                responder.respond(NewSessionResponse::new(session_id))
+            {
+                let sessions = sessions.clone();
+                let state = state.clone();
+                async move |req: NewSessionRequest, responder, _cx: ConnectionTo<Client>| {
+                    let session_id = SessionId::new(uuid::Uuid::new_v4().to_string());
+                    let identity = match state.for_request().await {
+                        Ok(state) => state,
+                        Err(error) => return responder.respond_with_internal_error(error),
+                    };
+                    let workspace = match req.cwd.canonicalize() {
+                        Ok(cwd) if cwd.is_dir() => cwd,
+                        _ => return responder.respond_with_internal_error("workspace unavailable"),
+                    };
+                    sessions
+                        .lock()
+                        .await
+                        .insert(session_id.to_string(), (identity.owner_epoch, workspace));
+                    tracing::debug!(
+                        session = %session_id,
+                        cwd = %req.cwd.display(),
+                        "new ACP session"
+                    );
+                    responder.respond(NewSessionResponse::new(session_id))
+                }
             },
             agent_client_protocol::on_receive_request!(),
         )
@@ -59,6 +76,24 @@ pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
                 let state = state.clone();
                 async move |req: PromptRequest, responder, cx: ConnectionTo<Client>| {
                     let session_id = req.session_id.clone();
+                    let state = match state.for_request().await {
+                        Ok(state) => state,
+                        Err(error) => return responder.respond_with_internal_error(error),
+                    };
+                    let valid = sessions
+                        .lock()
+                        .await
+                        .get(&session_id.to_string())
+                        .is_some_and(|(epoch, _)| *epoch == state.owner_epoch);
+                    if !valid {
+                        return responder.respond_with_internal_error(
+                            "session belongs to another login or workspace",
+                        );
+                    }
+                    if state.backend_profile == codex::BackendProfile::OpenAiChatCompletions {
+                        return responder
+                            .respond_with_internal_error("ACP requires a Responses API route");
+                    }
                     match handle_prompt(req, &state, &cx).await {
                         Ok(stop_reason) => responder.respond(PromptResponse::new(stop_reason)),
                         Err(e) => {
@@ -67,7 +102,7 @@ pub async fn run_acp_server(state: AppState) -> anyhow::Result<()> {
                                 error = %e,
                                 "ACP prompt handler error"
                             );
-                            responder.respond(PromptResponse::new(StopReason::EndTurn))
+                            responder.respond_with_internal_error("upstream prompt failed")
                         }
                     }
                 }
@@ -126,10 +161,7 @@ async fn handle_prompt(
 
     // Skill injection: prepend selected skills as a system message.
     if !state.skills.is_empty() {
-        let max = std::env::var("PROXY_SKILLS_MAX")
-            .ok()
-            .and_then(|v| v.parse::<usize>().ok())
-            .unwrap_or(3);
+        let max = state.runtime.config.skills.max_injected;
         let selected = state
             .skills
             .select(&user_text, max, state.backend_profile.name());
@@ -180,14 +212,14 @@ async fn handle_prompt(
     let http_req = build_responses_request(state, &codex_req)
         .map_err(|e| anyhow::anyhow!("failed to build request: {e}"))?;
 
-    let resp = http_req
-        .send()
+    let resp = state
+        .send_upstream(http_req, true)
         .await
         .map_err(|e| anyhow::anyhow!("upstream HTTP error: {e}"))?;
 
     if !resp.status().is_success() {
         let status = resp.status();
-        let body = resp.text().await.unwrap_or_default();
+        let body = crate::upstream_error(resp.status());
         return Err(anyhow::anyhow!("upstream {status}: {body}"));
     }
 

@@ -102,7 +102,6 @@ mod memory_impl {
         async fn migrate(db: &Surreal<Db>) -> anyhow::Result<()> {
             db.query(
                 "DEFINE TABLE IF NOT EXISTS document SCHEMAFULL;
-                 DEFINE FIELD IF NOT EXISTS id           ON document TYPE string;
                  DEFINE FIELD IF NOT EXISTS scope        ON document TYPE string;
                  DEFINE FIELD IF NOT EXISTS text         ON document TYPE string;
                  DEFINE FIELD IF NOT EXISTS embedding    ON document TYPE array<float>;
@@ -111,7 +110,8 @@ mod memory_impl {
                  DEFINE INDEX IF NOT EXISTS hnsw_embed   ON document FIELDS embedding
                      HNSW DIMENSION 1536 DIST COSINE TYPE F32;",
             )
-            .await?;
+            .await?
+            .check()?;
             Ok(())
         }
 
@@ -173,30 +173,32 @@ mod memory_impl {
             let now = chrono::Utc::now().to_rfc3339();
             let embedding = self.embed_text(text).await;
             self.db
-                .query("CREATE type::thing('document', $id) SET id = $id, scope = $scope, text = $text, embedding = $embedding, metadata = $metadata, created_at = <datetime>$now")
+                .query("CREATE type::record('document', $id) SET scope = $scope, text = $text, embedding = $embedding, metadata = $metadata, created_at = <datetime>$now")
                 .bind(("id", id_for_query))
                 .bind(("scope", scope_owned))
                 .bind(("text", text_owned))
                 .bind(("embedding", embedding))
                 .bind(("metadata", metadata_owned))
                 .bind(("now", now))
-                .await?;
+                .await?.check()?;
             Ok(id)
         }
 
-        pub async fn delete_document(&self, id: &str) -> anyhow::Result<()> {
+        pub async fn delete_document(&self, id: &str, scope: Option<&str>) -> anyhow::Result<()> {
             let id_owned = id.to_string();
             self.db
-                .query("DELETE type::thing('document', $id)")
+                .query("DELETE type::record('document', $id) WHERE $owner = NONE OR scope = $owner")
                 .bind(("id", id_owned))
-                .await?;
+                .bind(("owner", scope.map(str::to_owned)))
+                .await?
+                .check()?;
             Ok(())
         }
 
         pub async fn list_documents(&self, scope: &str) -> anyhow::Result<Vec<DocumentRecord>> {
             let scope_owned = scope.to_string();
             let mut resp = self.db
-                .query("SELECT id, scope, text, metadata, time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at FROM document WHERE scope = $scope")
+                .query("SELECT record::id(id) AS id, scope, text, metadata, time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at FROM document WHERE scope = $scope")
                 .bind(("scope", scope_owned))
                 .await?;
             let docs: Vec<DocumentRecord> = resp.take(0)?;
@@ -230,7 +232,7 @@ mod memory_impl {
             let mut resp = self
                 .db
                 .query(format!(
-                    "SELECT id, scope, text, metadata, \
+                    "SELECT record::id(id) AS id, scope, text, metadata, \
                      time::format(created_at, '%Y-%m-%dT%H:%M:%SZ') AS created_at, \
                      vector::distance::knn() AS distance \
                      FROM document WHERE scope = $scope \
@@ -316,7 +318,11 @@ pub mod handlers {
             )
         })?;
         let id = store
-            .store_document(&body.scope, &body.text, body.metadata)
+            .store_document(
+                state.runtime.memory_scope.as_deref().unwrap_or(&body.scope),
+                &body.text,
+                body.metadata,
+            )
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
         Ok(Json(serde_json::json!({ "id": id })))
@@ -333,7 +339,7 @@ pub mod handlers {
             )
         })?;
         store
-            .delete_document(&id)
+            .delete_document(&id, state.runtime.memory_scope.as_deref())
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
         Ok(StatusCode::NO_CONTENT)
@@ -349,7 +355,12 @@ pub mod handlers {
                 "memory not enabled".to_string(),
             )
         })?;
-        let scope = params.scope.as_deref().unwrap_or("session");
+        let scope = state
+            .runtime
+            .memory_scope
+            .as_deref()
+            .or(params.scope.as_deref())
+            .unwrap_or("session");
         let docs = store
             .list_documents(scope)
             .await
@@ -367,7 +378,12 @@ pub mod handlers {
                 "memory not enabled".to_string(),
             )
         })?;
-        let scope = params.scope.as_deref().unwrap_or("session");
+        let scope = state
+            .runtime
+            .memory_scope
+            .as_deref()
+            .or(params.scope.as_deref())
+            .unwrap_or("session");
         let results = store
             .search_documents(&params.q, scope, params.limit)
             .await

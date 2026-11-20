@@ -1,0 +1,5 @@
+#!/bin/sh
+# The SDK accepts an executable path; these native flags must precede its generated arguments.
+test "$1" = "exec" || exit 64
+shift
+exec "$PROXY_CODEX_BINARY" exec --ignore-user-config --ignore-rules "$@"

@@ -1,6 +1,2 @@
-src/
-tsconfig.json
-*.test.ts
-tests/
 node_modules/
-.bun/
+tsconfig.json

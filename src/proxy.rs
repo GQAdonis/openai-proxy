@@ -34,6 +34,7 @@ pub async fn chat_completions(
     headers: HeaderMap,
     Json(req): Json<ChatCompletionRequest>,
 ) -> Result<Response, ProxyError> {
+    let state = state.for_request().await?;
     // Hook: RequestReceived
     state
         .hooks
@@ -47,9 +48,11 @@ pub async fn chat_completions(
     let req = inject_skills(req, &state);
 
     // Inject memory context (RAG) when memory feature is enabled.
-    let memory_scope = headers
-        .get("x-memory-scope")
-        .and_then(|v| v.to_str().ok())
+    let memory_scope = state
+        .runtime
+        .memory_scope
+        .as_deref()
+        .or_else(|| headers.get("x-memory-scope").and_then(|v| v.to_str().ok()))
         .unwrap_or("session")
         .to_string();
     let req = inject_memory(req, &state, &memory_scope).await;
@@ -112,11 +115,11 @@ async fn non_stream_responses(
     );
 
     let http_req = build_responses_request(&state, &codex_req)?;
-    let resp = http_req.send().await?;
+    let resp = state.send_upstream(http_req, replay_safe(&req)).await?;
 
     let status = resp.status();
     if !status.is_success() {
-        let body = resp.text().await.unwrap_or_default();
+        let body = crate::upstream_error(resp.status());
         state
             .hooks
             .fire(HookEvent::Error {
@@ -255,7 +258,11 @@ async fn non_stream_responses(
     // body. This produces an outwardly well-formed but empty-content response
     // to the caller, which is otherwise silent and hard to distinguish from a
     // legitimate empty completion after the fact.
-    if response_id.is_empty() && content_parts.is_empty() && call_order.is_empty() && !raw.trim().is_empty() {
+    if response_id.is_empty()
+        && content_parts.is_empty()
+        && call_order.is_empty()
+        && !raw.trim().is_empty()
+    {
         tracing::warn!(
             raw_len = raw.len(),
             raw_snippet = %raw.chars().take(1000).collect::<String>(),
@@ -353,11 +360,11 @@ async fn stream_responses(
     }
 
     let http_req = build_responses_request(&state, &codex_req)?;
-    let resp = http_req.send().await?;
+    let resp = state.send_upstream(http_req, replay_safe(&req)).await?;
 
     let status = resp.status();
     if !status.is_success() {
-        let body = resp.text().await.unwrap_or_default();
+        let body = crate::upstream_error(resp.status());
         state
             .hooks
             .fire(HookEvent::Error {
@@ -530,18 +537,17 @@ async fn non_stream_chat_completions(
     }
 
     let (auth_header, _) = state.auth.bearer()?;
-    let resp = state
+    let builder = state
         .http_client
         .post(&state.backend_url)
         .header("authorization", &auth_header)
         .header("content-type", "application/json")
-        .json(&outbound)
-        .send()
-        .await?;
+        .json(&outbound);
+    let resp = state.send_upstream(builder, replay_safe(&req)).await?;
 
     let status = resp.status();
     if !status.is_success() {
-        let body = resp.text().await.unwrap_or_default();
+        let body = crate::upstream_error(resp.status());
         state
             .hooks
             .fire(HookEvent::Error {
@@ -558,10 +564,7 @@ async fn non_stream_chat_completions(
     let body: serde_json::Value = resp.json().await?;
 
     if !body["choices"].is_array() {
-        tracing::warn!(
-            raw_body = %body.to_string().chars().take(1000).collect::<String>(),
-            "non_stream_chat_completions: upstream response missing choices array"
-        );
+        tracing::warn!("non_stream_chat_completions: upstream response missing choices array");
     }
 
     let content = body["choices"][0]["message"]["content"]
@@ -641,18 +644,17 @@ async fn stream_chat_completions(
     }
 
     let (auth_header, _) = state.auth.bearer()?;
-    let resp = state
+    let builder = state
         .http_client
         .post(&state.backend_url)
         .header("authorization", &auth_header)
         .header("content-type", "application/json")
-        .json(&outbound)
-        .send()
-        .await?;
+        .json(&outbound);
+    let resp = state.send_upstream(builder, replay_safe(&req)).await?;
 
     let status = resp.status();
     if !status.is_success() {
-        let body = resp.text().await.unwrap_or_default();
+        let body = crate::upstream_error(resp.status());
         state
             .hooks
             .fire(HookEvent::Error {
@@ -680,6 +682,14 @@ async fn stream_chat_completions(
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+fn replay_safe(req: &ChatCompletionRequest) -> bool {
+    req.tools.is_none()
+        && req
+            .messages
+            .iter()
+            .all(|m| m.role != "tool" && m.tool_calls.is_none())
+}
 
 pub(crate) fn build_responses_request(
     state: &AppState,
@@ -953,10 +963,7 @@ fn unix_now() -> u64 {
 fn inject_skills(mut req: ChatCompletionRequest, state: &AppState) -> ChatCompletionRequest {
     // Inject skill context as a system message.
     if !state.skills.is_empty() {
-        let max = std::env::var("PROXY_SKILLS_MAX")
-            .ok()
-            .and_then(|v| v.parse::<usize>().ok())
-            .unwrap_or(3);
+        let max = state.runtime.config.skills.max_injected;
 
         let user_text: String = req
             .messages

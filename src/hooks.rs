@@ -101,6 +101,13 @@ impl HookEvent {
 /// `Arc<dyn ProxyHooks + Send + Sync>`. We use an explicit
 /// `Pin<Box<dyn Future>>` return type to avoid the `async_trait` crate.
 pub trait ProxyHooks: Send + Sync {
+    fn configured_events(&self) -> Vec<String> {
+        Vec::new()
+    }
+    fn last_failure(&self) -> Option<u64> {
+        None
+    }
+
     /// Fire a hook event.  Implementations MUST NOT propagate errors to the caller.
     fn fire(
         &self,
@@ -111,6 +118,49 @@ pub trait ProxyHooks: Send + Sync {
 // ---------------------------------------------------------------------------
 // NullHooks — no-op default
 // ---------------------------------------------------------------------------
+
+/// Shared deployments send lifecycle counts and terminal state only. Text, tool
+/// arguments, opaque IDs and upstream error bodies remain inside their owner scope.
+pub struct SharedHooks(pub std::sync::Arc<dyn ProxyHooks + Send + Sync>);
+
+impl ProxyHooks for SharedHooks {
+    fn configured_events(&self) -> Vec<String> {
+        self.0
+            .configured_events()
+            .into_iter()
+            .filter(|key| {
+                matches!(
+                    key.as_str(),
+                    "on_request_received" | "on_response_complete" | "on_error"
+                )
+            })
+            .collect()
+    }
+    fn last_failure(&self) -> Option<u64> {
+        self.0.last_failure()
+    }
+    fn fire(
+        &self,
+        event: HookEvent,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send + '_>> {
+        match event {
+            HookEvent::RequestReceived { message_count, .. } => {
+                self.0.fire(HookEvent::RequestReceived {
+                    model: "shared".into(),
+                    message_count,
+                })
+            }
+            HookEvent::ResponseComplete { .. } => self.0.fire(HookEvent::ResponseComplete {
+                finish_reason: "complete".into(),
+            }),
+            HookEvent::Error { status, .. } => self.0.fire(HookEvent::Error {
+                status,
+                message: "request failed".into(),
+            }),
+            _ => Box::pin(std::future::ready(())),
+        }
+    }
+}
 
 /// Default no-op implementation.  All hook fires are ignored.
 pub struct NullHooks;
@@ -159,12 +209,48 @@ pub struct WebhookHooks {
     /// Map from event-type string (e.g. `"on_text_delta"`) to webhook URL.
     urls: HashMap<String, String>,
     client: reqwest::Client,
+    last_failure: std::sync::Arc<std::sync::atomic::AtomicU64>,
 }
 
 impl WebhookHooks {
     /// Construct from an explicit URL map and a shared HTTP client.
     pub fn new(urls: HashMap<String, String>, client: reqwest::Client) -> Self {
-        Self { urls, client }
+        Self {
+            urls,
+            client,
+            last_failure: Default::default(),
+        }
+    }
+
+    pub fn trusted_destinations() -> HashMap<String, String> {
+        std::env::var("PROXY_HOOK_DESTINATIONS")
+            .ok()
+            .and_then(|s| serde_json::from_str::<HashMap<String, String>>(&s).ok())
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|(id, url)| {
+                !id.is_empty()
+                    && id.len() <= 64
+                    && id
+                        .bytes()
+                        .all(|c| c.is_ascii_alphanumeric() || b"-_".contains(&c))
+                    && valid_url(url)
+            })
+            .collect()
+    }
+
+    pub fn from_trusted_destination(alias: &str) -> anyhow::Result<Self> {
+        let url = Self::trusted_destinations()
+            .remove(alias)
+            .ok_or_else(|| anyhow::anyhow!("unknown webhook destination"))?;
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(5))
+            .redirect(reqwest::redirect::Policy::none())
+            .build()?;
+        Ok(Self::new(
+            HashMap::from([("on_request_received".to_string(), url)]),
+            client,
+        ))
     }
 
     /// Load from a `hooks.toml` file at `path`.
@@ -190,16 +276,46 @@ impl WebhookHooks {
         insert_if_some!(config.on_response_complete, "on_response_complete");
         insert_if_some!(config.on_error, "on_error");
 
+        anyhow::ensure!(
+            urls.values().all(|url| valid_url(url)),
+            "invalid webhook destination"
+        );
         let client = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
             .timeout(std::time::Duration::from_secs(5))
             .build()
             .map_err(|e| anyhow::anyhow!("failed to build webhook http client: {e}"))?;
 
-        Ok(Self { urls, client })
+        Ok(Self {
+            urls,
+            client,
+            last_failure: Default::default(),
+        })
     }
 }
 
+fn valid_url(raw: &str) -> bool {
+    reqwest::Url::parse(raw).is_ok_and(|url| {
+        url.username().is_empty()
+            && url.password().is_none()
+            && url.fragment().is_none()
+            && (url.scheme() == "https"
+                || (url.scheme() == "http"
+                    && matches!(url.host_str(), Some("localhost" | "127.0.0.1" | "[::1]"))))
+    })
+}
+
 impl ProxyHooks for WebhookHooks {
+    fn configured_events(&self) -> Vec<String> {
+        let mut events: Vec<_> = self.urls.keys().cloned().collect();
+        events.sort();
+        events
+    }
+    fn last_failure(&self) -> Option<u64> {
+        let t = self.last_failure.load(std::sync::atomic::Ordering::Relaxed);
+        (t != 0).then_some(t)
+    }
+
     fn fire(
         &self,
         event: HookEvent,
@@ -207,27 +323,38 @@ impl ProxyHooks for WebhookHooks {
         let event_type = event.event_type().to_string();
         let url = self.urls.get(event_type.as_str()).cloned();
         let client = self.client.clone();
+        let last_failure = self.last_failure.clone();
 
         Box::pin(async move {
             let Some(url) = url else { return };
             let payload = event.to_payload();
             tokio::spawn(async move {
+                let failed = || {
+                    last_failure.store(
+                        std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .unwrap_or_default()
+                            .as_secs(),
+                        std::sync::atomic::Ordering::Relaxed,
+                    )
+                };
                 match client.post(&url).json(&payload).send().await {
                     Ok(resp) => {
                         if !resp.status().is_success() {
+                            failed();
                             tracing::warn!(
                                 event_type = %event_type,
-                                url = %url,
                                 status = %resp.status(),
                                 "webhook returned non-2xx status"
                             );
                         }
                     }
-                    Err(e) => {
+                    Err(_) => {
+                        failed();
                         tracing::warn!(
                             event_type = %event_type,
-                            url = %url,
-                            error = %e,
+
+
                             "webhook POST failed"
                         );
                     }

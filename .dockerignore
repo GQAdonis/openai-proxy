@@ -27,3 +27,11 @@ openspec/
 docs/
 tests/
 references/
+
+frontend/node_modules/
+frontend/dist/
+workers/node_modules/
+**/.codex/
+**/.env
+**/auth.json
+.git/

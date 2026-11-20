@@ -1,0 +1,14 @@
+{
+  "phase": "codex-live-auth-opencode-console",
+  "dispatchedAt": "2026-11-19T23:52:27.373923+00:00",
+  "backend": "openspec",
+  "planCommit": "02ca022",
+  "contractDigest": "68d8aad4ac3a015e56d6606d8fc4d0dfb945eecf78b3df63802f21101b33dd28",
+  "workers": {
+    "identity_implementation": "reconcile-codex-login; runtime auth wiring",
+    "opencode_implementation": "integrate-opencode-and-sdk-drivers; client setup",
+    "console_implementation": "embed-chat-and-validated-surfaces; build and packaging",
+    "phase-driver": "administer-proxy-and-local-clients; conversation runtime and integration"
+  },
+  "pending": "Production implementation and all B4 evidence"
+}

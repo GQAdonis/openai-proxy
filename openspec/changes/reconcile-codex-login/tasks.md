@@ -2,9 +2,9 @@
 
 ## 1. Shared credential owner
 
-- [ ] 1.1 AUTH-1 Implement source-aware resolution, signed-out startup, event and polling reconciliation, deployment capability detection and generation-consistent requests across direct HTTP, AG-UI, ACP stdio, MCP stdio/HTTP, models and CLI setup. Agree the scoped snapshot/status handoff with the companion SDK and settings changes.
-- [ ] 1.2 AUTH-2 Integrate same-owner Codex managed refresh, deduplicate expiry/401/manual requests, verify committed freshness, suppress uncertain exchanges, and preserve limits, external token ownership, API-key selection and separate embeddings billing. Deliver redacted owner-scoped refresh and recovery status.
-- [ ] 1.3 AUTH-3 Invalidate stale helpers and generations on logout, revocation and account switch. Enforce principal/workspace checks on resume and bounded safe retries. Document and expose unsupported store/transport combinations.
+- [x] 1.1 AUTH-1 Implement source-aware resolution, signed-out startup, event and polling reconciliation, deployment capability detection and generation-consistent requests across direct HTTP, AG-UI, ACP stdio, MCP stdio/HTTP, models and CLI setup. Agree the scoped snapshot/status handoff with the companion SDK and settings changes.
+- [x] 1.2 AUTH-2 Integrate same-owner Codex managed refresh, deduplicate expiry/401/manual requests, verify committed freshness, suppress uncertain exchanges, and preserve limits, external token ownership, API-key selection and separate embeddings billing. Deliver redacted owner-scoped refresh and recovery status.
+- [x] 1.3 AUTH-3 Invalidate stale helpers and generations on logout, revocation and account switch. Enforce principal/workspace checks on resume and bounded safe retries. Document and expose unsupported store/transport combinations.
 
 ## Verification at the phase boundary
 

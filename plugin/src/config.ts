@@ -1,41 +1,55 @@
-/** Provider ID used across opencode config, auth store, and /connect UI. */
-export const PROVIDER_ID = "codex"
+import { Model, Provider } from "@opencode/plugin"
 
-/**
- * Base URL of the Rust proxy.  The `/v1` suffix is what @ai-sdk/openai-compatible
- * expects — it appends `/chat/completions` automatically.
- */
-export const PROXY_BASE_URL =
-  process.env.CODEX_PROXY_URL ?? "http://localhost:8181/v1"
+export const providerID = Provider.ID.make("codex")
 
-/** Shape of a single model entry used by the plugin and config hook. */
-export interface ProxyModel {
-  id: string
-  name: string
-  context: number
-  output: number
+export function serviceOrigin(): URL {
+  const url = new URL(process.env.PROXY_CONSOLE_URL ?? "http://127.0.0.1:8181")
+  const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+  if (url.username || url.password || url.pathname !== "/" || url.search || url.hash ||
+      !(url.protocol === "https:" || (loopback && url.protocol === "http:"))) {
+    throw new Error("Configure a trusted service origin with HTTPS or loopback HTTP")
+  }
+  return url
 }
 
-/**
- * Static fallback model list. Used when the proxy is not reachable at startup.
- * The event hook refreshes this from GET /v1/models when the proxy is healthy.
- * Context limits here match the Rust catalog in src/models.rs.
- * codex-mini is intentionally excluded from this list.
- */
-export const PROXY_MODELS: ProxyModel[] = [
-  { id: "gpt-6.1-sol",   name: "GPT-6.1 Sol",   context: 1_050_000, output: 128_000 },
-  { id: "gpt-5.6-sol",   name: "GPT-5.6 Sol",   context: 1_050_000, output: 128_000 },
-  { id: "gpt-5.6-terra", name: "GPT-5.6 Terra", context: 1_050_000, output: 128_000 },
-  { id: "gpt-5.6-luna",  name: "GPT-5.6 Luna",  context: 1_050_000, output: 128_000 },
-  { id: "gpt-5.5",       name: "GPT-5.5",       context: 1_000_000, output: 32_768 },
-  { id: "gpt-5.5-pro",   name: "GPT-5.5 Pro",   context: 1_000_000, output: 32_768 },
-  { id: "gpt-5.4",       name: "GPT-5.4",       context:   400_000, output: 32_768 },
-  { id: "gpt-5.4-mini",  name: "GPT-5.4 Mini",  context:   200_000, output: 16_384 },
-  { id: "gpt-5.4-nano",  name: "GPT-5.4 Nano",  context:   128_000, output:  8_192 },
-  { id: "gpt-5.3-codex", name: "GPT-5.3 Codex", context:   400_000, output: 32_768 },
-  { id: "gpt-5.3-chat",  name: "GPT-5.3 Chat",  context:   128_000, output: 16_384 },
-  { id: "gpt-5.2-chat",  name: "GPT-5.2 Chat",  context:   128_000, output: 16_384 },
-]
+export function authorization(): string {
+  const token = process.env.PROXY_CONSOLE_TOKEN
+  if (!token) throw new Error("A scoped service connection is required")
+  return `Bearer ${token}`
+}
 
-/** Default model used when none is specified. */
-export const DEFAULT_MODEL = "gpt-6.1-sol"
+export function request(path: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers)
+  headers.set("authorization", authorization())
+  return fetch(new URL(path, serviceOrigin()), {
+    ...init, headers, redirect: "error", signal: init.signal ?? AbortSignal.timeout(5000),
+  })
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null
+
+function model(entry: unknown) {
+  if (!isRecord(entry) || typeof entry.id !== "string" || !/^[a-zA-Z0-9._-]{1,128}$/.test(entry.id)) return []
+  const id = Model.ID.make(entry.id)
+  const info = Model.Info.default(providerID, id)
+  return [{
+    ...info, name: entry.id,
+    capabilities: { tools: false, input: ["text"], output: ["text"] },
+    limit: {
+      context: typeof entry.context_length === "number" ? entry.context_length : info.limit.context,
+      output: typeof entry.max_output_tokens === "number" ? entry.max_output_tokens : info.limit.output,
+    },
+  }]
+}
+
+export async function inventory() {
+  try {
+    const response = await request("/api/v1/drivers/codex/v1/models")
+    if (!response.ok) return []
+    const payload: unknown = await response.json()
+    return isRecord(payload) && Array.isArray(payload.data) ? payload.data.flatMap(model) : []
+  } catch {
+    return []
+  }
+}

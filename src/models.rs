@@ -19,18 +19,20 @@ pub struct ModelObject {
     pub max_output_tokens: u32,
 }
 
-pub async fn list_models(State(state): State<AppState>) -> Json<ModelList> {
-    let profile = state.backend_profile;
+pub async fn list_models(
+    State(state): State<AppState>,
+) -> Result<Json<ModelList>, crate::error::ProxyError> {
+    let profile = state.credentials.snapshot().await?.backend_profile;
     let data = model_catalog::CATALOG
         .iter()
         .filter(|entry| entry.supports(profile))
         .map(|entry| model_object(entry, profile))
         .collect();
 
-    Json(ModelList {
+    Ok(Json(ModelList {
         object: "list",
         data,
-    })
+    }))
 }
 
 fn model_object(entry: &model_catalog::ModelCatalogEntry, profile: BackendProfile) -> ModelObject {

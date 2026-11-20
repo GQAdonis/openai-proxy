@@ -1,38 +1,26 @@
 {
   "name": "@prometheus-ags/opencode-codex-proxy",
-  "version": "0.1.0",
-  "description": "OpenCode plugin: routes requests through openai-proxy → Codex Responses API using your ChatGPT subscription",
+  "version": "0.2.0",
+  "description": "OpenCode 2.x subscription provider for openai-proxy",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+    ".": "./dist/index.js",
+    "./server": "./dist/index.js"
   },
   "files": [
     "dist",
-    "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc --declaration --declarationMap --outDir dist --emitDeclarationOnly && bun build src/index.ts --outdir dist --format esm --target bun",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "bun run build",
-    "dev": "bun run src/index.ts"
+    "build": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target bun --external @opencode/plugin && cp src/login.mjs dist/login.mjs"
   },
-  "peerDependencies": {
-    "@opencode-ai/plugin": "*"
+  "dependencies": {
+    "@opencode/plugin": "2.3.0"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "latest",
     "@types/node": "^25.9.1",
-    "typescript": "^5.4.0"
+    "typescript": "^6.0.0"
   },
-  "keywords": ["opencode", "opencode-plugin", "codex", "openai", "proxy"],
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  }
+  "license": "MIT"
 }

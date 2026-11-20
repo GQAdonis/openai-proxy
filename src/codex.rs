@@ -8,38 +8,25 @@ use crate::openai::{ChatCompletionRequest, MessageContent, ToolCall, ToolCallFun
 // auth.json deserialization
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Deserialize, Clone, PartialEq, Eq)]
 pub struct CodexAuth {
     pub access_token: Option<String>,
     pub account_id: Option<String>,
     pub api_key: Option<String>,
 }
 
-/// Nested format used by Codex CLI ≥ v1.x: `{ "tokens": { "access_token": ..., "account_id": ... } }`
-#[derive(Debug, Deserialize)]
-struct CodexAuthFile {
-    access_token: Option<String>,
-    account_id: Option<String>,
-    api_key: Option<String>,
-    tokens: Option<TokensBlock>,
-    #[serde(rename = "OPENAI_API_KEY")]
-    openai_api_key: Option<String>,
+impl std::fmt::Debug for CodexAuth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CodexAuth([redacted])")
+    }
 }
 
-#[derive(Debug, Deserialize)]
-struct TokensBlock {
-    access_token: Option<String>,
-    account_id: Option<String>,
-}
-
-/// Keyring service name Codex CLI uses for its own CLI auth storage
-/// (`cli_auth_credentials_store = "keyring"`). Matches `codex-rs/login/src/auth/storage.rs`
-/// upstream so this proxy can read credentials Codex CLI wrote, not just the plaintext file.
+#[cfg(test)]
 const CODEX_KEYRING_SERVICE: &str = "Codex Auth";
 
 /// Reproduces Codex CLI's `compute_store_key()`: the keyring account for a given
 /// `$CODEX_HOME` is `cli|<first 16 hex chars of SHA256(canonicalized codex_home path)>`.
-fn codex_keyring_account(codex_home: &std::path::Path) -> String {
+pub(crate) fn codex_keyring_account(codex_home: &std::path::Path) -> String {
     let canonical = codex_home
         .canonicalize()
         .unwrap_or_else(|_| codex_home.to_path_buf());
@@ -52,55 +39,17 @@ fn codex_keyring_account(codex_home: &std::path::Path) -> String {
     format!("cli|{truncated}")
 }
 
-/// Attempt to load Codex CLI's `AuthDotJson`-shaped credentials from the OS keyring,
-/// for users who have opted into `cli_auth_credentials_store = "keyring"` (direct backend).
-/// Returns `None` on any failure — this is a best-effort fallback, not a hard requirement.
-fn load_from_keyring(codex_home: &std::path::Path) -> Option<CodexAuthFile> {
-    let account = codex_keyring_account(codex_home);
-    let entry = keyring::Entry::new(CODEX_KEYRING_SERVICE, &account).ok()?;
-    let serialized = entry.get_password().ok()?;
-    serde_json::from_str(&serialized).ok()
-}
-
 impl CodexAuth {
     pub fn load(path: &std::path::Path) -> anyhow::Result<Self> {
-        let raw = match Self::load_from_file(path) {
-            Ok(raw) => raw,
-            Err(file_err) => {
-                let codex_home = path.parent().unwrap_or_else(|| std::path::Path::new("."));
-                load_from_keyring(codex_home).ok_or_else(|| {
-                    anyhow::anyhow!(
-                        "no Codex credentials found: {} is missing or unreadable ({file_err}), \
-                         and no matching entry exists in the OS keyring under service \
-                         \"{CODEX_KEYRING_SERVICE}\"",
-                        path.display()
-                    )
-                })?
-            }
-        };
-        let (access_token, account_id) = if let Some(t) = raw.tokens {
-            (t.access_token, t.account_id)
-        } else {
-            (raw.access_token, raw.account_id)
-        };
-        let api_key = raw.api_key.or(raw.openai_api_key);
-        Ok(Self {
-            access_token,
-            account_id,
-            api_key,
-        })
-    }
-
-    fn load_from_file(path: &std::path::Path) -> anyhow::Result<CodexAuthFile> {
-        let content = std::fs::read_to_string(path)?;
-        let raw: CodexAuthFile = serde_json::from_str(&content)?;
-        Ok(raw)
+        crate::auth::read_selected(path)
     }
 
     pub fn bearer(&self) -> Result<(String, Option<String>), crate::error::ProxyError> {
         if let (Some(token), Some(account_id)) = (&self.access_token, &self.account_id) {
             Ok((format!("Bearer {token}"), Some(account_id.clone())))
-        } else if let Some(key) = &self.api_key {
+        } else if let (None, None, Some(key)) =
+            (&self.access_token, &self.account_id, &self.api_key)
+        {
             Ok((format!("Bearer {key}"), None))
         } else {
             Err(crate::error::ProxyError::AuthUnavailable(
@@ -374,8 +323,9 @@ pub struct ChatCompletionsOutbound {
 fn resolve_model_id(req_model: &str, default_model: Option<&str>) -> String {
     let target = resolve_model(req_model);
     if let Some(dm) = default_model {
-        let is_explicit =
-            req_model.starts_with("gpt-5.") || req_model.starts_with("gpt-6.") || req_model.starts_with("codex");
+        let is_explicit = req_model.starts_with("gpt-5.")
+            || req_model.starts_with("gpt-6.")
+            || req_model.starts_with("codex");
         if is_explicit {
             target.model_id
         } else {
@@ -775,10 +725,23 @@ mod tests {
         let a_again = codex_keyring_account(std::path::Path::new("/tmp/codex-home-a"));
         let b = codex_keyring_account(std::path::Path::new("/tmp/codex-home-b"));
 
-        assert_eq!(a, a_again, "same codex_home must yield the same account key");
-        assert_ne!(a, b, "different codex_home paths must yield different account keys");
-        assert!(a.starts_with("cli|"), "account key must use Codex CLI's own prefix");
-        assert_eq!(a.len(), "cli|".len() + 16, "account key must be a 16-hex-char digest");
+        assert_eq!(
+            a, a_again,
+            "same codex_home must yield the same account key"
+        );
+        assert_ne!(
+            a, b,
+            "different codex_home paths must yield different account keys"
+        );
+        assert!(
+            a.starts_with("cli|"),
+            "account key must use Codex CLI's own prefix"
+        );
+        assert_eq!(
+            a.len(),
+            "cli|".len() + 16,
+            "account key must be a 16-hex-char digest"
+        );
     }
 
     #[test]
