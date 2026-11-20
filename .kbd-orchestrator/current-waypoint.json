@@ -2,10 +2,10 @@
   "schemaVersion": "5",
   "generatedBy": "kbd-runtime",
   "projectionContractVersion": 2,
-  "sourceRevision": 137,
-  "derivedRevision": 137,
+  "sourceRevision": 139,
+  "derivedRevision": 139,
   "frontier": {
-    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 137
+    "b606e9ff-20f4-44cb-94d0-e9ca757227d9": 139
   },
   "conflictCount": 0,
   "projectId": "6567e84f-cf17-4d6e-b0f6-679fcf3be06a",
@@ -31,9 +31,9 @@
   "implementationCompleted": 33,
   "implementationTotal": 34,
   "planRevision": 1,
-  "revision": 137,
+  "revision": 139,
   "exactNextCommand": "/kbd-execute codex-live-auth-opencode-console",
   "nextChange": null,
   "nextTask": null,
-  "updatedAt": "2026-11-20T14:04:17.378313Z"
+  "updatedAt": "2026-11-20T14:09:13.954418Z"
 }
