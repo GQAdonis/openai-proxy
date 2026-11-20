@@ -10,6 +10,10 @@ After acceptance and authorization to publish to the designated staging registry
 
 ## Record before the change
 
+The owner selected the local `orbstack` Docker context. For this target the proposed Compose project is `openai-proxy-staging` with dedicated project volumes and browser origin `http://127.0.0.1:18181`. The pre-deployment inventory found no containers for this project and no listener on port 18181. Repeat both checks immediately before deployment. Do not substitute an existing service bound to a different port.
+
+On this same engine a private registry is optional. Use the retained, candidate-specific local image tag in the Compose overlay, compare its full image ID with the accepted build receipt, and run Compose with `--no-build --pull never`. Set `PORT=18181` and `PROXY_CONSOLE_ORIGIN=http://127.0.0.1:18181`. Compare the created container's `.Image` with the receipt and smoke-test that exact origin. For a first deployment that fails smoke, stop and remove only this project's containers, preserving its volumes. Recheck port availability and record the observed state.
+
 - Accepted source commit, KBD candidate digest and registry image reference in the form `registry/repository@sha256:…`
 - Staging host and Docker context, Compose project, configuration revision, and exact HTTPS origin or approved loopback origin
 - Current container image ID, its pullable previous digest, and the location of the previous deployment configuration

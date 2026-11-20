@@ -37,6 +37,13 @@
       "authorizer": "travis@tribehealthsolutions.com",
       "contractDigest": "6dfe2af14bc2c906cc350b71866bc4fdd8c96d973c3fa9806a0ec9cec7ce596c",
       "reason": "Owner approved release verification recovery. Fourth fixture attempt for frozen candidate SHA-256 03c7c31fb74b83c1afe7a176258ae83bfb52c895e70233027b7a03690cd25b91, source 1742c3f, all 13 adopted scenarios and negative controls, disposable profiles and synthetic credentials."
+    },
+    {
+      "boundary": "B5",
+      "authorizedAt": "2026-11-20T13:34:21.380Z",
+      "authorizer": "travis@tribehealthsolutions.com",
+      "contractDigest": "6dfe2af14bc2c906cc350b71866bc4fdd8c96d973c3fa9806a0ec9cec7ce596c",
+      "reason": "Owner-approved second and final fixture recovery in signed amendment b3ca01db, frozen candidate f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9 at source 3dda940. All thirteen scenarios and negative controls in disposable profiles. Excludes genuine login, subscriber usage, publication and deployment."
     }
   ]
 }
