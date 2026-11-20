@@ -44,6 +44,13 @@
       "authorizer": "travis@tribehealthsolutions.com",
       "contractDigest": "6dfe2af14bc2c906cc350b71866bc4fdd8c96d973c3fa9806a0ec9cec7ce596c",
       "reason": "Owner-approved second and final fixture recovery in signed amendment b3ca01db, frozen candidate f6f595e5141d336abf907ecbdcdbf25dc9e539c07032459de203b1eb4314e8e9 at source 3dda940. All thirteen scenarios and negative controls in disposable profiles. Excludes genuine login, subscriber usage, publication and deployment."
+    },
+    {
+      "boundary": "B5",
+      "authorizedAt": "2026-11-20T14:11:34.415Z",
+      "authorizer": "travis@tribehealthsolutions.com",
+      "contractDigest": "b565a57dcdcd4cbf48ff1cb4aa44cd8f2267dc49b6143cf7708ee8a01137d3d8",
+      "reason": "Owner approved one targeted fixture repair in signed amendment e43825ef. Frozen candidate SHA-256 196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd, source 885a17a. PLUGIN-1, UI-1, SURFACE-1, ADMIN-1 and FEATURE-1 plus negative controls. No genuine account use or deployment."
     }
   ]
 }
