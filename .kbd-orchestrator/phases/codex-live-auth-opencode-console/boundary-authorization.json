@@ -23,6 +23,13 @@
       "authorizer": "travis@tribehealthsolutions.com",
       "contractDigest": "e30eb61f2c38c673a9369fe85650372cd4721ce97afee29e3d5a052dcf55cc6b",
       "reason": "Owner approved the final fixture-only B5 repair and full fixture verification. Frozen candidate SHA-256 030c79ba732985520a276a825be90f545d739524cbe7bac3be0f75e9fa911ff4, source 929b220. Build and both controls for all 13 scenarios. Disposable profiles and synthetic credentials."
+    },
+    {
+      "boundary": "B5",
+      "authorizedAt": "2026-11-20T12:16:48.786Z",
+      "authorizer": "travis@tribehealthsolutions.com",
+      "contractDigest": "d0593e44cd3dbaf682980d043058e402e1d6c2cfad36524e1886a3e1036a7773",
+      "reason": "Owner approved signed amendment and fixture recovery. Third attempt for frozen candidate SHA-256 9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067, source 4e2ac0a, positive and negative controls for all 13 existing scenarios, disposable profiles and synthetic credentials."
     }
   ]
 }

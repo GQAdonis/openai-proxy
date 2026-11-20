@@ -1,0 +1,55 @@
+{
+  "command": "negative AUTH-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "native REST recipient identity and file publication",
+      "status": "PASS",
+      "observed": {
+        "partial_and_unsupported_recipient_calls": 0,
+        "unrelated_generation_unchanged": true
+      },
+      "seconds": 1.54
+    },
+    {
+      "name": "replaced single-file container mount",
+      "status": "BLOCKED",
+      "observed": "requires a separately mounted container fixture"
+    }
+  ],
+  "notes": {
+    "auth-case-a02f473v": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "51699",
+        "--backend-url",
+        "http://127.0.0.1:51698/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "ed9c2460339e67541981db24fda67d23a4c2f08890554521e5cbb185f62e2803"
+        },
+        {
+          "account": "owner-a",
+          "bearerSha256": "ed9c2460339e67541981db24fda67d23a4c2f08890554521e5cbb185f62e2803"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 1.532,
+      "exit": -15
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178074.276702
+}

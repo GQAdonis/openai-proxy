@@ -1,0 +1,106 @@
+{
+  "command": "scenario PLUGIN-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "installed plugin project",
+      "status": "PASS",
+      "observed": {
+        "hostVersion": "2.3.0",
+        "activePlugin": "openai-proxy.codex",
+        "configuredSourceMatched": true,
+        "provider": "codex",
+        "changedModel": "gpt-5.4"
+      },
+      "seconds": 7.586
+    },
+    {
+      "name": "installed plugin installed",
+      "status": "PASS",
+      "observed": {
+        "hostVersion": "2.3.0",
+        "activePlugin": "openai-proxy.codex",
+        "configuredSourceMatched": true,
+        "provider": "codex",
+        "changedModel": "gpt-5.4"
+      },
+      "seconds": 7.075
+    },
+    {
+      "name": "installed plugin override",
+      "status": "PASS",
+      "observed": {
+        "hostVersion": "2.3.0",
+        "activePlugin": "openai-proxy.codex",
+        "configuredSourceMatched": true,
+        "preservedOverride": true
+      },
+      "seconds": 2.062
+    },
+    {
+      "name": "real highest-tier subscription turn and independent allowance attribution",
+      "status": "BLOCKED",
+      "observed": "requires current consent and correlated provider usage evidence"
+    }
+  ],
+  "notes": {
+    "auth-case-foiprgfr": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "51988",
+        "--backend-url",
+        "http://127.0.0.1:51987/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 7.516,
+      "exit": -15
+    },
+    "auth-case-w7_svcth": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "52042",
+        "--backend-url",
+        "http://127.0.0.1:52041/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 7.015,
+      "exit": -15
+    },
+    "auth-case-v0xf7ta_": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "52105",
+        "--backend-url",
+        "http://127.0.0.1:52104/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.004,
+      "exit": -15
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178103.5273862
+}

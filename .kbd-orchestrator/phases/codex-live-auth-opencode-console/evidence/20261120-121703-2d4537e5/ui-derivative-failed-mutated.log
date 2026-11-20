@@ -1,0 +1,30 @@
+   Compiling openai-proxy v0.1.0 (/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/ui-build-failed/source)
+error: failed to run custom build command for `openai-proxy v0.1.0 (/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/ui-build-failed/source)`
+
+Caused by:
+  process didn't exit successfully: `/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/ui-build-failed/target/release/build/openai-proxy-d2b23cdba9ba78b1/build-script-build` (exit status: 101)
+  --- stdout
+  cargo:rerun-if-changed=frontend/src
+  cargo:rerun-if-changed=frontend/public
+  cargo:rerun-if-changed=frontend/index.html
+  cargo:rerun-if-changed=frontend/package.json
+  cargo:rerun-if-changed=frontend/package-lock.json
+  cargo:rerun-if-changed=frontend/.node-version
+  cargo:rerun-if-changed=frontend/tsconfig.json
+  cargo:rerun-if-changed=frontend/vite.config.ts
+  cargo:rerun-if-changed=frontend/schema-plugin.mjs
+  cargo:rerun-if-env-changed=PATH
+  cargo:rerun-if-env-changed=NODE_OPTIONS
+  cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH
+
+  > openai-proxy-console@0.1.0 build
+  > tsc --noEmit && vite build --outDir /private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/ui-build-failed/target/release/build/openai-proxy-9824f75f22f440c7/out/console --emptyOutDir
+
+  src/main.tsx(221,26): error TS1110: Type expected.
+  src/main.tsx(221,28): error TS1109: Expression expected.
+
+  --- stderr
+
+  thread 'main' (27907455) panicked at build.rs:49:5:
+  console build failed; install the locked frontend dependencies with npm ci --include=dev
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

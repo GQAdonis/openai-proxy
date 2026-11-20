@@ -1,0 +1,135 @@
+{
+  "command": "negative ADMIN-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "chat admin inventory",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "configWrites": 0,
+        "generationChanges": 0
+      },
+      "seconds": 0.007
+    },
+    {
+      "name": "chat admin defaults",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "configWrites": 0,
+        "generationChanges": 0
+      },
+      "seconds": 0.008
+    },
+    {
+      "name": "invalid browser origin",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "configWrites": 0,
+        "generationChanges": 0
+      },
+      "seconds": 0.003
+    },
+    {
+      "name": "untrusted role header",
+      "status": "PASS",
+      "observed": {
+        "http": 403,
+        "configWrites": 0,
+        "generationChanges": 0
+      },
+      "seconds": 0.003
+    },
+    {
+      "name": "personal subject query",
+      "status": "FAIL",
+      "observed": "Protected endpoint returned 422"
+    },
+    {
+      "name": "foreign refresh subject",
+      "status": "FAIL",
+      "observed": "Protected endpoint returned 422"
+    }
+  ],
+  "notes": {
+    "chat admin inventory before 9b576df62f30": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/8d6f7827ffb34813bff3d97f3ba311ea.bin"
+    },
+    "chat admin inventory after 3c0aa6a8df9f": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/5311ebc142ca4c419c5c358ff4dcd27e.bin"
+    },
+    "chat admin defaults before 3e0e15454875": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/c8515f8394234350b222988597379312.bin"
+    },
+    "chat admin defaults after 88aea4a5a90a": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/111d6a292fe1457da0c75e69e06cfeeb.bin"
+    },
+    "invalid browser origin before 292d4f27faa8": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/c025f0dbd40f453287aa5b6d94cdf138.bin"
+    },
+    "invalid browser origin after c1ce2e266e13": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/ee91229004034174b1e9a9df966d5fb4.bin"
+    },
+    "untrusted role header before 9a9d876feb3d": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/fc61e19eabe14ff4a7f52de182444861.bin"
+    },
+    "untrusted role header after b143fa081d16": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/2c3b8bb808804a7e89979a9de7f5a91f.bin"
+    },
+    "personal subject query before 14b96a4a82f9": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/4c6df9d74f944aab8ad70f9689ebfa00.bin"
+    },
+    "foreign refresh subject before 740aa2e4c4ec": {
+      "exists": true,
+      "sha256": "f0de348aa2d13e24b904e6adec20e193e1fce28fd06abd5072218af1adc3bfd3",
+      "bytes": 540,
+      "mode": 384,
+      "original": "admin-originals/ca15abdb528841e79a2c14756139fe41.bin"
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178626.018958
+}

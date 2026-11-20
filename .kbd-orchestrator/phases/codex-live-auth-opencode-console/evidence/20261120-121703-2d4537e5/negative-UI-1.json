@@ -1,0 +1,81 @@
+{
+  "command": "negative UI-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "local asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.004
+    },
+    {
+      "name": "chat asset and API errors",
+      "status": "PASS",
+      "observed": {
+        "statuses": [
+          404,
+          404
+        ]
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "final image packaged console",
+      "status": "BLOCKED",
+      "observed": "final image service unavailable"
+    },
+    {
+      "name": "failed native stream preserves usable text",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "chat user cannot write host settings",
+      "status": "PASS",
+      "observed": {
+        "status": 403,
+        "changed": false
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "controlled failed frontend build",
+      "status": "PASS",
+      "observed": {
+        "originalSource": "a63c99a26718b667b2cbe242dbc51db7cad05bfa48ba7aeb112e4636b786953b",
+        "derivativeSource": "74f6d140a6453c7c3d6800b6431355ebf8332a2d896ecd144ffaa6bf702b4801",
+        "originalHtml": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "baselineBinary": "3c6bde0015abfca3bbbfcca64304606f82219c4f06c6793ed8c58bde20e4ecb3",
+        "resultBinary": "3c6bde0015abfca3bbbfcca64304606f82219c4f06c6793ed8c58bde20e4ecb3",
+        "resultHtml": null,
+        "resultExit": 101,
+        "log": "ui-derivative-failed-mutated.log"
+      },
+      "seconds": 174.493
+    }
+  ],
+  "notes": {
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178612.393934
+}

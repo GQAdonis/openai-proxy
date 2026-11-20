@@ -1,0 +1,117 @@
+{
+  "command": "negative TOOL-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "workspace read and permission replay",
+      "status": "FAIL",
+      "observed": "unexpected terminal state cancelled"
+    },
+    {
+      "name": "kernel-level canary file-open counter",
+      "status": "BLOCKED",
+      "observed": "this platform supplies independent tool-result counts only"
+    },
+    {
+      "name": "explicit Codex delegation and single executor",
+      "status": "FAIL",
+      "observed": "unexpected terminal state cancelled"
+    },
+    {
+      "name": "unsupported function rejected before native admission",
+      "status": "FAIL",
+      "observed": "AssertionError"
+    },
+    {
+      "name": "self-referential provider fails without model traffic",
+      "status": "PASS",
+      "observed": {
+        "visible_terminal": "failed",
+        "independent_upstream_requests": 0
+      },
+      "seconds": 0.51
+    },
+    {
+      "name": "live shared native permission stays with its owner",
+      "status": "FAIL",
+      "observed": "unexpected terminal state cancelled"
+    }
+  ],
+  "notes": {
+    "auth-case-riycpu2z": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "52534",
+        "--backend-url",
+        "http://127.0.0.1:52533/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.003,
+      "exit": -15
+    },
+    "auth-case-q8j2sbpv": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "52595",
+        "--backend-url",
+        "http://127.0.0.1:52594/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 2.003,
+      "exit": -15
+    },
+    "auth-case-iaiukm3a": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "52648",
+        "--backend-url",
+        "http://127.0.0.1:52647/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.5,
+      "exit": -15
+    },
+    "auth-case-zes1xwv1": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "52659",
+        "--backend-url",
+        "http://127.0.0.1:52658/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.506,
+      "exit": -15
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178127.5907059
+}

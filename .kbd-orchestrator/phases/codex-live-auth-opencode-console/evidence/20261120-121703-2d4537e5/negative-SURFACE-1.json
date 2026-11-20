@@ -1,0 +1,70 @@
+{
+  "command": "negative SURFACE-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "invalid surface text",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface old",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface wrong",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface catalog",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface reserved",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface rpc",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface oversized",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "invalid surface partial",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "two-owner surface boundaries",
+      "status": "FAIL",
+      "observed": "Error"
+    }
+  ],
+  "notes": {
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178621.5569909
+}

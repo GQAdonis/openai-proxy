@@ -1,0 +1,212 @@
+{
+  "command": "scenario ADMIN-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "local settings and consumers",
+      "status": "PASS",
+      "observed": {
+        "mode": "local",
+        "areas": [
+          "a2a",
+          "acp",
+          "agui",
+          "chat",
+          "deployment",
+          "identity",
+          "machine",
+          "mcp",
+          "memory",
+          "opencode",
+          "packaging",
+          "sdk",
+          "service",
+          "skills",
+          "tools",
+          "webhooks"
+        ],
+        "socketPort": 51552
+      },
+      "seconds": 0.011
+    },
+    {
+      "name": "admin settings and consumers",
+      "status": "PASS",
+      "observed": {
+        "mode": "shared",
+        "areas": [
+          "a2a",
+          "acp",
+          "agui",
+          "chat",
+          "deployment",
+          "identity",
+          "machine",
+          "mcp",
+          "memory",
+          "opencode",
+          "packaging",
+          "sdk",
+          "service",
+          "skills",
+          "tools",
+          "webhooks"
+        ],
+        "socketPort": 51562
+      },
+      "seconds": 0.006
+    },
+    {
+      "name": "chat connection against own private config",
+      "status": "PASS",
+      "observed": {
+        "role": "chat",
+        "privateModelVisible": true,
+        "foreignModelVisible": false
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "chat2 connection against own private config",
+      "status": "PASS",
+      "observed": {
+        "role": "chat",
+        "privateModelVisible": true,
+        "foreignModelVisible": false
+      },
+      "seconds": 0.001
+    },
+    {
+      "name": "local installed settings browser visibility",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "admin installed settings browser visibility",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "chat installed settings browser visibility",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "chat2 installed settings browser visibility",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "new conversations consume changed defaults",
+      "status": "PASS",
+      "observed": {
+        "oldModel": "fixture-chat",
+        "newModel": "kbd-new-default",
+        "turnsRequested": 0,
+        "restored": true
+      },
+      "seconds": 0.052
+    },
+    {
+      "name": "service restart edit persistence and exact undo",
+      "status": "PASS",
+      "observed": {
+        "appliedWrites": 1,
+        "restored": true,
+        "effective": 1
+      },
+      "seconds": 0.064
+    }
+  ],
+  "notes": {
+    "browser runtime local": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime admin": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime chat2": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "conversation defaults before 73d511fb86b0": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/f88b7586c3be47eb81cc0b73b7248bdd.bin"
+    },
+    "conversation defaults restored 61bf7cbffe71": {
+      "exists": true,
+      "sha256": "93f2b61ab2f4a68f017fb200cdfddc6b8536526ebe389e86852fa704fce37b95",
+      "bytes": 68,
+      "mode": 384,
+      "original": "admin-originals/39bf073316434653b11b78d56bb6cf48.bin"
+    },
+    "config before restart-scoped edit 67243e61edf1": {
+      "exists": true,
+      "sha256": "81240e81327a826f3b29e2a95741b25a293d385a06e4b45afe3108233ee93d8b",
+      "bytes": 535,
+      "mode": 384,
+      "original": "admin-originals/983fb827fecf47ceb6d43dc0a5ec8b8d.bin"
+    },
+    "after preview 7ce55233e56e": {
+      "exists": true,
+      "sha256": "81240e81327a826f3b29e2a95741b25a293d385a06e4b45afe3108233ee93d8b",
+      "bytes": 535,
+      "mode": 384,
+      "original": "admin-originals/1dc8bb59c9d04928aadc9d5927c415f5.bin"
+    },
+    "persisted config da556ebc37d5": {
+      "exists": true,
+      "sha256": "e74f437a39dad26ad644d474da4f93bb654c9f5cf5a0c44ed76bac4a2cf5e48a",
+      "bytes": 535,
+      "mode": 384,
+      "original": "admin-originals/290a09ec8b4a4382961f5742ed13fe73.bin"
+    },
+    "after config undo c1f6608320cb": {
+      "exists": true,
+      "sha256": "81240e81327a826f3b29e2a95741b25a293d385a06e4b45afe3108233ee93d8b",
+      "bytes": 535,
+      "mode": 384,
+      "original": "admin-originals/ca630914965b477782a0b42cff416fcd.bin"
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178625.2543209
+}

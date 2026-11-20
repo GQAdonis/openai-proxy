@@ -1,0 +1,114 @@
+{
+  "command": "scenario UI-1",
+  "status": "FAIL",
+  "observations": [
+    {
+      "name": "local packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.007
+    },
+    {
+      "name": "local keyboard settings and driver capabilities",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "local native stop",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "chat packaged asset and cache",
+      "status": "PASS",
+      "observed": {
+        "/ui/": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/settings": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "/ui/favicon.svg": "50c899b87dbd28c09553934c477d2c5ad9bb95875b41ee67faab915762575720",
+        "/ui/assets/index-NdRLFV3A.js": "65163de9e5d852d3873caeee40aaf78d6fb2ddc49e60c8b85bff292a95a79af9",
+        "/ui/assets/index-Cagpgd4u.css": "d8f4553a78d944b730425cbdc6315697fd59b2daab387605fb34349cb3f96a78"
+      },
+      "seconds": 0.004
+    },
+    {
+      "name": "chat keyboard settings and driver capabilities",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "chat native stop",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "final image packaged console",
+      "status": "BLOCKED",
+      "observed": "final image service unavailable"
+    },
+    {
+      "name": "standalone release without worker runtime",
+      "status": "FAIL",
+      "observed": "Error"
+    },
+    {
+      "name": "incremental embedded asset replacement",
+      "status": "PASS",
+      "observed": {
+        "originalSource": "a63c99a26718b667b2cbe242dbc51db7cad05bfa48ba7aeb112e4636b786953b",
+        "derivativeSource": "8bede0b12eaf73b7dec285be05a183ab19c487a434e271b6b2373f4b1d74d6d1",
+        "originalHtml": "8deb2bc9049eb4af2ea5a546b7313e13facef0fa5f7de163095c8feb692c2068",
+        "baselineBinary": "c34f1f0e43b36fbb37d670b042385ae6d2352059ae52df88600f0138fa471cc4",
+        "resultBinary": "f13e0564204e2d90a2f75f7a32c18301620afed950aef2f9adfda02b5443ed2d",
+        "resultHtml": "62ebe9636aeddf161824e226cd2b050baf497cdedaa4694eeb4b717933395cb6",
+        "resultExit": 0,
+        "log": "ui-derivative-incremental-mutated.log"
+      },
+      "seconds": 303.406
+    }
+  ],
+  "notes": {
+    "browser runtime local": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "browser runtime web-only": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178435.950326
+}

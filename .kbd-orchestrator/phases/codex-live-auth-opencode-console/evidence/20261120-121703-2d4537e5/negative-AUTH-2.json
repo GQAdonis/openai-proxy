@@ -1,0 +1,128 @@
+{
+  "command": "negative AUTH-2",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "managed exchange metadata",
+      "status": "PASS",
+      "observed": {
+        "mode": "metadata",
+        "status": "refresh_unconfirmed",
+        "exchanges": 1
+      },
+      "seconds": 0.522
+    },
+    {
+      "name": "managed exchange interrupted",
+      "status": "PASS",
+      "observed": {
+        "mode": "interrupted",
+        "status": "refresh_unconfirmed",
+        "exchanges": 1
+      },
+      "seconds": 0.514
+    },
+    {
+      "name": "managed exchange revoked",
+      "status": "PASS",
+      "observed": {
+        "mode": "revoked",
+        "status": "sign_in_required",
+        "exchanges": 1
+      },
+      "seconds": 0.512
+    },
+    {
+      "name": "subscription quota without paid fallback",
+      "status": "PASS",
+      "observed": {
+        "http": 429,
+        "recipient_calls": 1,
+        "exchanges": 0
+      },
+      "seconds": 0.812
+    }
+  ],
+  "notes": {
+    "auth-case-k2_eoh_2": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "51822",
+        "--backend-url",
+        "http://127.0.0.1:51821/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    },
+    "auth-case-4u2rel03": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "51828",
+        "--backend-url",
+        "http://127.0.0.1:51827/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.501,
+      "exit": -15
+    },
+    "auth-case-geiiku4c": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "51843",
+        "--backend-url",
+        "http://127.0.0.1:51842/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 1,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    },
+    "auth-case-wsyzq5gr": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-baje7001/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "51855",
+        "--backend-url",
+        "http://127.0.0.1:51854/responses"
+      ],
+      "fixtureRecipient": [
+        {
+          "account": "owner-a",
+          "bearerSha256": "12bc0be843da117f2f558e71fecd0850796e15b7dca52a1ae81d97b2c4c1d727"
+        }
+      ],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.807,
+      "exit": -15
+    }
+  },
+  "candidate": "9c5663036d80d8e8f308915c6e7761d3d5e976ac98774bbeb14e83229bfc7067",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795178081.238244
+}
