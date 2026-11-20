@@ -1,0 +1,79 @@
+{
+  "command": "negative FEATURE-1",
+  "status": "BLOCKED",
+  "observations": [
+    {
+      "name": "two-user scoped list, search and delete preservation",
+      "status": "PASS",
+      "observed": {
+        "actors": 2,
+        "ownedCreates": 2,
+        "ownDeletes": 2,
+        "foreignReads": 0,
+        "foreignDeletes": 0
+      },
+      "seconds": 0.044
+    },
+    {
+      "name": "signed-out request cannot inject a foreign document",
+      "status": "PASS",
+      "observed": {
+        "deniedCalls": 1,
+        "outboundCalls": 0
+      },
+      "seconds": 0.011
+    },
+    {
+      "name": "disabled DB, disabled hooks and unregistered egress",
+      "status": "PASS",
+      "observed": {
+        "database": "disabled",
+        "hookDeliveries": 0,
+        "modelCalls": 1
+      },
+      "seconds": 0.511
+    },
+    {
+      "name": "degraded DB, disabled hooks and unregistered egress",
+      "status": "PASS",
+      "observed": {
+        "database": "database_unavailable",
+        "hookDeliveries": 0,
+        "modelCalls": 1
+      },
+      "seconds": 0.502
+    },
+    {
+      "name": "authenticated shared upstream memory injection",
+      "status": "BLOCKED",
+      "observed": "Dedicated shared profiles have no live grants or independently routable shared direct-backend recipient"
+    }
+  ],
+  "notes": {
+    "memory variant (False, False)": {
+      "pid": 20175,
+      "enabled": false,
+      "degraded": false,
+      "port": 51756,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    },
+    "memory variant (True, True)": {
+      "pid": 20177,
+      "enabled": true,
+      "degraded": true,
+      "port": 51768,
+      "binary": "openai-proxy-memory",
+      "hooks": false,
+      "embeddingsCredentialProvided": false
+    }
+  },
+  "candidate": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795185342.3981388
+}

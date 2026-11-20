@@ -1,0 +1,169 @@
+{
+  "command": "negative PLUGIN-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "installed plugin version-guard",
+      "status": "PASS",
+      "observed": {
+        "controlledVersionsRejected": 4
+      },
+      "seconds": 0.522
+    },
+    {
+      "name": "actual V1-host registration denial",
+      "status": "PASS",
+      "observed": {
+        "version": "1.15.13",
+        "hostSha256": "1cdcb7e426a863528a41ae8f9f6b65470b8395ddd48937229b01299ddc1085f0",
+        "positiveControl": "fixturecontrol/canary",
+        "candidateExportObserved": true,
+        "codexProvider": false,
+        "nativeTurns": 0,
+        "recipientCalls": 0
+      },
+      "seconds": 6.039
+    },
+    {
+      "name": "synthetic subscription projection KBD_DENIED",
+      "status": "PASS",
+      "observed": {
+        "synthetic_code": "KBD_DENIED",
+        "service_http": 403,
+        "native_execs": 1
+      },
+      "seconds": 1.013
+    },
+    {
+      "name": "synthetic subscription projection KBD_QUOTA",
+      "status": "PASS",
+      "observed": {
+        "synthetic_code": "KBD_QUOTA",
+        "service_http": 429,
+        "native_execs": 1
+      },
+      "seconds": 0.509
+    }
+  ],
+  "notes": {
+    "auth-case-1ihpgnbb": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-owrvwhbz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "63284",
+        "--backend-url",
+        "http://127.0.0.1:63283/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    },
+    "legacy host version": {
+      "exit": 0,
+      "timeout": false,
+      "exportObserved": false,
+      "exportRefused": false,
+      "providerMissing": false,
+      "modelMissing": false,
+      "dependencyWarning": false,
+      "nativeTurns": 0,
+      "recipientCalls": 0
+    },
+    "legacy host control": {
+      "exit": 0,
+      "timeout": false,
+      "exportObserved": false,
+      "exportRefused": false,
+      "providerMissing": false,
+      "modelMissing": false,
+      "dependencyWarning": false,
+      "nativeTurns": 0,
+      "recipientCalls": 0
+    },
+    "legacy host provider discovery": {
+      "exit": 1,
+      "timeout": false,
+      "exportObserved": true,
+      "exportRefused": true,
+      "providerMissing": true,
+      "modelMissing": false,
+      "dependencyWarning": false,
+      "nativeTurns": 0,
+      "recipientCalls": 0
+    },
+    "legacy host turn admission": {
+      "exit": 1,
+      "timeout": false,
+      "exportObserved": true,
+      "exportRefused": true,
+      "providerMissing": false,
+      "modelMissing": true,
+      "dependencyWarning": false,
+      "nativeTurns": 0,
+      "recipientCalls": 0
+    },
+    "auth-case-afuhk4cj": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-owrvwhbz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "63290",
+        "--backend-url",
+        "http://127.0.0.1:63289/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 0,
+      "elapsedSeconds": 6.019,
+      "exit": -15
+    },
+    "auth-case-odd44bac": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-owrvwhbz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "63345",
+        "--backend-url",
+        "http://127.0.0.1:63344/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 1,
+      "elapsedSeconds": 1.004,
+      "exit": -15
+    },
+    "auth-case-96q8pm7g": {
+      "argv": [
+        "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/kbd-console-owrvwhbz/install/bin/openai-proxy",
+        "serve",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "63354",
+        "--backend-url",
+        "http://127.0.0.1:63353/responses"
+      ],
+      "fixtureRecipient": [],
+      "controlledPeerExchanges": 0,
+      "controlledPeerExecs": 1,
+      "elapsedSeconds": 0.502,
+      "exit": -15
+    }
+  },
+  "candidate": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795184809.508055
+}

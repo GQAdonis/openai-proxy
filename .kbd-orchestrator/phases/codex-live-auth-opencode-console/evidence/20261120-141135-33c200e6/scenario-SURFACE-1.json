@@ -1,0 +1,454 @@
+{
+  "command": "scenario SURFACE-1",
+  "status": "PASS",
+  "observations": [
+    {
+      "name": "typed projection, keyboard action and replay",
+      "status": "PASS",
+      "observed": {
+        "thread": "b2af4029-a44d-42fd-9728-f61f242ce8f3",
+        "turn": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e",
+        "receiverDelta": 1
+      },
+      "seconds": 4.109
+    }
+  ],
+  "notes": {
+    "browser runtime chat": {
+      "chromium": "148.0.7778.96",
+      "revision": "1223",
+      "playwright": "1.60.0",
+      "digests": {
+        "browserBundle": "775f09cf1b36c4c0936e13c9458daf094ee485802e63616965478025d54bc42d",
+        "playwrightPackage": "2335132c9797dee41204c55fcb87d95eb87b8eb5aba5e85c728bfc9a09a061ef",
+        "pyeePackage": "0c4196e459970009ce789a337d50eac846604d8ef08da642221b71e0d54e8e54"
+      }
+    },
+    "typed UI projection kbd-surface-positive": {
+      "events": [
+        {
+          "type": "RUN_STARTED",
+          "threadId": "b2af4029-a44d-42fd-9728-f61f242ce8f3",
+          "runId": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e"
+        },
+        {
+          "type": "ACTIVITY_SNAPSHOT",
+          "messageId": "msg_1f96197340013E7BbuZiq3HdXl",
+          "activityType": "a2ui-surface",
+          "replace": true,
+          "content": {
+            "a2ui_operations": [
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-choice",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Confirm fixture selection",
+                        "description": "Records one synthetic choice in this conversation."
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": {
+                        "@path": "/@caption"
+                      }
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive",
+                    "@caption": "Initial choice"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-transient",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Transient selection"
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": "Temporary choice"
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "ACTIVITY_SNAPSHOT",
+          "messageId": "msg_1f96197340013E7BbuZiq3HdXl",
+          "activityType": "a2ui-surface",
+          "replace": true,
+          "content": {
+            "a2ui_operations": [
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-choice",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Confirm fixture selection",
+                        "description": "Records one synthetic choice in this conversation."
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": {
+                        "@path": "/@caption"
+                      }
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive",
+                    "@caption": "Initial choice"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-transient",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Transient selection"
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": "Temporary choice"
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "updateDataModel": {
+                  "surfaceId": "kbd-choice",
+                  "path": "/@caption",
+                  "value": "Final choice"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "ACTIVITY_SNAPSHOT",
+          "messageId": "msg_1f96197340013E7BbuZiq3HdXl",
+          "activityType": "a2ui-surface",
+          "replace": true,
+          "content": {
+            "a2ui_operations": [
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-choice",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Confirm fixture selection",
+                        "description": "Records one synthetic choice in this conversation."
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": {
+                        "@path": "/@caption"
+                      }
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive",
+                    "@caption": "Initial choice"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-transient",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Transient selection"
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": "Temporary choice"
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "updateDataModel": {
+                  "surfaceId": "kbd-choice",
+                  "path": "/@caption",
+                  "value": "Final choice"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "ACTIVITY_SNAPSHOT",
+          "messageId": "msg_1f96197340013E7BbuZiq3HdXl",
+          "activityType": "a2ui-surface",
+          "replace": true,
+          "content": {
+            "a2ui_operations": [
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-choice",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Confirm fixture selection",
+                        "description": "Records one synthetic choice in this conversation."
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": {
+                        "@path": "/@caption"
+                      }
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive",
+                    "@caption": "Initial choice"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "createSurface": {
+                  "surfaceId": "kbd-transient",
+                  "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+                  "components": [
+                    {
+                      "id": "root",
+                      "component": "Button",
+                      "child": "caption",
+                      "@accessibility": {
+                        "label": "Transient selection"
+                      },
+                      "action": {
+                        "event": {
+                          "name": "choose",
+                          "context": {
+                            "item": {
+                              "@path": "/@item"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "caption",
+                      "component": "Text",
+                      "text": "Temporary choice"
+                    }
+                  ],
+                  "dataModel": {
+                    "@item": "kbd-surface-positive"
+                  }
+                }
+              },
+              {
+                "version": "1.0",
+                "updateDataModel": {
+                  "surfaceId": "kbd-choice",
+                  "path": "/@caption",
+                  "value": "Final choice"
+                }
+              },
+              {
+                "version": "1.0",
+                "deleteSurface": {
+                  "surfaceId": "kbd-transient"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "TEXT_MESSAGE_START",
+          "messageId": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e-assistant",
+          "role": "assistant"
+        },
+        {
+          "type": "TEXT_MESSAGE_CONTENT",
+          "messageId": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e-assistant",
+          "delta": "Plain assistant output survives."
+        },
+        {
+          "type": "TEXT_MESSAGE_END",
+          "messageId": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e-assistant"
+        },
+        {
+          "type": "RUN_FINISHED",
+          "threadId": "b2af4029-a44d-42fd-9728-f61f242ce8f3",
+          "runId": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e"
+        }
+      ],
+      "replayMessage": "msg_1f96197340013E7BbuZiq3HdXl",
+      "replayEventCount": 9,
+      "tree": {
+        "role": "button",
+        "name": "Confirm fixture selection",
+        "description": "Records one synthetic choice in this conversation."
+      },
+      "browserVisibleCaption": "Final choice"
+    },
+    "surface projection and action": {
+      "thread": "b2af4029-a44d-42fd-9728-f61f242ce8f3",
+      "turn": "b0ab33b6-cbf5-41e4-950f-f7af063fdb5e",
+      "result": "88be31fc-0f39-4711-a510-c82a60bc7221",
+      "receiverDelta": 1,
+      "observedAction": {
+        "name": "choose",
+        "surfaceId": "kbd-choice",
+        "sourceComponentId": "root",
+        "timestamp": "2026-11-20T14:34:45.374Z",
+        "context": {
+          "item": "kbd-surface-positive"
+        }
+      },
+      "name": "Confirm fixture selection",
+      "description": "Records one synthetic choice in this conversation."
+    }
+  },
+  "candidate": "196a0ba3f60be3745c7aff5a154c548982e6e7ed745753d83b4a59c92a192fbd",
+  "executedBy": {
+    "harness": "Bash/Python KBD boundary runner",
+    "model": "none (scripted observations)",
+    "python": "3.11.3"
+  },
+  "completedAt": 1795185286.5713222
+}
