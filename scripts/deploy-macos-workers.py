@@ -78,7 +78,7 @@ def version(executable):
 
 
 def stage_full(revision, release, active_worker, launcher, bun):
-    with tempfile.TemporaryDirectory(prefix="knowme-build-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="build-", dir=release) as temporary:
         build = Path(temporary)
         with (build / "source.tar").open("wb") as archive:
             subprocess.run(["git", "archive", revision, *BUILD_INPUTS], cwd=ROOT, stdout=archive, check=True)
@@ -110,8 +110,9 @@ def stage_full(revision, release, active_worker, launcher, bun):
         subprocess.run(["cargo", "build", "--release", "--locked", "--bin", "openai-proxy",
                         "--target-dir", str(target)], cwd=build, stdout=sys.stderr, check=True)
         binary = release / "openai-proxy"
-        shutil.copy2(target / "release" / "openai-proxy", binary)
-        if not version(binary).startswith("openai-proxy "):
+        (target / "release" / "openai-proxy").replace(binary)
+        help_text = subprocess.check_output([str(binary), "--help"], text=True, timeout=20)
+        if "Usage: openai-proxy " not in help_text:
             raise RuntimeError("The staged proxy binary failed its startup probe")
     return worker / "main.mjs", binary, candidates[0]
 
