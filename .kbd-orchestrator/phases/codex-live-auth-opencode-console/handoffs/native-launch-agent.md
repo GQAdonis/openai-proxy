@@ -50,3 +50,15 @@ To restore the previous console from this deployment, run the restore script for
 ```bash
 /bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261121T165408Z/restore.sh"
 ```
+
+## Codex model picker recovery
+
+The active macOS executable builds from `f227ce4`. Codex App Server now has a 30-second picker RPC window after credential resolution. Concurrent callers share a refresh even if the initiating caller disconnects. The last verified catalogue can serve during refresh for up to five minutes, scoped to the same credential generation and owner.
+
+The isolated 13-second response reproduced HTTP 503 on the previous binary. The replacement returned both lists from one App Server request after the initiating caller disconnected. On the deployed service, the protected picker and `/v1/models` both returned all 10 live IDs. The first lookup took 1.545 seconds and a repeated lookup used the cache.
+
+To restore the previous release from this deployment, run the restore script for the active executable.
+
+```bash
+/bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261121T170656Z/restore.sh"
+```
