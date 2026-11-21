@@ -10,6 +10,7 @@ import {
   type TurnDetails,
 } from './api'
 import { Button } from './components/ui/button'
+import { KnowMeLogo } from './components/KnowMeLogo'
 import { Surface, type SurfaceAction } from './Surface'
 import { project } from './projection'
 
@@ -655,7 +656,7 @@ export function Chat({
             {!entries.length && (
               <div className="empty">
                 <div className="empty-mark" aria-hidden="true">
-                  /
+                  <KnowMeLogo />
                 </div>
                 <h2>Start a conversation</h2>
                 <p>

@@ -1,9 +1,13 @@
 import { createRoot } from 'react-dom/client'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import '@fontsource-variable/inter/wght.css'
+import '@fontsource-variable/space-grotesk/wght.css'
+import '@fontsource-variable/roboto/wght.css'
+import '@fontsource-variable/jetbrains-mono/wght.css'
 import './styles.css'
 import { api, ApiError, errorText, type Connection, type Session } from './api'
 import { Button } from './components/ui/button'
+import { KnowMeLogo } from './components/KnowMeLogo'
 import { Chat } from './Chat'
 import { Settings } from './Settings'
 
@@ -126,10 +130,11 @@ function App() {
       </a>
       <header className="mast">
         <span className="wordmark">
-          <span className="mark" aria-hidden="true">
-            /
+          <KnowMeLogo />
+          <span className="brand-name">
+            Know<span className="brand-accent">Me</span>
           </span>{' '}
-          OpenAI Proxy
+          <span className="brand-context">Proxy</span>
         </span>
         {session && (
           <>

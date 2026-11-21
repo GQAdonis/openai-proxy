@@ -1,18 +1,57 @@
 :root {
-  font-family: 'Inter Variable', Inter, system-ui, sans-serif;
-  color: #1d2b27;
-  background: #f6f7f3;
+  /* KnowMe desktop brand ramps, with stronger control edges for the web console. */
+  color-scheme: dark;
+  --canvas: #0b0f14;
+  --masthead: #111620;
+  --surface: #161d29;
+  --control: #1c2535;
+  --control-hover: #202b40;
+  --line: #233041;
+  --control-line: #667c99;
+  --ink: #e8edf3;
+  --muted: #a7b0bc;
+  --brand-ember: #ff6a3d;
+  --accent: var(--brand-ember);
+  --accent-hover: #e04e28;
+  --accent-soft: #2b1a18;
+  --on-ember: #0b0f14;
+  --disabled: #253044;
+  --error-background: #351d22;
+  --error-ink: #fca5a5;
+  --font-ui: 'Inter Variable', Inter, system-ui, sans-serif;
+  --font-display: 'Space Grotesk Variable', var(--font-ui);
+  --font-body: 'Roboto Variable', var(--font-ui);
+  --font-data: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: var(--canvas);
   font-size: 15px;
   line-height: 1.55;
   font-synthesis: none;
-  --ink: #1d2b27;
-  --muted: #586660;
-  --line: #ccd4cd;
-  --accent: #17624b;
-  --surface: #fff;
   accent-color: var(--accent);
   caret-color: var(--accent);
-  scrollbar-color: #a2b0a7 transparent;
+  scrollbar-color: var(--control-line) transparent;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --canvas: #f7f7f8;
+    --masthead: #fff;
+    --surface: #fff;
+    --control: #fafbfc;
+    --control-hover: #f2f4f7;
+    --line: #e5e8ed;
+    --control-line: #7b8899;
+    --ink: #0b0f14;
+    --muted: #4b5563;
+    --brand-ember: #e04e28;
+    --accent: #b73a1d;
+    --accent-hover: #ff6a3d;
+    --accent-soft: #fbe8e1;
+    --disabled: #f2f4f7;
+    --error-background: #fef2f2;
+    --error-ink: #b91c1c;
+  }
 }
 * {
   box-sizing: border-box;
@@ -36,15 +75,14 @@ summary {
   cursor: pointer;
 }
 button:disabled {
-  opacity: 0.55;
   cursor: default;
 }
 ::selection {
-  background: #cce7d5;
-  color: #17251d;
+  background: var(--accent-soft);
+  color: var(--ink);
 }
 :focus-visible {
-  outline: 3px solid #1e7559;
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 [hidden] {
@@ -63,7 +101,7 @@ button:disabled {
   position: fixed;
   top: 0.5rem;
   left: 0.5rem;
-  background: white;
+  background: var(--surface);
   padding: 0.6rem;
   z-index: 5;
 }
@@ -72,6 +110,11 @@ h2,
 h3,
 p {
   margin: 0;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 h1 {
   font-weight: 630;
@@ -104,9 +147,9 @@ textarea,
 select {
   display: block;
   width: 100%;
-  background: #fff;
+  background: var(--control);
   color: var(--ink);
-  border: 1px solid #adbab0;
+  border: 1px solid var(--control-line);
   border-radius: 6px;
   padding: 0.55rem 0.72rem;
   min-height: 40px;
@@ -116,7 +159,7 @@ textarea {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #6a7771;
+  color: var(--muted);
 }
 .button {
   border-radius: 6px;
@@ -130,18 +173,28 @@ textarea::placeholder {
   background: transparent;
 }
 .button.outline {
-  border-color: #aebbb2;
-  background: #fff;
+  border-color: var(--control-line);
+  background: var(--control);
 }
 .button.quiet {
   color: var(--muted);
 }
 .button.primary {
-  background: var(--accent);
-  color: white;
+  background: var(--brand-ember);
+  color: var(--on-ember);
 }
-.button:hover:not(:disabled) {
-  filter: brightness(0.95);
+.button:hover:not(:disabled):not(.primary) {
+  background: var(--control-hover);
+}
+.button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: var(--disabled);
+  color: var(--muted);
 }
 .actions {
   display: flex;
@@ -157,29 +210,33 @@ textarea::placeholder {
   gap: clamp(1.2rem, 6vw, 5rem);
   padding: 0 max(4vw, 1rem);
   border-bottom: 1px solid var(--line);
-  background: #fff;
+  background: var(--masthead);
 }
 .wordmark {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  font-weight: 660;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-weight: 700;
   white-space: nowrap;
-  font-size: 1.05rem;
-  letter-spacing: -0.03em;
+  font-size: 1.23rem;
+  letter-spacing: -0.025em;
 }
-.mark,
-.empty-mark {
-  display: grid;
-  place-items: center;
-  background: var(--accent);
-  color: white;
-  font-weight: 750;
-  font-style: italic;
-  font-size: 1.2rem;
+.brand-logo {
+  display: block;
+  flex: none;
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+}
+.brand-accent {
+  color: var(--accent);
+}
+.brand-context {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 0.74em;
+  font-weight: 570;
+  letter-spacing: normal;
 }
 .mast nav {
   display: flex;
@@ -251,7 +308,7 @@ textarea::placeholder {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #638979;
+  background: var(--muted);
 }
 .rail details {
   margin-top: 1rem;
@@ -284,11 +341,17 @@ textarea::placeholder {
   margin: auto;
 }
 .empty-mark {
-  height: 38px;
-  width: 38px;
-  margin-bottom: 1.1rem;
-  background: #e4eee6;
-  color: var(--accent);
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  background: var(--accent-soft);
+}
+.empty-mark .brand-logo {
+  width: 34px;
+  height: 34px;
 }
 .empty h2 {
   font-size: 1.65rem;
@@ -308,7 +371,7 @@ textarea::placeholder {
   margin-bottom: 0.3rem;
 }
 .speaker.assistant {
-  color: var(--accent);
+  color: var(--ink);
   margin-top: 1.2rem;
 }
 .message,
@@ -318,6 +381,7 @@ textarea::placeholder {
   overflow-wrap: anywhere;
 }
 .message {
+  font-family: var(--font-body);
   white-space: pre-wrap;
 }
 .turn-boundary {
@@ -334,7 +398,7 @@ textarea::placeholder {
 }
 .composer {
   padding: 0.9rem clamp(0.95rem, 3vw, 2.4rem);
-  background: #fafbf8;
+  background: var(--masthead);
   border-top: 1px solid var(--line);
 }
 .composer textarea {
@@ -379,15 +443,15 @@ textarea::placeholder {
   font-size: 0.87rem;
 }
 .settings-nav button[aria-current] {
-  background: #e1ece2;
-  color: #194e39;
+  background: var(--accent-soft);
+  color: var(--accent);
   font-weight: 620;
 }
 .settings-content {
   min-width: 0;
 }
 .settings-section {
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: clamp(1rem, 3vw, 2rem);
@@ -414,11 +478,15 @@ textarea::placeholder {
   grid-template-columns: minmax(85px, 0.5fr) minmax(0, 1.2fr);
   gap: 0.7rem;
   padding: 0.7rem 0;
-  border-bottom: 1px solid #e4e9e3;
+  border-bottom: 1px solid var(--line);
 }
 .facts dt,
 .driver-list span {
   color: var(--muted);
+}
+.facts dd,
+.driver-list span {
+  overflow-wrap: anywhere;
 }
 .facts dd {
   margin: 0;
@@ -434,10 +502,14 @@ textarea::placeholder {
   margin-top: 1rem;
   border-top: 1px solid var(--line);
 }
+code,
+.facts pre,
 .preview pre {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-data);
+}
+.preview pre {
   font-size: 0.82rem;
-  background: #f3f6f2;
+  background: var(--control);
   padding: 0.7rem;
 }
 .entry {
@@ -459,12 +531,13 @@ textarea::placeholder {
 .error {
   margin: 1rem;
   padding: 0.65rem 1rem;
-  background: #e8efe7;
+  background: var(--control);
   border-radius: 5px;
 }
-.error {
-  background: #fff0ec;
-  color: #813322;
+.error,
+.entry .error {
+  background: var(--error-background);
+  color: var(--error-ink);
 }
 .shortcut {
   margin: 0;
@@ -500,6 +573,7 @@ textarea::placeholder {
     margin: 0;
   }
   .rail details,
+  .rail #driver-availability,
   .rail p {
     grid-column: 1/-1;
   }
@@ -519,13 +593,13 @@ textarea::placeholder {
   }
   .settings-nav button {
     white-space: nowrap;
-    border: 1px solid var(--line);
-    background: white;
+    border: 1px solid var(--control-line);
+    background: var(--control);
   }
   .wordmark {
-    font-size: 0.93rem;
+    font-size: 1.05rem;
   }
-  .mark {
+  .brand-logo {
     width: 22px;
     height: 22px;
   }
@@ -541,6 +615,12 @@ textarea::placeholder {
   .mast {
     gap: 0.5rem;
     padding: 0 0.5rem;
+    height: auto;
+    min-height: 54px;
+    flex-wrap: wrap;
+  }
+  .mast nav a {
+    min-height: 40px;
   }
   .wordmark {
     gap: 0.3rem;
