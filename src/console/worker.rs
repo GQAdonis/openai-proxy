@@ -325,16 +325,31 @@ pub(super) async fn run(
 
 #[derive(Default)]
 pub(super) struct ModelCache {
-    owners: tokio::sync::Mutex<
-        std::collections::HashMap<String, std::sync::Arc<tokio::sync::Mutex<Option<CachedModels>>>>,
-    >,
+    owners: tokio::sync::Mutex<std::collections::HashMap<String, std::sync::Arc<ModelSlot>>>,
+}
+#[derive(Default)]
+struct ModelSlot {
+    cached: tokio::sync::Mutex<Option<CachedModels>>,
+    flight: std::sync::Arc<tokio::sync::Mutex<()>>,
 }
 struct CachedModels {
     generation: u64,
     epoch: u64,
-    expires: Instant,
+    recheck_at: Instant,
+    usable_until: Instant,
     models: Vec<Value>,
 }
+
+impl CachedModels {
+    fn usable(&self, a: &Actor) -> bool {
+        Instant::now() < self.usable_until
+            && a.credentials.codex_home().is_some()
+            && a.credentials
+                .observed_snapshot(Some(self.epoch))
+                .is_ok_and(|snapshot| snapshot.generation == self.generation)
+    }
+}
+
 pub(super) async fn catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
     let slot = s
         .models
@@ -344,28 +359,62 @@ pub(super) async fn catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
         .entry(a.id.clone())
         .or_default()
         .clone();
-    let mut value = slot.lock().await;
     let status = a.credentials.status().await;
     let epoch = a.credentials.owner_epoch().await;
-    if let Some(v) = value.as_ref().filter(|v| {
-        v.generation == status.generation
-            && v.epoch == epoch
-            && Instant::now() < v.expires
-            && status.state == "ready"
-    }) {
-        return Ok(v.models.clone());
+    let cached = slot.cached.lock().await;
+    let usable = cached
+        .as_ref()
+        .filter(|entry| status.state == "ready" && entry.epoch == epoch && entry.usable(a));
+    if let Some(entry) = usable.filter(|entry| Instant::now() < entry.recheck_at) {
+        return Ok(entry.models.clone());
     }
-    let models = native_catalog(s, a).await?;
-    *value = Some(CachedModels {
-        generation: status.generation,
-        epoch,
-        expires: Instant::now() + Duration::from_secs(25),
-        models: models.clone(),
+    let stale = usable.map(|entry| entry.models.clone());
+    let flight = slot.flight.clone().try_lock_owned();
+    drop(cached);
+
+    // Keep the shared load running if an HTTP caller disconnects. While it runs,
+    // return the last verified catalogue only to the same credential generation.
+    let load = flight.ok().map(|permit| {
+        let (slot, s, a) = (slot.clone(), s.clone(), a.clone());
+        tokio::spawn(async move {
+            let _permit = permit;
+            let result = native_catalog(&s, &a, epoch).await;
+            let mut cached = slot.cached.lock().await;
+            match result {
+                Ok(entry) if entry.usable(&a) => {
+                    let models = entry.models.clone();
+                    *cached = Some(entry);
+                    Ok(models)
+                }
+                Ok(_) => Err(Error::conflict()),
+                Err(err) => {
+                    if let Some(entry) = cached
+                        .as_mut()
+                        .filter(|entry| entry.epoch == epoch && entry.usable(&a))
+                    {
+                        entry.recheck_at = Instant::now() + Duration::from_secs(10);
+                    }
+                    Err(err)
+                }
+            }
+        })
     });
-    Ok(models)
+    if let Some(models) = stale {
+        return Ok(models);
+    }
+    if let Some(load) = load {
+        return load.await.map_err(|_| Error::unavailable())?;
+    }
+    let _permit = slot.flight.lock().await;
+    let cached = slot.cached.lock().await;
+    cached
+        .as_ref()
+        .filter(|entry| entry.epoch == epoch && entry.usable(a))
+        .map(|entry| entry.models.clone())
+        .ok_or_else(Error::unavailable)
 }
 /// Read the native picker for this credential owner. No session or turn is created.
-async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
+async fn native_catalog(s: &Console, a: &Actor, epoch: u64) -> Result<CachedModels> {
     use std::collections::HashSet;
     use tokio::process::ChildStdout;
 
@@ -408,8 +457,14 @@ async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
         Err(Error::unavailable())
     }
 
-    timeout(Duration::from_secs(12), async {
-        let snap = a.credentials.snapshot().await.map_err(|_| Error::unauthorized())?;
+    let snap = a
+        .credentials
+        .snapshot_for(Some(epoch))
+        .await
+        .map_err(|_| Error::unauthorized())?;
+    let mut phase = "credential store";
+    // A cold App Server can do both a startup refresh and a model/list fetch.
+    let result = timeout(Duration::from_secs(30), async {
         if snap.backend_profile != crate::codex::BackendProfile::ChatGptCodex { return Err(Error::forbidden()); }
         let account = snap.auth.account_id.as_deref().filter(|id| !id.is_empty() && id.len() <= 256)
             .ok_or_else(Error::forbidden)?;
@@ -423,6 +478,7 @@ async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
         };
         if status.generation != snap.generation { return Err(Error::conflict()); }
         let bin = binary("PROXY_CODEX_BINARY", "codex").ok_or_else(Error::unavailable)?;
+        phase = "CLI version";
         let cwd = s.root.join("workers").join(access::digest(a.id.as_bytes())).join("catalog");
         access::private_dir(&cwd).map_err(|_| Error::storage())?;
         let mut version_child = Command::new(&bin).arg("--version")
@@ -452,10 +508,12 @@ async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
         let mut input = child.stdin.take().ok_or_else(Error::unavailable)?;
         let mut output = FramedRead::new(child.stdout.take().ok_or_else(Error::unavailable)?, LinesCodec::new_with_max_length(MAX_LINE));
         let mut budget = MAX_TOTAL;
+        phase = "App Server initialize";
         let initialized = rpc(&mut input,&mut output,&mut budget,1,"initialize",
             json!({"clientInfo":{"name":"openai_proxy","version":env!("CARGO_PKG_VERSION")},"capabilities":null})).await?;
         if initialized["codexHome"].as_str().map(Path::new) != Some(home.as_path()) { return Err(Error::forbidden()); }
         send(&mut input,&json!({"method":"initialized","params":{}})).await?;
+        phase = "App Server account/read";
         let identity = rpc(&mut input,&mut output,&mut budget,2,"account/read",json!({"refreshToken":false})).await?;
         if identity["account"]["type"] != "chatgpt" {return Err(Error::forbidden());}
 
@@ -463,6 +521,7 @@ async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
         let mut cursors = HashSet::new();
         let mut ids = HashSet::new();
         let mut models = Vec::new();
+        phase = "App Server model/list";
         for page in 0..16_u64 {
             let result = rpc(&mut input,&mut output,&mut budget,page+3,"model/list",
                 json!({"modelProvider":"openai","cursor":cursor,"limit":PAGE,"includeHidden":false})).await?;
@@ -480,17 +539,29 @@ async fn native_catalog(s: &Console, a: &Actor) -> Result<Vec<Value>> {
                 models.push(row);
             }
             if result["nextCursor"].is_null() {
+                phase = "credential reconciliation";
                 let current = a.credentials.reconcile_now().await;
                 if current.generation != snap.generation || a.credentials.owner_epoch().await != snap.owner_epoch ||
                     a.credentials.codex_home().is_none() {
                     return Err(Error::conflict());
                 }
-                return Ok(models);
+                let now = Instant::now();
+                return Ok(CachedModels {
+                    generation: snap.generation,
+                    epoch: snap.owner_epoch,
+                    recheck_at: now + Duration::from_secs(60),
+                    usable_until: now + Duration::from_secs(300),
+                    models,
+                });
             }
             let next = result["nextCursor"].as_str().filter(|s| !s.is_empty() && s.len()<=4096).ok_or_else(Error::unavailable)?;
             if !cursors.insert(next.to_owned()) {return Err(Error::unavailable());}
             cursor = Some(next.to_owned());
         }
         Err(Error::unavailable())
-    }).await.map_err(|_|Error::unavailable())?
+    }).await;
+    result.map_err(|_| {
+        tracing::warn!(phase, "Codex model catalogue request timed out");
+        Error::unavailable()
+    })?
 }

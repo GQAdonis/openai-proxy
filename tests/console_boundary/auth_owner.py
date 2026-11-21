@@ -65,6 +65,9 @@ def main():
                 assert params["modelProvider"] == "openai" and not params["includeHidden"]
                 cursor = params.get("cursor")
                 observed("catalogue", cursor=cursor)
+                delay = home / "catalogue-delay"
+                if delay.exists():
+                    time.sleep(float(delay.read_text()))
                 result = json.loads(path.read_text())[cursor or "first"]
             else:
                 model = (home / "catalogue").read_text().strip() if (home / "catalogue").exists() else "gpt-5.5"

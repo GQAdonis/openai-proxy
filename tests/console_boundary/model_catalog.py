@@ -5,10 +5,12 @@ Run with: python3 -B tests/console_boundary/model_catalog.py /path/to/openai-pro
 import argparse
 import json
 import secrets
+import socket
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from auth_fixture import atomic, credential, digest, fixture
+from auth_fixture import atomic, credential, digest, fixture, wait_for
 from identity import status_json
 from runner import Harness
 
@@ -111,6 +113,39 @@ def api_key(h):
         assert not f.trace
 
 
+def slow_subscription(h):
+    with fixture(h) as f:
+        f.stop_service()
+        available = ["gpt-6.2-sol", "fixture-cold-catalogue-model"]
+        atomic(f.store, credential("fixture-slow-owner", managed=True))
+        atomic(f.home / "catalogue-pages.json", {
+            "first": {"data": [entry(model) for model in available], "nextCursor": None}
+        })
+        (f.home / "catalogue-delay").write_text("13")
+        f.start_service()
+        picker = "/api/v1/drivers/codex/v1/models"
+
+        # Let a client leave while Codex is still preparing the catalogue.
+        with socket.create_connection(("127.0.0.1", f.port), timeout=5) as client:
+            client.sendall((
+                f"GET {picker} HTTP/1.1\r\n"
+                f"Host: 127.0.0.1:{f.port}\r\n"
+                f"Authorization: Bearer {h.keys['local']}\r\n"
+                "Connection: close\r\n\r\n"
+            ).encode("ascii"))
+            wait_for(lambda: f.events("catalogue"))
+            client.shutdown(socket.SHUT_RDWR)
+
+        with ThreadPoolExecutor(max_workers=2) as requests:
+            protected = requests.submit(f.api, picker)
+            public = requests.submit(models, f, {"Authorization": ""})
+            inventory = status_json(protected.result(), 200)
+            assert [row["id"] for row in inventory["data"]] == available
+            assert list(public.result()) == available
+        assert len(f.events("catalogue")) == 1, "overlapping callers should reuse the cold native read"
+        assert not f.trace, "model discovery should not send a prompt"
+
+
 def legacy_subscription(h):
     with fixture(h) as f:
         f.stop_service()
@@ -160,7 +195,8 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="oproxy-model-catalog-") as root:
         harness = LocalHarness(root, args.binary.resolve(strict=True))
         subscription(harness)
+        slow_subscription(harness)
         api_key(harness)
         legacy_subscription(harness)
         shared_catalogues(harness)
-    print("Native catalogue, wire model IDs, owner isolation, and static fallback passed.")
+    print("Native catalogue, slow-read coalescing, wire model IDs, owner isolation, and static fallback passed.")
