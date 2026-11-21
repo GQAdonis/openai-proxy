@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Deploy the committed native workers to an existing local macOS LaunchAgent."""
+"""Deploy a worker update or a full release to the existing macOS LaunchAgent."""
 
 import argparse
 from datetime import datetime, timezone
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[1]
 LABEL = "dev.prometheusags.openai-proxy"
 WORKER_FILES = ("main.mjs", "codex.mjs", "codex-metrics.mjs", "opencode.mjs", "package.json", "bun.lock", "codex-exec.c")
+BUILD_INPUTS = ("Cargo.toml", "Cargo.lock", "build.rs", "src", "data", "frontend", "workers", "plugin")
 
 
 def git(*args):
@@ -46,6 +48,14 @@ def stage_launcher(source, destination):
         raise RuntimeError(f"The staged Codex launcher failed its startup probe ({probe.returncode})")
 
 
+def bind_launcher(active_worker, worker, launcher):
+    old_launcher_source = active_worker / "codex-exec.c"
+    if (launcher is None and old_launcher_source.exists()
+            and old_launcher_source.read_bytes() != (worker / "codex-exec.c").read_bytes()):
+        raise RuntimeError("The launcher source changed. Supply the new native executable with --launcher")
+    stage_launcher(launcher or active_worker / "codex-exec", worker / "codex-exec")
+
+
 def stage_workers(revision, release, active_worker, launcher):
     worker = release / "workers"
     worker.mkdir()
@@ -57,14 +67,53 @@ def stage_workers(revision, release, active_worker, launcher):
     if (old_package.get("dependencies") != new_package.get("dependencies")
             or (old_lock.exists() and old_lock.read_bytes() != (worker / "bun.lock").read_bytes())):
         raise RuntimeError("Worker dependencies changed. Prepare the updated runtime before deploying")
-    old_launcher_source = active_worker / "codex-exec.c"
-    if (launcher is None and old_launcher_source.exists()
-            and old_launcher_source.read_bytes() != (worker / "codex-exec.c").read_bytes()):
-        raise RuntimeError("The launcher source changed. Supply the new native executable with --launcher")
     (worker / "node_modules").symlink_to((active_worker / "node_modules").resolve(strict=True))
     (release / "plugin").symlink_to((active_worker.parent / "plugin").resolve(strict=True))
-    stage_launcher(launcher or active_worker / "codex-exec", worker / "codex-exec")
+    bind_launcher(active_worker, worker, launcher)
     return worker / "main.mjs"
+
+
+def version(executable):
+    return subprocess.check_output([str(executable), "--version"], text=True, timeout=20).strip()
+
+
+def stage_full(revision, release, active_worker, launcher, bun):
+    with tempfile.TemporaryDirectory(prefix="knowme-build-") as temporary:
+        build = Path(temporary)
+        with (build / "source.tar").open("wb") as archive:
+            subprocess.run(["git", "archive", revision, *BUILD_INPUTS], cwd=ROOT, stdout=archive, check=True)
+        subprocess.run(["/usr/bin/tar", "-xf", "source.tar"], cwd=build, check=True)
+
+        worker = release / "workers"
+        plugin = release / "plugin"
+        shutil.copytree(build / "workers", worker, ignore=shutil.ignore_patterns("codex-exec"))
+        shutil.copytree(build / "plugin", plugin)
+        bind_launcher(active_worker, worker, launcher)
+
+        frontend = build / "frontend"
+        engines = json.loads((frontend / "package.json").read_bytes())["engines"]
+        if version("node") != "v" + engines["node"] or version("npm") != engines["npm"]:
+            raise RuntimeError(f"Full build requires Node {engines['node']} and npm {engines['npm']}")
+        # Keep stdout reserved for the JSON deployment receipt.
+        for package in worker, plugin:
+            subprocess.run([str(bun), "install", "--frozen-lockfile", "--production"],
+                           cwd=package, stdout=sys.stderr, check=True)
+        subprocess.run([str(bun), "run", "build"], cwd=plugin, stdout=sys.stderr, check=True)
+        candidates = sorted((worker / "node_modules" / "@openai").glob("codex-*/vendor/*/bin/codex"))
+        sdk_version = json.loads((worker / "package.json").read_bytes())["dependencies"]["@openai/codex-sdk"]
+        if len(candidates) != 1 or version(candidates[0]) != f"codex-cli {sdk_version}":
+            raise RuntimeError("The full release must contain the locked platform Codex CLI")
+
+        subprocess.run(["npm", "ci", "--include=dev", "--no-audit", "--no-fund"],
+                       cwd=frontend, stdout=sys.stderr, check=True)
+        target = build / "target"
+        subprocess.run(["cargo", "build", "--release", "--locked", "--bin", "openai-proxy",
+                        "--target-dir", str(target)], cwd=build, stdout=sys.stderr, check=True)
+        binary = release / "openai-proxy"
+        shutil.copy2(target / "release" / "openai-proxy", binary)
+        if not version(binary).startswith("openai-proxy "):
+            raise RuntimeError("The staged proxy binary failed its startup probe")
+    return worker / "main.mjs", binary, candidates[0]
 
 
 def publish(source, destination):
@@ -75,6 +124,21 @@ def publish(source, destination):
         temporary.replace(destination)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def publish_executable(source, destination, *, symlink):
+    with tempfile.TemporaryDirectory(dir=destination.parent) as folder:
+        staged = Path(folder) / destination.name
+        if symlink:
+            staged.symlink_to(source.resolve(strict=True))
+        else:
+            os.link(source, staged)
+        staged.replace(destination)
+
+
+def digest(path):
+    with path.open("rb") as artifact:
+        return hashlib.file_digest(artifact, "sha256").hexdigest()
 
 
 def launch(*args, check=True):
@@ -95,11 +159,21 @@ def boot(plist, domain, port):
     raise RuntimeError("KnowMe LaunchAgent did not become healthy")
 
 
-def deploy(plist, config, release, launcher, revision, port):
+def deploy(plist, config, release, launcher, revision, port, *, full=False):
     environment = config["EnvironmentVariables"]
     active_worker = Path(environment["PROXY_SDK_WORKER"]).resolve(strict=True).parent
     try:
-        worker = stage_workers(revision, release, active_worker, launcher)
+        if full:
+            installed_binary = Path(config["ProgramArguments"][0])
+            expected_binary = Path.home() / ".local/bin/openai-proxy"
+            if installed_binary != expected_binary or not installed_binary.is_file():
+                raise RuntimeError("Expected the installed KnowMe executable at ~/.local/bin/openai-proxy")
+            bun = Path(environment["PROXY_SDK_BUN"]).resolve(strict=True)
+            worker, binary, codex = stage_full(revision, release, active_worker, launcher, bun)
+            environment["PROXY_CODEX_BINARY"] = str(codex)
+            candidate_digest = digest(binary)
+        else:
+            worker = stage_workers(revision, release, active_worker, launcher)
     except BaseException:
         shutil.rmtree(release)
         raise
@@ -111,6 +185,13 @@ def deploy(plist, config, release, launcher, revision, port):
     backup = Path(tempfile.mkdtemp(prefix=f"{timestamp}-", dir=rollback_root))
     saved = backup / plist.name
     shutil.copy2(plist, saved)
+    if full:
+        saved_binary = backup / installed_binary.name
+        was_symlink = installed_binary.is_symlink()
+        if was_symlink:
+            saved_binary.symlink_to(installed_binary.resolve(strict=True))
+        else:
+            os.link(installed_binary, saved_binary)
     candidate = backup / "candidate.plist"
     candidate.write_bytes(plistlib.dumps(config))
     subprocess.run(["/usr/bin/plutil", "-lint", str(candidate)], check=True, capture_output=True)
@@ -121,11 +202,15 @@ def deploy(plist, config, release, launcher, revision, port):
     try:
         launch("bootout", target)
         replacing_plist = True
+        if full:
+            publish_executable(binary, installed_binary, symlink=True)
         publish(candidate, plist)
         boot(plist, domain, port)
     except BaseException:
         try:
             if replacing_plist:
+                if full:
+                    publish_executable(saved_binary, installed_binary, symlink=was_symlink)
                 publish(saved, plist)
                 launch("bootout", target, check=False)
                 boot(plist, domain, port)
@@ -136,11 +221,16 @@ def deploy(plist, config, release, launcher, revision, port):
             raise RuntimeError(f"Rollback failed. Saved LaunchAgent plist: {saved}") from rollback_error
         print(f"Previous LaunchAgent configuration is active. Saved plist: {saved}", file=sys.stderr)
         raise
-    return {"commit": revision, "worker": str(worker), "rollbackPlist": str(saved), "health": 200}
+    receipt = {"commit": revision, "worker": str(worker), "rollbackPlist": str(saved), "health": 200}
+    if full:
+        receipt.update(binary=str(binary), binarySha256=candidate_digest, rollbackBinary=str(saved_binary),
+                       previousBinarySha256=digest(saved_binary), codex=str(codex))
+    return receipt
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--full", action="store_true", help="build and deploy the proxy, console, and locked SDK runtime")
     parser.add_argument("--launcher", type=Path, help="verified native launcher for an intentional launcher upgrade")
     args = parser.parse_args()
     if sys.platform != "darwin" or os.getuid() == 0:
@@ -161,8 +251,9 @@ def main():
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         if config != plistlib.loads(plist.read_bytes()):
             raise RuntimeError("The active LaunchAgent changed during deployment preparation")
-        release = Path(tempfile.mkdtemp(prefix=f"workers-{revision[:12]}-", dir=releases))
-        print(json.dumps(deploy(plist, config, release, args.launcher, revision, port)))
+        kind = "full" if args.full else "workers"
+        release = Path(tempfile.mkdtemp(prefix=f"{kind}-{revision[:12]}-", dir=releases))
+        print(json.dumps(deploy(plist, config, release, args.launcher, revision, port, full=args.full)))
 
 
 if __name__ == "__main__":

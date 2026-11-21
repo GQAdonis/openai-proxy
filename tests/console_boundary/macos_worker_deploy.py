@@ -64,6 +64,43 @@ class LaunchAgentRollback(unittest.TestCase):
                 else:
                     boot.assert_called_once_with(plist, f"gui/{os.getuid()}", 8181)
 
+    def test_failed_full_cutover_restores_the_binary_and_plist(self):
+        for symlink in (False, True):
+            with self.subTest(symlink=symlink), tempfile.TemporaryDirectory() as folder:
+                root = Path(folder)
+                installed = root / ".local/bin/openai-proxy"
+                installed.parent.mkdir(parents=True)
+                previous = root / "old-binary" if symlink else installed
+                previous.write_text("old binary")
+                if symlink:
+                    installed.symlink_to(previous)
+                inode = installed.stat().st_ino
+                worker, candidate, codex = (root / name for name in ("main.mjs", "new-binary", "codex"))
+                for path in (worker, candidate, codex):
+                    path.touch()
+                plist = root / "agent.plist"
+                config = {"ProgramArguments": [str(installed)], "EnvironmentVariables": {
+                    "PROXY_SDK_BUN": str(candidate), "PROXY_SDK_WORKER": str(worker),
+                }}
+                original = plistlib.dumps(config)
+                plist.write_bytes(original)
+
+                def boot(*args):
+                    if installed.samefile(candidate):
+                        self.assertNotEqual(plist.read_bytes(), original)
+                        raise RuntimeError("candidate failed health check")
+                    self.assertEqual(plist.read_bytes(), original)
+
+                stage = mock.Mock(return_value=(worker, candidate, codex))
+                with (mock.patch.dict(deploy.__globals__, launch=mock.Mock(), boot=mock.Mock(side_effect=boot),
+                                      stage_full=stage), mock.patch.object(Path, "home", return_value=root),
+                      mock.patch("subprocess.run"), mock.patch("builtins.print")):
+                    with self.assertRaisesRegex(RuntimeError, "candidate failed health check"):
+                        deploy(plist, config, root / "release", None, "fixture", 8181, full=True)
+                self.assertEqual(plist.read_bytes(), original)
+                self.assertEqual(installed.stat().st_ino, inode)
+                self.assertEqual(installed.is_symlink(), symlink)
+
 
 if __name__ == "__main__":
     unittest.main()
