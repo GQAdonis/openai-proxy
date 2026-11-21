@@ -169,6 +169,7 @@ async fn supervise(
     prompt: String,
     mut control: mpsc::Receiver<Value>,
 ) -> Result<bool> {
+    let preparing_since = Instant::now();
     if !availability(a, &c.driver).await.0 {
         return Err(Error::unavailable());
     }
@@ -239,6 +240,7 @@ async fn supervise(
         .kill_on_drop(true);
     #[cfg(unix)]
     command.process_group(0);
+    let starting_since = Instant::now();
     let mut child = command.spawn().map_err(|_| Error::unavailable())?;
     let group = ProcessGroup(child.id());
     let mut stdin = child.stdin.take().ok_or_else(Error::unavailable)?;
@@ -246,30 +248,59 @@ async fn supervise(
         child.stdout.take().ok_or_else(Error::unavailable)?,
         LinesCodec::new_with_max_length(262144),
     );
-    let line = timeout(Duration::from_secs(10), frames.next())
-        .await
-        .map_err(|_| Error::unavailable())?
-        .and_then(|x| x.ok())
-        .ok_or_else(Error::unavailable)?;
-    let ready: Value = serde_json::from_str(&line).map_err(|_| Error::unavailable())?;
-    let version = if c.driver == "codex" {
-        "0.169.0"
-    } else {
-        "2.3.0"
+    // The embedded OpenCode runtime loads its SDK and plugin graph before readiness.
+    // Cold launches can take longer than the lighter Codex worker handshake.
+    let (version, ready_limit) = match c.driver.as_str() {
+        "opencode" => ("2.3.0", Duration::from_secs(30)),
+        _ => ("0.169.0", Duration::from_secs(10)),
     };
-    if ready["v"] != 1
-        || ready["type"] != "ready"
-        || ready["driver"] != c.driver
-        || ready["version"] != version
+    let ready = tokio::select! {
+        biased;
+        _ = control.recv() => None,
+        frame = timeout(ready_limit, frames.next()) => {
+            let line = frame.map_err(|_| {
+                tracing::warn!(driver = %c.driver, turn_id = id, limit_ms = ready_limit.as_millis() as u64,
+                    "Console native worker readiness timed out");
+                Error::unavailable()
+            })?.and_then(|frame| frame.ok()).ok_or_else(Error::unavailable)?;
+            let ready: Value = serde_json::from_str(&line).map_err(|_| Error::unavailable())?;
+            if ready["v"] != 1 || ready["type"] != "ready" || ready["driver"] != c.driver
+                || ready["version"] != version
+            {
+                return Err(Error::unavailable());
+            }
+            Some(Instant::now())
+        }
+    };
+    if ready.is_some() && conversations::binding(a, &c.driver).await.as_deref() != Some(&c.binding)
     {
-        return Err(Error::unavailable());
+        return Err(Error::forbidden());
     }
+    let ready_at =
+        ready.filter(|_| matches!(control.try_recv(), Err(mpsc::error::TryRecvError::Empty)));
+    let Some(ready_at) = ready_at else {
+        // Only cancellation can arrive before the worker has started a native turn.
+        drop(stdin);
+        drop(group);
+        let _ = child.kill().await;
+        conversations::record(
+            s,
+            &c.id,
+            id,
+            json!({"type":"terminal","status":"cancelled"}),
+        )?;
+        return Ok(true);
+    };
+    let dispatched_at = Instant::now();
     if send(&mut stdin, &start).await.is_err() {
         return Ok(false);
     }
     // After start, a lost worker can have performed an effect. Never replay its input.
     let mut deadline = Instant::now() + Duration::from_secs(900);
     let mut watch = tokio::time::interval(Duration::from_millis(750));
+    let mut native_session_ms = None;
+    let mut first_text_ms = None;
+    let mut terminal_state = "interrupted".to_owned();
     let result = loop {
         tokio::select! {
             _=watch.tick()=>{
@@ -288,14 +319,38 @@ async fn supervise(
                 let Ok(v)=serde_json::from_str::<Value>(&line) else{break false};
                 if v["v"]!=1{break false;}
                 let done=v["type"]=="terminal";
+                match v["type"].as_str() {
+                    Some("bound") => { native_session_ms.get_or_insert(dispatched_at.elapsed().as_millis() as u64); }
+                    Some("text") => { first_text_ms.get_or_insert(dispatched_at.elapsed().as_millis() as u64); }
+                    _ => {}
+                }
+                let state = done.then(|| {
+                    v["status"].as_str().filter(|state| conversations::terminal(state))
+                        .unwrap_or("interrupted").to_owned()
+                });
                 if conversations::record(s,&c.id,id,v).is_err(){break false;}
-                if done{break true;}
+                if let Some(state) = state {
+                    terminal_state = state;
+                    break true;
+                }
             }
         }
     };
+    tracing::info!(
+        driver = %c.driver,
+        turn_id = id,
+        prepare_ms = starting_since.duration_since(preparing_since).as_millis() as u64,
+        worker_ready_ms = ready_at.duration_since(starting_since).as_millis() as u64,
+        dispatch_ms = dispatched_at.duration_since(preparing_since).as_millis() as u64,
+        native_session_ms = ?native_session_ms,
+        first_text_ms = ?first_text_ms,
+        elapsed_ms = preparing_since.elapsed().as_millis() as u64,
+        state = terminal_state,
+        "Console native turn timing"
+    );
     drop(stdin);
     drop(group);
-    let _ = child.wait().await;
+    let _ = child.kill().await;
     Ok(result)
 }
 pub(super) async fn run(
