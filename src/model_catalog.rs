@@ -1,8 +1,7 @@
 use crate::codex::BackendProfile;
 
-/// Single source of truth for the gpt-5.x model catalogue. `resolve_model()`,
-/// `models::list_models()`, and `cli::setup` all read from this table instead
-/// of maintaining independent copies.
+/// Built-in model metadata and fallback inventory used by model resolution,
+/// model discovery, and CLI setup.
 #[derive(Debug, Clone, Copy)]
 pub struct ModelCatalogEntry {
     pub model_id: &'static str,

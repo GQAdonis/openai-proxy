@@ -9,7 +9,7 @@ mod worker;
 use crate::{AppState, config::ProxyConfig};
 use access::{Access, Actor};
 use axum::{
-    Json, Router,
+    Extension, Json, Router,
     body::Body,
     extract::{DefaultBodyLimit, State},
     http::{HeaderMap, HeaderValue, Method, Request, StatusCode, header},
@@ -127,6 +127,29 @@ impl Server {
         self.access.authenticate(h, &method).map(|(a, _)| a)
     }
 }
+
+/// Reuse the console's native catalogue for the credential selected by the HTTP router.
+#[derive(Clone)]
+pub struct NativeModelDiscovery {
+    server: Console,
+    actor: Actor,
+}
+impl NativeModelDiscovery {
+    pub(crate) async fn models(&self, state: &AppState) -> Option<Vec<Value>> {
+        if state.backend_profile != crate::codex::BackendProfile::ChatGptCodex
+            || state.credentials.codex_home().is_none()
+        {
+            return None;
+        }
+        let models = worker::catalog(&self.server, &self.actor).await.ok()?;
+        let current = state
+            .credentials
+            .observed_snapshot(Some(state.owner_epoch))
+            .ok()?;
+        (current.generation == state.generation).then_some(models)
+    }
+}
+
 pub fn router_with_legacy(state: AppState, legacy: Router, enable_a2a: bool) -> Router {
     let shared = std::env::var_os("PROXY_CONSOLE_PRINCIPALS").is_some();
     let unavailable = || async { Error::storage() };
@@ -170,15 +193,24 @@ pub fn router_with_legacy(state: AppState, legacy: Router, enable_a2a: bool) -> 
                             Ok(v) => v,
                             Err(e) => return e.into_response(),
                         };
-                        state.credentials = actor.credentials;
+                        state.credentials = actor.credentials.clone();
                         Arc::make_mut(&mut state.runtime).memory_scope =
                             Some(format!("actor:{}", access::digest(actor.id.as_bytes())));
+                        req.extensions_mut().insert(NativeModelDiscovery {
+                            server: s.clone(),
+                            actor,
+                        });
                     }
                     req.extensions_mut().insert(state);
                     next.run(req).await
                 }
             },
         ))
+    } else if let Some(actor) = server.access.local_actor() {
+        legacy.layer(Extension(NativeModelDiscovery {
+            server: server.clone(),
+            actor,
+        }))
     } else {
         legacy
     };

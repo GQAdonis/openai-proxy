@@ -160,6 +160,13 @@ fn service_token(root: &Path) -> anyhow::Result<String> {
     Ok(value)
 }
 impl Access {
+    pub(super) fn local_actor(&self) -> Option<Actor> {
+        if self.shared {
+            return None;
+        }
+        self.actors.first().map(|(_, actor)| actor.clone())
+    }
+
     pub fn load(state: &AppState, root: &Path) -> anyhow::Result<Self> {
         let shared_file = std::env::var_os("PROXY_CONSOLE_PRINCIPALS");
         let shared = shared_file.is_some();

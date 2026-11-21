@@ -57,6 +57,7 @@ class Fixture:
         self.workspace = root / "workspace"
         self.workspace.mkdir()
         self.trace = []
+        self.request_models = []
         self.auth_status = 200
         self.reject_hash = None
         self.held_request = threading.Event()
@@ -75,6 +76,7 @@ class Fixture:
                 bearer = self.headers.get("Authorization", "").removeprefix("Bearer ")
                 marker = (self.headers.get("chatgpt-account-id"), digest(bearer))
                 fixture.trace.append(marker)
+                fixture.request_models.append(json.loads(body).get("model"))
                 status = 401 if fixture.reject_hash == marker[1] else fixture.auth_status
                 if status != 200:
                     self.send_response(status)

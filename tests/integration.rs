@@ -110,8 +110,12 @@ async fn models_list_returns_object_type() {
 }
 
 #[tokio::test]
-async fn models_list_contains_gpt_5_4() {
-    let server = test_server();
+async fn models_list_contains_gpt_5_4_for_api_key_profile() {
+    let (state, _) = load_real_auth();
+    if matches!(state.backend_profile, BackendProfile::ChatGptCodex) {
+        return;
+    }
+    let server = TestServer::new(build_app(state, false));
     let body: Value = server.get("/v1/models").await.json();
     let ids: Vec<&str> = body["data"]
         .as_array()
@@ -126,14 +130,12 @@ async fn models_list_contains_gpt_5_4() {
 }
 
 #[tokio::test]
-async fn models_list_contains_codex_mini_for_api_key_profile() {
-    // codex-mini is only listed on OpenAI API key profiles (Responses or Chat Completions).
-    // This test is skipped when the active profile is ChatGptCodex.
+async fn models_list_contains_gpt_5_3_codex_for_api_key_profile() {
     let (state, _) = load_real_auth();
     if matches!(state.backend_profile, BackendProfile::ChatGptCodex) {
-        return; // ChatGPT subscription does not support codex-mini
+        return;
     }
-    let server = test_server();
+    let server = TestServer::new(build_app(state, false));
     let body: Value = server.get("/v1/models").await.json();
     let ids: Vec<&str> = body["data"]
         .as_array()
@@ -142,23 +144,28 @@ async fn models_list_contains_codex_mini_for_api_key_profile() {
         .filter_map(|m| m["id"].as_str())
         .collect();
     assert!(
-        ids.contains(&"codex-mini"),
-        "expected codex-mini in API key model list"
+        ids.contains(&"gpt-5.3-codex"),
+        "expected the canonical gpt-5.3-codex ID in the API key model list"
     );
 }
 
 #[tokio::test]
-async fn models_list_contains_gpt_5_6_tiers_with_correct_limits() {
-    let server = test_server();
+async fn models_list_reports_limits_for_advertised_gpt_5_6_tiers() {
+    let (state, _) = load_real_auth();
+    let subscription = matches!(state.backend_profile, BackendProfile::ChatGptCodex);
+    let server = TestServer::new(build_app(state, false));
     let body: Value = server.get("/v1/models").await.json();
     let models = body["data"].as_array().unwrap();
     for id in ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"] {
-        let model = models
-            .iter()
-            .find(|m| m["id"] == id)
-            .unwrap_or_else(|| panic!("expected {id} in model list"));
-        assert_eq!(model["context_length"], 1_050_000, "{id} context_length");
-        assert_eq!(model["max_output_tokens"], 128_000, "{id} max_output_tokens");
+        if let Some(model) = models.iter().find(|m| m["id"] == id) {
+            assert_eq!(model["context_length"], 1_050_000, "{id} context_length");
+            assert_eq!(
+                model["max_output_tokens"], 128_000,
+                "{id} max_output_tokens"
+            );
+        } else {
+            assert!(subscription, "expected {id} in API key model list");
+        }
     }
 }
 
@@ -170,6 +177,7 @@ async fn models_list_all_have_required_fields() {
         assert!(model["id"].is_string(), "model missing id");
         assert_eq!(model["object"], "model", "model missing object field");
         assert!(model["owned_by"].is_string(), "model missing owned_by");
+        assert!(model["created"].is_u64(), "model missing created timestamp");
     }
 }
 

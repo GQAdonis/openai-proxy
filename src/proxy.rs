@@ -4,7 +4,7 @@ use std::{
 };
 
 use axum::{
-    Json,
+    Extension, Json,
     extract::State,
     http::HeaderMap,
     response::{IntoResponse, Response, Sse, sse::Event},
@@ -18,9 +18,10 @@ use crate::{
     AppState,
     codex::{
         self, BackendProfile, ChatCompletionChunk, ChunkChoice, Delta, PendingFunctionCall,
-        ResponseStreamEvent, ToolCallDelta, ToolCallFunctionDelta, build_chat_completions_request,
-        resolve_model,
+        ResponseStreamEvent, ResponsesRequest, ToolCallDelta, ToolCallFunctionDelta,
+        build_chat_completions_request, resolve_model,
     },
+    console::NativeModelDiscovery,
     error::ProxyError,
     hooks::HookEvent,
     openai::{
@@ -32,6 +33,7 @@ use crate::{
 pub async fn chat_completions(
     State(state): State<AppState>,
     headers: HeaderMap,
+    discovery: Option<Extension<NativeModelDiscovery>>,
     Json(req): Json<ChatCompletionRequest>,
 ) -> Result<Response, ProxyError> {
     let state = state.for_request().await?;
@@ -63,7 +65,25 @@ pub async fn chat_completions(
         BackendProfile::OpenAiResponses => target.supports_responses_api,
         BackendProfile::OpenAiChatCompletions => target.supports_chat_completions,
     };
-    if !available {
+    let mut responses =
+        (state.backend_profile != BackendProfile::OpenAiChatCompletions).then(|| {
+            codex::convert_request(&req, state.default_model.as_deref(), state.backend_profile)
+        });
+    let native_match = if state.backend_profile == BackendProfile::ChatGptCodex
+        && let Some(outbound) = responses.as_mut()
+        && (!available || outbound.model != req.model)
+        && let Some(Extension(discovery)) = discovery
+        && discovery.models(&state).await.is_some_and(|models| {
+            models
+                .iter()
+                .any(|model| model["id"].as_str() == Some(req.model.as_str()))
+        }) {
+        outbound.model.clone_from(&req.model);
+        true
+    } else {
+        false
+    };
+    if !available && !native_match {
         let err = ProxyError::ModelNotAvailable {
             model: target.model_id,
             profile: state.backend_profile.name().to_string(),
@@ -78,21 +98,11 @@ pub async fn chat_completions(
         return Err(err);
     }
 
-    match state.backend_profile {
-        BackendProfile::OpenAiChatCompletions => {
-            if req.stream {
-                stream_chat_completions(state, req).await
-            } else {
-                non_stream_chat_completions(state, req).await
-            }
-        }
-        _ => {
-            if req.stream {
-                stream_responses(state, req).await
-            } else {
-                non_stream_responses(state, req).await
-            }
-        }
+    match (responses, req.stream) {
+        (Some(outbound), true) => stream_responses(state, req, outbound).await,
+        (Some(outbound), false) => non_stream_responses(state, req, outbound).await,
+        (None, true) => stream_chat_completions(state, req).await,
+        (None, false) => non_stream_chat_completions(state, req).await,
     }
 }
 
@@ -103,10 +113,9 @@ pub async fn chat_completions(
 async fn non_stream_responses(
     state: AppState,
     req: ChatCompletionRequest,
+    codex_req: ResponsesRequest,
 ) -> Result<Response, ProxyError> {
     let model_id = req.model.clone();
-    let codex_req =
-        codex::convert_request(&req, state.default_model.as_deref(), state.backend_profile);
 
     tracing::debug!(
         model = %codex_req.model,
@@ -333,10 +342,9 @@ async fn non_stream_responses(
 async fn stream_responses(
     state: AppState,
     req: ChatCompletionRequest,
+    codex_req: ResponsesRequest,
 ) -> Result<Response, ProxyError> {
     let model_id = req.model.clone();
-    let codex_req =
-        codex::convert_request(&req, state.default_model.as_deref(), state.backend_profile);
     let completion_id = format!("chatcmpl-{}", Uuid::new_v4());
 
     tracing::debug!(

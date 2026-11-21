@@ -74,6 +74,8 @@ The three backends have different parameter allowlists. The proxy shapes each re
 
 ## Model catalog
 
+`GET /v1/models` reads the active managed Codex account's visible model picker. New model IDs appear as Codex offers them. The proxy uses the built-in catalogue for API-key routes and when it cannot read the Codex picker.
+
 | Model ID | Context | Output | Notes |
 |----------|--------:|-------:|-------|
 | `gpt-5.5` | 1,000,000 | 32,768 | Default model |

@@ -59,9 +59,17 @@ def main():
         elif method == "initialized":
             continue
         elif method == "model/list":
-            model = (home / "catalogue").read_text().strip() if (home / "catalogue").exists() else "gpt-5.5"
-            result = {"data": [{"id": model, "model": model, "hidden": False, "displayName": "Fixture"}],
-                      "nextCursor": None}
+            path = home / "catalogue-pages.json"
+            if path.exists():
+                params = req["params"]
+                assert params["modelProvider"] == "openai" and not params["includeHidden"]
+                cursor = params.get("cursor")
+                observed("catalogue", cursor=cursor)
+                result = json.loads(path.read_text())[cursor or "first"]
+            else:
+                model = (home / "catalogue").read_text().strip() if (home / "catalogue").exists() else "gpt-5.5"
+                result = {"data": [{"id": model, "model": model, "hidden": False, "displayName": "Fixture"}],
+                          "nextCursor": None}
         elif method == "account/read":
             result = {"account": {"type": "chatgpt"}, "requiresOpenaiAuth": True}
             if req["params"].get("refreshToken"):
