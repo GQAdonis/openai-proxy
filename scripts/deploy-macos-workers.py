@@ -117,18 +117,24 @@ def deploy(plist, config, release, launcher, revision, port):
 
     domain = f"gui/{os.getuid()}"
     target = f"{domain}/{LABEL}"
-    launch("bootout", target)
+    replacing_plist = False
     try:
+        launch("bootout", target)
+        replacing_plist = True
         publish(candidate, plist)
         boot(plist, domain, port)
     except BaseException:
         try:
-            launch("bootout", target, check=False)
-            publish(saved, plist)
-            boot(plist, domain, port)
+            if replacing_plist:
+                publish(saved, plist)
+                launch("bootout", target, check=False)
+                boot(plist, domain, port)
+            elif launch("print", target, check=False).returncode != 0:
+                # A timed-out bootout can still have unloaded the original job.
+                boot(plist, domain, port)
         except Exception as rollback_error:
             raise RuntimeError(f"Rollback failed. Saved LaunchAgent plist: {saved}") from rollback_error
-        print(f"Restored the previous LaunchAgent from {saved}", file=sys.stderr)
+        print(f"Previous LaunchAgent configuration is active. Saved plist: {saved}", file=sys.stderr)
         raise
     return {"commit": revision, "worker": str(worker), "rollbackPlist": str(saved), "health": 200}
 
