@@ -3,7 +3,7 @@ import { isAbsolute, dirname } from "node:path"
 import { realpath } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import { execFileSync } from "node:child_process"
-import { receiveMetrics } from "./codex-metrics.mjs"
+import { isEarlyMetric, receiveMetrics, recordEarlyMetrics } from "./codex-metrics.mjs"
 
 // The pinned SDK exposes native errors as messages. Export only stable, redacted
 // categories; an unrecognized message provides no evidence of an entitlement.
@@ -29,8 +29,14 @@ export function create(input, send) {
       const workspace = await realpath(input.workspace)
       const env = { PATH: "/usr/bin:/bin", HOME: dirname(home), CODEX_HOME: home,
         PROXY_CODEX_BINARY: binary, LANG: "C", NO_COLOR: "1" }
+      const earlyMetrics = []
+      const versionProbe = performance.now()
       if (execFileSync(binary, ["--version"], {env, timeout:3000, encoding:"utf8", maxBuffer:4096}).trim() !== "codex-cli 0.169.0") {
         throw new Error("codex_version_mismatch")
+      }
+      if (input.localMetrics === true) {
+        earlyMetrics.push({stage:"native_bootstrap", operation:"version_probe",
+          count:1, durationMs:performance.now() - versionProbe})
       }
       const disabled = ["shell_tool","unified_exec","experimental_use_unified_exec_tool","apps","plugins","hooks",
         "plugin_hooks","codex_hooks","multi_agent","multi_agent_v2","js_repl","code_mode","code_mode_host","image_generation",
@@ -66,6 +72,7 @@ export function create(input, send) {
       const drainDeadline = metrics && new Promise(resolve => { finishDrain = resolve })
       async function consume() {
         try {
+          metrics?.startExec()
           const {events} = await thread.runStreamed(input.prompt, {signal:controller.signal})
           for await (const event of events) {
             if (completed) continue
@@ -108,7 +115,20 @@ export function create(input, send) {
         return await (metrics ? Promise.race([consume(), drainDeadline]) : consume())
       } finally {
         clearTimeout(metricsDrain)
-        metrics?.drain(send)
+        metrics?.drain((type, row) => {
+          if (isEarlyMetric(row.stage, row.operation)) earlyMetrics.push(row)
+          else send(type, row)
+        })
+        if (earlyMetrics.length) {
+          let logDeadline
+          try {
+            await Promise.race([recordEarlyMetrics(earlyMetrics), new Promise(resolve => {
+              logDeadline = setTimeout(resolve, 250)
+            })])
+          } finally {
+            clearTimeout(logDeadline)
+          }
+        }
       }
     },
   }
