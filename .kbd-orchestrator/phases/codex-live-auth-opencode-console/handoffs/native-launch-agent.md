@@ -30,3 +30,13 @@ To roll back this update to the first native release, run the restore script for
 ```bash
 /bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261120T213502Z/restore.sh"
 ```
+
+## Native model catalog update
+
+The active macOS executable builds from `5305903`. On November 21, 2026, the live `/v1/models` response matched all 10 model IDs in the active Codex picker. The packaged regression exercised streaming and non-streaming dispatch, shared-principal isolation, credential replacement, and static fallback with synthetic peers.
+
+To restore the previous console selector release from this deployment, run the restore script for the active executable.
+
+```bash
+/bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261121T100634Z/restore.sh"
+```
