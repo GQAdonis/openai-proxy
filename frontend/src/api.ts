@@ -1,6 +1,7 @@
 export type Session = {
   role: string
   mode: string
+  automatic: boolean
   workspace: string
   csrfToken: string
 }

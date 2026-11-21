@@ -63,6 +63,15 @@ function Pair({ onReady }: { onReady: (session: Session) => void }) {
     </main>
   )
 }
+async function connect(signal: AbortSignal) {
+  try {
+    return await api<Session>('/session', undefined, 'GET', undefined, signal)
+  } catch (err) {
+    if (!(err instanceof ApiError && err.status === 401)) throw err
+    return api<Session>('/session', undefined, 'POST', {}, signal)
+  }
+}
+
 function App() {
   const [session, setSession] = useState<Session | null | undefined>()
   const [connection, setConnection] = useState<Connection | null>(null),
@@ -77,21 +86,33 @@ function App() {
   }, [])
   useEffect(() => {
     const controller = new AbortController()
-    api<Session>('/session', undefined, 'GET', undefined, controller.signal)
-      .then(setSession)
-      .catch((err) => {
+    let connecting = false
+    async function start() {
+      if (connecting) return
+      connecting = true
+      setSession(undefined)
+      setConnection(null)
+      setError('')
+      try {
+        const next = await connect(controller.signal)
+        if (!controller.signal.aborted) setSession(next)
+      } catch (err) {
         if (controller.signal.aborted) return
         if (err instanceof ApiError && [401, 403].includes(err.status)) reset()
         else setError(errorText(err))
-      })
+      } finally {
+        connecting = false
+      }
+    }
+    void start()
     const pop = () =>
       setSettings(location.pathname.replace(/\/$/, '') === '/ui/settings')
     window.addEventListener('popstate', pop)
-    window.addEventListener('console-session-expired', reset)
+    window.addEventListener('console-session-expired', start)
     return () => {
       controller.abort()
       window.removeEventListener('popstate', pop)
-      window.removeEventListener('console-session-expired', reset)
+      window.removeEventListener('console-session-expired', start)
     }
   }, [reset])
   const reload = useCallback(
@@ -160,20 +181,22 @@ function App() {
                 Settings
               </a>
             </nav>
-            <Button
-              tone="quiet"
-              className="signout"
-              onClick={async () => {
-                try {
-                  await api('/session', session, 'DELETE')
-                  reset()
-                } catch (err) {
-                  setError(errorText(err))
-                }
-              }}
-            >
-              Sign out
-            </Button>
+            {!session.automatic && (
+              <Button
+                tone="quiet"
+                className="signout"
+                onClick={async () => {
+                  try {
+                    await api('/session', session, 'DELETE')
+                    reset()
+                  } catch (err) {
+                    setError(errorText(err))
+                  }
+                }}
+              >
+                Sign out
+              </Button>
+            )}
           </>
         )}
       </header>

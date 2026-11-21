@@ -274,14 +274,20 @@ pub fn router_with_legacy(state: AppState, legacy: Router, enable_a2a: bool) -> 
     guarded.merge(api).merge(crate::web_assets::router())
 }
 fn session_info(s: &Server, a: &Actor, csrf: Option<String>) -> Value {
-    json!({"role":if a.admin{"admin"}else{"chat"},"mode":if s.access.shared{"shared"}else{"local"},"workspace":"default","csrfToken":csrf})
+    json!({
+        "role": if a.admin { "admin" } else { "chat" },
+        "mode": if s.access.shared { "shared" } else { "local" },
+        "automatic": s.access.local_auto_session(),
+        "workspace": "default",
+        "csrfToken": csrf,
+    })
 }
 #[derive(Deserialize)]
 struct Pair {
-    token: String,
+    token: Option<String>,
 }
 async fn pair(State(s): State<Console>, h: HeaderMap, Json(body): Json<Pair>) -> Result<Response> {
-    let (a, cookie, csrf) = s.access.login(&h, &body.token)?;
+    let (a, cookie, csrf) = s.access.login(&h, body.token.as_deref())?;
     let mut resp = Json(session_info(&s, &a, Some(csrf))).into_response();
     let secure = if s.access.secure_cookie() {
         "; Secure"

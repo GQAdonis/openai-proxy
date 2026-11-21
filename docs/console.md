@@ -21,6 +21,8 @@ openai-proxy serve --host 127.0.0.1 --port 8181
 
 The browser receives an eight-hour HttpOnly, SameSite=Strict session cookie and sends a CSRF token on mutations. Sign out ends that session. Local integrations use a separate service token, supplied through `PROXY_CONSOLE_TOKEN` or initialized as the private `service-token` file under the console data directory. Upstream OAuth and API credentials belong in the selected server-side store. [Credential source selection and renewal](codex-auth.md)
 
+For a private workstation, set `PROXY_CONSOLE_LOCAL_AUTO_SESSION=1` and bind the proxy to `127.0.0.1` or `::1`. Open the console directly on that listener. The browser starts a session automatically and can use chat and settings without an access code. The listener grants console access to local clients, so use this mode only on a trusted machine and keep it off reverse proxies. A configured browser origin must use loopback and the listener's port. Shared deployments always require a principal token.
+
 ## Install the native drivers
 
 For a source deployment, keep `workers/` and `plugin/` as siblings in a trusted installation directory. Use the checked-in worker entrypoints and lockfiles, preserve the executable bit on `workers/codex-exec`, and install the platform-native Codex CLI **0.169.0**. From that installation root, prepare the dependencies and point the service at absolute paths.

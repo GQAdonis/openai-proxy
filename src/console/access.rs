@@ -8,6 +8,7 @@ use std::{
     collections::HashMap,
     fs,
     io::Write,
+    net::SocketAddr,
     path::{Path, PathBuf},
     sync::Mutex,
     time::{Duration, Instant},
@@ -42,6 +43,7 @@ struct Session {
 }
 pub(super) struct Access {
     pub shared: bool,
+    automatic_port: Option<u16>,
     actors: Vec<(String, Actor)>,
     sessions: Mutex<HashMap<String, Session>>,
     origin: Option<String>,
@@ -160,6 +162,10 @@ fn service_token(root: &Path) -> anyhow::Result<String> {
     Ok(value)
 }
 impl Access {
+    pub(super) fn local_auto_session(&self) -> bool {
+        self.automatic_port.is_some()
+    }
+
     pub(super) fn local_actor(&self) -> Option<Actor> {
         if self.shared {
             return None;
@@ -297,7 +303,25 @@ impl Access {
                 "invalid browser origin"
             );
         }
-        let pairing = if shared {
+        let automatic_port =
+            if !shared && std::env::var("PROXY_CONSOLE_LOCAL_AUTO_SESSION").as_deref() == Ok("1") {
+                let listen: SocketAddr = state.bind_addr.parse()?;
+                anyhow::ensure!(
+                    listen.ip().is_loopback(),
+                    "automatic local console access requires a loopback listener"
+                );
+                if let Some(origin) = &origin {
+                    let url = reqwest::Url::parse(origin)?;
+                    anyhow::ensure!(
+                        is_loopback(&url) && url.port_or_known_default() == Some(listen.port()),
+                        "automatic local console access requires a matching loopback browser origin"
+                    );
+                }
+                Some(listen.port())
+            } else {
+                None
+            };
+        let pairing = if shared || automatic_port.is_some() {
             None
         } else {
             let mut p = Pairing {
@@ -311,6 +335,7 @@ impl Access {
         };
         Ok(Self {
             shared,
+            automatic_port,
             actors,
             origin,
             pairing,
@@ -353,9 +378,34 @@ impl Access {
             Err(Error::forbidden())
         }
     }
-    pub fn login(&self, h: &HeaderMap, token: &str) -> Result<(Actor, String, String)> {
+    pub fn login(&self, h: &HeaderMap, token: Option<&str>) -> Result<(Actor, String, String)> {
         self.check_origin(h, true)?;
-        let i = if let Some(state) = &self.pairing {
+        let i = if let Some(port) = self.automatic_port {
+            if token.is_some() {
+                return Err(Error::unauthorized());
+            }
+            // Browsers set this themselves. An unrelated page on the same Mac
+            // cannot use a different site or port to start a console session.
+            let same_origin = h.get("sec-fetch-site").is_some_and(|v| v == "same-origin");
+            let loopback_origin =
+                h.get("origin")
+                    .and_then(|v| v.to_str().ok())
+                    .is_some_and(|origin| {
+                        let authority = origin.split_once("://").map(|(_, authority)| authority);
+                        let host = h.get("host").and_then(|v| v.to_str().ok());
+                        authority
+                            .zip(host)
+                            .is_some_and(|(a, b)| a.eq_ignore_ascii_case(b))
+                            && reqwest::Url::parse(origin).is_ok_and(|url| {
+                                is_loopback(&url) && url.port_or_known_default() == Some(port)
+                            })
+                    });
+            if !same_origin || !loopback_origin {
+                return Err(Error::forbidden());
+            }
+            0
+        } else if let Some(state) = &self.pairing {
+            let token = token.ok_or_else(Error::unauthorized)?;
             let mut p = state.lock().map_err(|_| Error::storage())?;
             let valid = p.expires > Instant::now()
                 && bool::from(p.hash.as_bytes().ct_eq(digest(token.as_bytes()).as_bytes()));
@@ -367,7 +417,9 @@ impl Access {
             }
             0
         } else {
-            self.by_token(token).ok_or_else(Error::unauthorized)?
+            token
+                .and_then(|value| self.by_token(value))
+                .ok_or_else(Error::unauthorized)?
         };
         let cookie = secret();
         let csrf = secret();
