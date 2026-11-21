@@ -1,5 +1,5 @@
 import { Codex } from "@openai/codex-sdk"
-import { isAbsolute, dirname, join } from "node:path"
+import { isAbsolute, join } from "node:path"
 import { readFile, realpath, unlink } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import { execFileSync } from "node:child_process"
@@ -27,7 +27,10 @@ export function create(input, send) {
       const binary = await realpath(input.codexPath)
       const home = await realpath(input.codexHome)
       const workspace = await realpath(input.workspace)
-      const env = { PATH: "/usr/bin:/bin", HOME: dirname(home), CODEX_HOME: home,
+      // The supervisor gives each conversation a private working directory.
+      // Keep Codex auth and history in its approved profile without inheriting
+      // the machine user's extra HOME/.agents/skills discovery root.
+      const env = { PATH: "/usr/bin:/bin", HOME: process.cwd(), CODEX_HOME: home,
         PROXY_CODEX_BINARY: binary, LANG: "C", NO_COLOR: "1" }
       const earlyMetrics = []
       const versionProbe = performance.now()
@@ -59,8 +62,12 @@ export function create(input, send) {
         // Collect during the turn as well as on shutdown. A short-lived exec
         // process may exit before the exporter would normally wake up.
         env.OTEL_METRIC_EXPORT_INTERVAL = "1000"
+        env.OTEL_BSP_MAX_EXPORT_BATCH_SIZE = "64"
+        env.OTEL_BSP_SCHEDULE_DELAY = "500"
         config.analytics = { enabled:false }
-        config.otel = { exporter:"none", trace_exporter:"none", log_user_prompt:false,
+        config.otel = { exporter:"none", log_user_prompt:false,
+          log_agent_responses:false,
+          trace_exporter:{"otlp-http":{endpoint:metrics.startupSpansEndpoint, protocol:"json"}},
           metrics_exporter:{"otlp-http":{endpoint:metrics.endpoint, protocol:"json"}} }
       }
       const client = new Codex({codexPathOverride:fileURLToPath(new URL("./codex-exec", import.meta.url)), env, config,

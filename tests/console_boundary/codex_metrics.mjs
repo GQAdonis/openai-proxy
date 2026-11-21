@@ -22,6 +22,18 @@ const rows = []
 try {
   const invalid = await fetch(receiver.endpoint.replace(/\/[^/]+$/, "/other"), {method:"POST", body:"{}"})
   assert.equal(invalid.status, 404)
+  const timing = {startTimeUnixNano:"1700000000000000000", endTimeUnixNano:"1700000000500000000"}
+  const exported = await fetch(receiver.startupSpansEndpoint, {
+    method:"POST", body:JSON.stringify({resourceSpans:[{
+      resource:{attributes:[label("account", privateFixture)]},
+      scopeSpans:[{spans:[
+        {...timing, name:"session_init.thread_persistence", attributes:[label("token", privateFixture)],
+          events:[{name:privateFixture}]},
+        {...timing, name:privateFixture},
+      ]}],
+    }]}),
+  })
+  assert.equal(exported.status, 200)
   for (const metrics of [
     [histogram("codex.startup.phase.duration_ms", 1, 15, label("phase", "thread_start_create_thread")),
       histogram("codex.startup.phase.duration_ms", 1, 55, label("phase", privateFixture)),
@@ -55,6 +67,7 @@ assert.deepEqual(rows, [
   {type:"diagnostic_metrics", stage:"sqlite_init", operation:"backfill_gate", count:1, durationMs:30},
   {type:"diagnostic_metrics", stage:"auth_selection", operation:"model", count:3, durationMs:5},
   {type:"diagnostic_metrics", stage:"model_fetch", operation:"all", count:1, durationMs:25},
+  {type:"diagnostic_metrics", stage:"thread_init", operation:"thread_persistence", count:1, durationMs:500},
 ])
 assert(!JSON.stringify(rows).includes(privateFixture))
 const folder = await mkdtemp(join(tmpdir(), "codex-startup-metrics-"))

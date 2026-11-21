@@ -20,12 +20,31 @@ const sqlitePhases = new Set([
   "open_memories", "migrate_memories", "open_queue", "migrate_queue",
   "open_thread_history", "migrate_thread_history", "ensure_backfill_state", "post_init_query", "backfill_gate",
 ])
+const threadSpans = new Map([
+  ["app_server.thread_start.create_thread", "create_thread"],
+  ["thread_spawn", "thread_spawn"],
+  ["session_init", "session_init"],
+  ["session_init.thread_persistence", "thread_persistence"],
+  ["session_init.state_db", "state_db"],
+  ["session_init.auth_mcp", "auth_mcp"],
+  ["session_init.plugin_skill_warmup", "plugin_skill_warmup"],
+  ["session_init.thread_name_lookup", "thread_name_lookup"],
+  ["session_init.network_proxy", "network_proxy"],
+  ["session_init.mcp_manager_init", "mcp_manager_init"],
+  ["session_init.required_mcp_wait", "required_mcp_wait"],
+  ["agents_md.refresh", "agents_md_refresh"],
+  ["plugins_for_config", "plugin_discovery"],
+  ["skills_for_config", "skill_discovery"],
+  ["list_models", "model_discovery"],
+])
+const threadPhases = new Set(threadSpans.values())
 const rows = value => Array.isArray(value) ? value : []
 
 export function isEarlyMetric(stage, operation) {
   return (stage === "native_bootstrap" && ["version_probe", "until_telemetry", "launcher_spawn"].includes(operation)) ||
     (stage === "sqlite_init" && sqlitePhases.has(operation)) ||
-    (stage === "cloud_config_fetch" && operation === "all")
+    (stage === "cloud_config_fetch" && operation === "all") ||
+    (stage === "thread_init" && threadPhases.has(operation))
 }
 
 export async function recordEarlyMetrics(records, directory = process.cwd()) {
@@ -105,17 +124,52 @@ function exporterStart(body) {
   }
 }
 
+function traceDurations(body) {
+  const result = []
+  for (const resource of rows(body?.resourceSpans)) {
+    for (const scope of rows(resource?.scopeSpans)) {
+      for (const span of rows(scope?.spans)) {
+        const operation = threadSpans.get(span?.name)
+        if (!operation || typeof span.startTimeUnixNano !== "string" ||
+            typeof span.endTimeUnixNano !== "string" ||
+            !/^\d{16,20}$/.test(span.startTimeUnixNano) ||
+            !/^\d{16,20}$/.test(span.endTimeUnixNano)) continue
+        const duration = BigInt(span.endTimeUnixNano) - BigInt(span.startTimeUnixNano)
+        if (duration >= 0n && duration <= 3_600_000_000_000n) {
+          result.push({stage:"thread_init", operation, count:1, durationMs:Number(duration) / 1_000_000})
+        }
+      }
+    }
+  }
+  return result
+}
+
 export function receiveMetrics() {
   const path = "/v1/metrics/" + crypto.randomUUID()
+  const spansPath = "/v1/traces/" + crypto.randomUUID()
   const latest = new Map()
+  const threadTimings = new Map()
   let spawnWallMs
   let exporterWallMs
   const server = Bun.serve({
-    hostname:"127.0.0.1", port:0, maxRequestBodySize:262_144,
+    hostname:"127.0.0.1", port:0, maxRequestBodySize:1_048_576,
     async fetch(request) {
-      if (new URL(request.url).pathname !== path || request.method !== "POST") return new Response(null, {status:404})
+      const pathname = new URL(request.url).pathname
+      if ((pathname !== path && pathname !== spansPath) || request.method !== "POST") return new Response(null, {status:404})
       try {
         const body = await request.json()
+        if (pathname === spansPath) {
+          for (const row of traceDurations(body)) {
+            const previous = threadTimings.get(row.operation)
+            if (previous) {
+              previous.count += 1
+              previous.durationMs += row.durationMs
+            } else {
+              threadTimings.set(row.operation, row)
+            }
+          }
+          return Response.json({})
+        }
         exporterWallMs ??= exporterStart(body)
         const batch = new Map()
         for (const row of readMetrics(body)) {
@@ -147,6 +201,7 @@ export function receiveMetrics() {
   })
   return {
     endpoint:"http://127.0.0.1:" + server.port + path,
+    startupSpansEndpoint:"http://127.0.0.1:" + server.port + spansPath,
     startExec() {
       spawnWallMs = Date.now()
     },
@@ -157,6 +212,7 @@ export function receiveMetrics() {
         send("diagnostic_metrics", {stage:"native_bootstrap", operation:"until_telemetry", count:1, durationMs})
       }
       for (const row of latest.values()) send("diagnostic_metrics", row)
+      for (const row of threadTimings.values()) send("diagnostic_metrics", row)
     },
   }
 }
