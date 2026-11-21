@@ -1,6 +1,6 @@
 import { Codex } from "@openai/codex-sdk"
-import { isAbsolute, dirname } from "node:path"
-import { realpath } from "node:fs/promises"
+import { isAbsolute, dirname, join } from "node:path"
+import { readFile, realpath, unlink } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import { execFileSync } from "node:child_process"
 import { isEarlyMetric, receiveMetrics, recordEarlyMetrics } from "./codex-metrics.mjs"
@@ -48,9 +48,12 @@ export function create(input, send) {
         ...(input.credentialStore ? { cli_auth_credentials_store: input.credentialStore } : {}),
       }
       let metrics
+      let spawnTimingPath
       if (input.localMetrics === true) {
         // Diagnostics must not make chat depend on the availability of a local port.
         try { metrics = receiveMetrics() } catch { /* optional diagnostics */ }
+        spawnTimingPath = join(process.cwd(), ".codex-spawn-" + crypto.randomUUID())
+        env.PROXY_CODEX_SPAWN_TIMING = spawnTimingPath
       }
       if (metrics) {
         // Collect during the turn as well as on shutdown. A short-lived exec
@@ -121,8 +124,21 @@ export function create(input, send) {
         })
         if (earlyMetrics.length) {
           let logDeadline
+          const persist = async () => {
+            if (spawnTimingPath) {
+              try {
+                const duration = (await readFile(spawnTimingPath, "utf8")).trim()
+                if (/^\d{1,12}$/.test(duration)) {
+                  earlyMetrics.push({stage:"native_bootstrap", operation:"launcher_spawn",
+                    count:1, durationMs:Number(duration) / 1000})
+                }
+                await unlink(spawnTimingPath)
+              } catch { /* The portable shell launcher does not emit this measurement. */ }
+            }
+            await recordEarlyMetrics(earlyMetrics)
+          }
           try {
-            await Promise.race([recordEarlyMetrics(earlyMetrics), new Promise(resolve => {
+            await Promise.race([persist(), new Promise(resolve => {
               logDeadline = setTimeout(resolve, 250)
             })])
           } finally {

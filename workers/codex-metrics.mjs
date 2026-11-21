@@ -23,7 +23,7 @@ const sqlitePhases = new Set([
 const rows = value => Array.isArray(value) ? value : []
 
 export function isEarlyMetric(stage, operation) {
-  return (stage === "native_bootstrap" && ["version_probe", "until_telemetry"].includes(operation)) ||
+  return (stage === "native_bootstrap" && ["version_probe", "until_telemetry", "launcher_spawn"].includes(operation)) ||
     (stage === "sqlite_init" && sqlitePhases.has(operation)) ||
     (stage === "cloud_config_fetch" && operation === "all")
 }

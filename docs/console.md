@@ -27,6 +27,8 @@ To diagnose Codex startup on a private workstation, set `PROXY_CODEX_LOCAL_METRI
 
 On macOS, set `ProcessType` to `Interactive` for a user LaunchAgent dedicated to the loopback console. This gives browser-initiated chat and its Codex subprocess the resource policy used by interactive apps. The setting belongs in the LaunchAgent plist and takes effect when the job is reloaded.
 
+For the native macOS worker bundle, compile `workers/codex-exec.c` as its executable `workers/codex-exec`. The launcher calls `posix_spawn`, passes the same isolation flags as the portable shell launcher, and forwards cancellation. With local metrics enabled, it also records only the elapsed native spawn time.
+
 ## Install the native drivers
 
 For a source deployment, keep `workers/` and `plugin/` as siblings in a trusted installation directory. Use the checked-in worker entrypoints and lockfiles, preserve the executable bit on `workers/codex-exec`, and install the platform-native Codex CLI **0.169.0**. From that installation root, prepare the dependencies and point the service at absolute paths.
