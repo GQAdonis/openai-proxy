@@ -23,6 +23,8 @@ The browser receives an eight-hour HttpOnly, SameSite=Strict session cookie and 
 
 For a private workstation, set `PROXY_CONSOLE_LOCAL_AUTO_SESSION=1` and bind the proxy to `127.0.0.1` or `::1`. Open the console directly on that listener. The browser starts a session automatically and can use chat and settings without an access code. The listener grants console access to local clients, so use this mode only on a trusted machine and keep it off reverse proxies. A configured browser origin must use loopback and the listener's port. Shared deployments always require a principal token.
 
+To diagnose Codex startup on a private workstation, set `PROXY_CODEX_LOCAL_METRICS=1` with the loopback listener. Look for `Codex local duration` in the service log alongside `Console native turn timing`. Codex exports metrics over an ephemeral loopback connection. The proxy retains an internal turn ID, approved phase and operation names, sample counts, and total milliseconds. Codex log and trace exporters are disabled in this mode. The auth series cover proxy snapshot resolution and native credential selection and storage. A model fetch timer covers the fetch after credential selection. Cache lookups and model fetches are separate metrics. A cancelled or failed native process may exit before its final metrics flush.
+
 ## Install the native drivers
 
 For a source deployment, keep `workers/` and `plugin/` as siblings in a trusted installation directory. Use the checked-in worker entrypoints and lockfiles, preserve the executable bit on `workers/codex-exec`, and install the platform-native Codex CLI **0.169.0**. From that installation root, prepare the dependencies and point the service at absolute paths.

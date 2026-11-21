@@ -161,6 +161,38 @@ impl Drop for ProcessGroup {
         }
     }
 }
+fn log_codex_metric(id: &str, frame: &Value) {
+    let stage = frame["stage"].as_str().unwrap_or_default();
+    let operation = frame["operation"].as_str().unwrap_or_default();
+    if !matches!(
+        (stage, operation),
+        (
+            "startup",
+            "thread_start_create_thread" | "thread_start_total"
+        ) | ("auth_selection", "model" | "all")
+            | ("auth_storage", "load" | "save" | "delete" | "all")
+            | (
+                "auth_refresh_persist" | "model_cache_load" | "model_fetch",
+                "all"
+            )
+    ) {
+        return;
+    }
+    if let (Some(count @ 1..=100_000), Some(duration_ms)) =
+        (frame["count"].as_u64(), frame["durationMs"].as_f64())
+        && (0.0..=3_600_000.0).contains(&duration_ms)
+    {
+        tracing::info!(
+            turn_id = id,
+            stage,
+            operation,
+            count,
+            duration_ms,
+            "Codex local duration"
+        );
+    }
+}
+
 async fn supervise(
     s: &Console,
     a: &Actor,
@@ -184,12 +216,28 @@ async fn supervise(
         .join(&c.id);
     access::private_dir(&root).map_err(|_| Error::storage())?;
     let mut start = json!({"v":1,"type":"start","workspace":c.workspace,"nativeId":c.native_id,"prompt":prompt,"model":c.model,"database":root.join("sessions.sqlite")});
+    let local_metrics = c.driver == "codex"
+        && !s.access.shared
+        && std::env::var("PROXY_CODEX_LOCAL_METRICS").as_deref() == Ok("1")
+        && s.app
+            .bind_addr
+            .parse::<std::net::SocketAddr>()
+            .is_ok_and(|addr| addr.ip().is_loopback());
     if c.driver == "codex" {
-        let snap = a
-            .credentials
-            .snapshot()
-            .await
-            .map_err(|_| Error::unauthorized())?;
+        let auth_started_at = Instant::now();
+        let snapshot = a.credentials.snapshot().await;
+        if local_metrics {
+            start["localMetrics"] = Value::Bool(true);
+            tracing::info!(
+                turn_id = id,
+                stage = "proxy_auth",
+                operation = "snapshot",
+                count = 1,
+                duration_ms = auth_started_at.elapsed().as_secs_f64() * 1000.0,
+                "Codex local duration"
+            );
+        }
+        let snap = snapshot.map_err(|_| Error::unauthorized())?;
         if snap.backend_profile != crate::codex::BackendProfile::ChatGptCodex {
             return Err(Error::forbidden());
         }
@@ -318,6 +366,10 @@ async fn supervise(
                 let Some(Ok(line))=frame else{break false};
                 let Ok(v)=serde_json::from_str::<Value>(&line) else{break false};
                 if v["v"]!=1{break false;}
+                if v["type"]=="diagnostic_metrics" {
+                    if local_metrics { log_codex_metric(id, &v); }
+                    continue;
+                }
                 let done=v["type"]=="terminal";
                 match v["type"].as_str() {
                     Some("bound") => { native_session_ms.get_or_insert(dispatched_at.elapsed().as_millis() as u64); }
