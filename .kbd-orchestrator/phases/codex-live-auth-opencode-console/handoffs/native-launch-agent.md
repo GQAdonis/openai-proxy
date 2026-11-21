@@ -40,3 +40,13 @@ To restore the previous console selector release from this deployment, run the r
 ```bash
 /bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261121T100634Z/restore.sh"
 ```
+
+## KnowMe branding update
+
+The active macOS executable builds from `213ed70`. Pairing, chat, and settings use the KnowMe desktop identity. The packaged console passed the light and dark browser checks at 320 px and 1440 px. The deployed service returned the canonical favicon, all four embedded typefaces, and valid health and model responses. An exact live model-list comparison caused the first cutover to roll back. The retry verified the API response shape and observed the same eight model IDs before and after restart.
+
+To restore the previous console from this deployment, run the restore script for the active executable.
+
+```bash
+/bin/bash "$HOME/Library/Application Support/OpenAI Proxy/rollbacks/20261121T165408Z/restore.sh"
+```
