@@ -31,6 +31,8 @@ On macOS, set `ProcessType` to `Interactive` for a user LaunchAgent dedicated to
 
 For the native macOS worker bundle, compile `workers/codex-exec.c` as its executable `workers/codex-exec`. The launcher calls `posix_spawn`, passes the same isolation flags as the portable shell launcher, and forwards cancellation. With local metrics enabled, it also records only the elapsed native spawn time.
 
+To deploy worker code from the current Git commit to an existing versioned KnowMe LaunchAgent, run `python3 scripts/deploy-macos-workers.py` from the checkout. The script hard-links the active native launcher into the new release and runs a local `/usr/bin/true` startup probe before stopping the job. It keeps the installed proxy binary, worker dependencies, and OpenCode plugin. It saves the previous plist, restarts the job, and restores that plist if the new service fails its health check. For an intentional launcher upgrade, pass `--launcher /absolute/path/to/codex-exec` with a compiled executable on the same filesystem.
+
 ## Install the native drivers
 
 For a source deployment, keep `workers/` and `plugin/` as siblings in a trusted installation directory. Use the checked-in worker entrypoints and lockfiles, preserve the executable bit on `workers/codex-exec`, and install the platform-native Codex CLI **0.169.0**. From that installation root, prepare the dependencies and point the service at absolute paths.
