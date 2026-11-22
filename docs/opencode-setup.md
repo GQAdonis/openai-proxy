@@ -41,7 +41,9 @@ The plugin reads `/api/v1/drivers/codex/v1/models` and sends subscription turns 
 
 For interactive login in a local V2 host, set `OPENAI_PROXY_LOGIN_HOME` and `OPENAI_PROXY_LOGIN_BINARY` to absolute paths for the service owner's Codex profile and native executable. The host login command waits for the service to observe the new credentials. You can also run `codex login` in the assigned profile directly. The service watches that store, and `/codex-reconcile` in OpenCode requests an immediate refresh after login. [Codex credential operation](codex-auth.md)
 
-The provider declares text-only models. A tool-capable OpenCode session can invoke `delegate_codex` when the supervisor has bound its parent session, message and workspace and the user approves. The tool returns one text result. Native SDK tool events remain observations of actions performed by the native driver.
+The `codex/` provider accepts text messages. The plugin omits OpenCode's tool offers and generic output-token hint on this route. The Codex SDK controls the native turn, and the proxy limits the combined prompt to 64 KiB. A dedicated OpenCode profile can keep unrelated global plugins and large automatically discovered skill catalogues out of the request.
+
+A tool-capable OpenCode session can invoke `delegate_codex` when the supervisor has bound its parent session, message and workspace and the user approves. The tool returns one text result. Native SDK tool events remain observations of actions performed by the native driver.
 
 ## Provision local clients
 

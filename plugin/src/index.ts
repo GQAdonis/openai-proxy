@@ -3,6 +3,7 @@ import { isAbsolute } from "node:path"
 import { Integration, Plugin, Provider } from "@opencode/plugin"
 import { authorization, inventory, providerID, request, serviceOrigin } from "./config"
 import { registerDelegation } from "./delegation"
+import { subscriptionRequest } from "./subscription-request"
 
 export default Plugin.define({
   id: "openai-proxy.codex",
@@ -18,9 +19,11 @@ export default Plugin.define({
     const connection = () => ctx.integration.connection.active(integrationID)
     let models = await inventory()
     let activeConnection = await connection()
+    let ownsProvider = false
 
     await ctx.provider.transform(editor => {
-      if (editor.get(providerID)) return
+      ownsProvider = !editor.get(providerID)
+      if (!ownsProvider) return
       editor.add({
         info: { ...Provider.Info.empty(providerID), integrationID, name: "Codex via openai-proxy",
           activation: "enabled", package: "@opencode/ai/providers/openai-compatible",
@@ -37,10 +40,17 @@ export default Plugin.define({
           command:[process.execPath,fileURLToPath(new URL("./login.mjs",import.meta.url))]}})
       }
     })
-    await ctx.session.hook("http.request", event => {
+    for (const kind of ["context", "compaction", "generate"] as const) {
+      await ctx.session.hook(kind, event => {
+        if (ownsProvider) event.tools = {}
+      }, { providerID })
+    }
+    await ctx.session.hook("http.request", async event => {
       const url = new URL(event.request.url)
       if (url.origin === origin.origin && url.pathname.startsWith(prefix + "/")) {
-        event.request = new Request(event.request, { redirect: "error" })
+        event.request = event.request.method === "POST" && url.pathname === prefix + "/chat/completions"
+          ? await subscriptionRequest(event.request)
+          : new Request(event.request, { redirect: "error" })
         event.request.headers.set("authorization", authorization())
       }
     }, { providerID })
