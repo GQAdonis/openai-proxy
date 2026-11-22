@@ -5,6 +5,8 @@
 **Method:** Sycophancy-corrected assessment. Flattery, scope inflation, and consensus-following are treated as failure modes. Protocol hype is weighed against the actual codebase and use cases.  
 **Scope:** Evaluate whether adding A2A (Agent-to-Agent), AG-UI (Agent-User Interaction), and/or A2UI (Agent-to-UI) support — along with a runtime extensibility model via hooks and config files — is genuinely valuable for this repository.
 
+This assessment records the May 2026 proposal. Current behavior is documented separately in the [Agent Card reference](a2a.md), [AG-UI endpoint reference](ag-ui.md), [embedded console guide](console.md), and [webhook reference](hooks.md).
+
 ---
 
 ## Sycophancy Correction Pre-Check

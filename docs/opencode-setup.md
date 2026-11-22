@@ -1,10 +1,10 @@
 # OpenCode 2.x setup
 
-The native plugin serves the authenticated service user's Codex subscription through the dedicated `/api/v1/drivers/codex/v1` endpoint. The service validates the user's account and model access on each turn. The console's selected chat driver is independent. A Pro usage assertion requires a consenting subscriber's provider-side allowance record correlated with the turn.
+There are two OpenCode integrations. The external V2 plugin lets an OpenCode host use the signed-in owner's ChatGPT subscription through the proxy's Codex SDK route. The KnowMe console's OpenCode chat driver uses the in-process OpenCode SDK with its own configured upstream. Set up the path you want to use.
 
 ## Load the plugin
 
-The release baseline is OpenCode 2.3.0. Later stable releases below 3.0 can use the V2 interface after a host capability check. A later release requires its own discovery and turn evidence for certification. The server plugin runs in terminal and headless hosts.
+The verified external host baseline is OpenCode 2.3.0. The plugin accepts stable 2.x hosts from 2.3.0 onward. Verify discovery and a real turn when changing the host version. The server plugin runs in terminal and headless hosts.
 
 Build the server entry before loading a checkout or packing a tarball.
 
@@ -15,7 +15,7 @@ bun run build
 bun pm pack
 ```
 
-In a checkout, the project configuration points to `./plugin`. To install the plugin globally, provide a resolved installation directory and preview the user configuration.
+In this checkout, `opencode.json` adds `./plugin` to the V2 `plugins` array. To install it globally, provide an absolute path to a built plugin and preview the user configuration before applying it. [OpenCode V2 plugin configuration](https://opencode.ai/v2/docs/build/plugins)
 
 ```sh
 export OPENAI_PROXY_PLUGIN_DIR=/absolute/path/to/plugin
@@ -23,9 +23,23 @@ openai-proxy setup opencode --global --plugin --dry-run
 openai-proxy setup opencode --global --plugin
 ```
 
-The resulting configuration contains the absolute plugin directory in `plugins`. You can also configure an installed versioned package or tarball through the host's package manager. Select `codex/<model>` in the host. A static provider is available through `setup opencode` without the plugin flag.
+The resulting configuration lists the absolute plugin directory in `plugins`. You can also use an installed versioned plugin package. A static subscription provider is available through `setup opencode` without the plugin flag. It uses the same scoped service token and its provider ID is `openai-proxy`.
 
-Provide a personal service credential in `PROXY_CONSOLE_TOKEN` to the OpenCode server process through its local environment or secret manager. Use `PROXY_CONSOLE_URL` to select the trusted origin. The default is `http://127.0.0.1:8181`. Remote origins require HTTPS. For a local interactive login from the V2 host, configure absolute `OPENAI_PROXY_LOGIN_HOME` and `OPENAI_PROXY_LOGIN_BINARY` paths that match the service's credential owner. The host's login command waits for the authoritative generation and stores a non-secret completion marker. For an external login, the owner runs `codex login` in its assigned Codex home. Run `/codex-reconcile` in OpenCode after the login completes to notify the service. The plugin refreshes its catalogue when the service reports a generation change. A failed or denied model list disables selection. An unavailable service returns an empty model inventory.
+## Credentials and models
+
+Set `PROXY_CONSOLE_URL` to the service's origin in the OpenCode server environment. The default is `http://127.0.0.1:8181`, and remote origins require HTTPS. Supply the owner's service token as `PROXY_CONSOLE_TOKEN` or set `PROXY_CONSOLE_TOKEN_FILE` to the absolute path of an owner-only regular file owned by the OpenCode process user. A local browser session and its access code are separate from this service credential. In shared mode, use the token for the principal that owns the approved Codex home. [Console session and integration tokens](console.md#start-a-local-console)
+
+For the local OpenCode background service on macOS or Linux, use the private `service-token` file in the running proxy's console data directory. Pass its path to the managed environment. An explicit `PROXY_CONSOLE_TOKEN` takes precedence. The plugin reads the file again when it makes a request.
+
+```sh
+opencode service set env PROXY_CONSOLE_TOKEN_FILE "/absolute/path/to/console/service-token"
+opencode service start
+opencode models
+```
+
+The plugin reads `/api/v1/drivers/codex/v1/models` and sends subscription turns to `/api/v1/drivers/codex/v1/chat/completions`. Select one of the `codex/<model>` IDs returned for that principal. The service checks access at use time. Model availability follows the signed-in owner's Codex picker. The plugin checks connection changes periodically and reloads its catalogue when the credential generation changes. An unavailable or denied inventory yields no selectable proxy models. ChatGPT Pro attribution requires the subscriber's provider-side allowance record for the turn.
+
+For interactive login in a local V2 host, set `OPENAI_PROXY_LOGIN_HOME` and `OPENAI_PROXY_LOGIN_BINARY` to absolute paths for the service owner's Codex profile and native executable. The host login command waits for the service to observe the new credentials. You can also run `codex login` in the assigned profile directly. The service watches that store, and `/codex-reconcile` in OpenCode requests an immediate refresh after login. [Codex credential operation](codex-auth.md)
 
 The provider declares text-only models. A tool-capable OpenCode session can invoke `delegate_codex` when the supervisor has bound its parent session, message and workspace and the user approves. The tool returns one text result. Native SDK tool events remain observations of actions performed by the native driver.
 
@@ -59,8 +73,8 @@ When the service configures a dedicated MCP bearer, supported HTTP client entrie
 
 ## SDK workers
 
-The supervisor launches a private child process for each admitted turn. Install Bun, the matching Codex executable and the locked worker production dependencies. Keep the `workers` directory and the sibling `plugin/src/delegation.ts` in the same relative layout. The Codex adapter selects the owner-bound home and checks the exact 0.169.0 executable. The OpenCode adapter uses the in-process 2.3.0 host, a durable per-conversation database and an explicitly configured upstream. Both drivers report native completion or interruption through a bounded private pipe.
+The console supervisor launches a private child process for each admitted turn. Keep the installed `workers/` and `plugin/` directories as siblings because the OpenCode worker imports `plugin/src/delegation.ts`. The Codex adapter uses the owner-bound home and checks for native Codex 0.169.0. The OpenCode adapter uses the in-process SDK at 2.3.0, a durable per-conversation database, and an explicitly configured upstream. After configuring the scoped provider, select **OpenCode** in the console and choose a listed model. [Native runtime and provider setup](console.md#install-the-native-drivers)
 
-The V2 implementation uses provider and integration transforms, scoped model inventory, command registration, permission assertion, tool registration and a request hook. TUI, desktop GUI, RPC, VCS, worktrees, agents, MCP extensions, skills and web search are outside the plugin's feature set. The actual OpenCode host remains the discovery and behavior oracle for each release.
+The external V2 plugin registers providers, integration methods, commands, a request hook, and a permission-gated delegation tool. The console worker also exposes its own approved tools in scoped sessions. [Structured surface rendering](ag-ui.md#console-ag-ui-stream-and-a2ui-10)
 
 [OpenCode 2.3.0 plugin parts](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/build/plugins/index.mdx) · [Server plugin APIs](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/build/plugins/server.mdx) · [OpenCode configuration layers](https://github.com/anomalyco/opencode/blob/v2.3.0/services/site/src/docs/content/config.mdx) · [JetBrains ACP](https://www.jetbrains.com/help/ai-assistant/acp.html) · [Zed external agents](https://zed.dev/docs/ai/external-agents)

@@ -1,106 +1,54 @@
-# AG-UI Streaming Endpoint Reference
+# AG-UI streams and A2UI surfaces
 
-The proxy exposes a native AG-UI (Agent-User Interaction) streaming endpoint, compatible with the [AG-UI protocol](https://github.com/ag-ui-protocol/ag-ui) and [CopilotKit](https://copilotkit.ai).
+The proxy has a Responses-backed text stream and an authenticated stream for KnowMe console conversations. The console uses AG-UI client packages at 1.0.5 and validates surfaces against the A2UI 1.0 wire schemas. [Console operation](console.md)
 
----
+## Responses-backed text stream
 
-## What is AG-UI?
-
-AG-UI is a lightweight protocol for streaming structured lifecycle events from an AI agent to a frontend. Instead of raw SSE text chunks, AG-UI sends typed events (`RUN_STARTED`, `TEXT_MESSAGE_START`, `TEXT_MESSAGE_CONTENT`, `TEXT_MESSAGE_END`, `RUN_FINISHED`) that frontend frameworks can map directly to UI state.
-
-This proxy implements AG-UI natively with 5 event types. When an official Rust SDK is published ([ag-ui-protocol/ag-ui#239](https://github.com/ag-ui-protocol/ag-ui/issues/239)), these types can be replaced with the SDK's definitions.
-
----
-
-## Endpoint
-
-```
-POST /ag-ui/stream
-Content-Type: application/json
-Accept: text/event-stream
-```
-
----
-
-## Request Format
+Send a JSON body to `POST /ag-ui/stream` with `Content-Type: application/json` and `Accept: text/event-stream`. The route uses the configured Responses API path for the local owner or authenticated shared principal. Requests accept `messages` and an optional `model`.
 
 ```json
 {
   "messages": [
     { "role": "user", "content": "What is the capital of France?" }
-  ],
-  "model": "gpt-5.5"
+  ]
 }
 ```
 
-`model` is optional — defaults to the proxy's configured default model.
+The service uses its default model when the request omits `model`. To choose a model, look up the currently available IDs through `GET /v1/models`. Each SSE `data:` field contains one JSON event.
 
----
-
-## Response: SSE Event Stream
-
-Each event is a JSON-encoded AG-UI event prefixed with `data: `.
-
-```
+```text
 data: {"type":"RUN_STARTED","run_id":"f47ac10b-..."}
 
 data: {"type":"TEXT_MESSAGE_START","message_id":"9f..."}
 
 data: {"type":"TEXT_MESSAGE_CONTENT","message_id":"9f...","delta":"Paris"}
 
-data: {"type":"TEXT_MESSAGE_CONTENT","message_id":"9f...","delta":" is"}
-
-data: {"type":"TEXT_MESSAGE_CONTENT","message_id":"9f...","delta":" the capital"}
-
 data: {"type":"TEXT_MESSAGE_END","message_id":"9f..."}
 
 data: {"type":"RUN_FINISHED","run_id":"f47ac10b-..."}
 ```
 
----
+| Event | Fields | Meaning |
+| --- | --- | --- |
+| `RUN_STARTED` | `run_id` | Opens the text run. |
+| `TEXT_MESSAGE_START` | `message_id` | Opens the assistant message. |
+| `TEXT_MESSAGE_CONTENT` | `message_id`, `delta` | Adds text to the assistant message. |
+| `TEXT_MESSAGE_END` | `message_id` | Closes the assistant message. |
+| `RUN_FINISHED` | `run_id` | Closes the run. |
 
-## Event Type Reference
+## Console AG-UI stream and A2UI 1.0
 
-| Type | Fields | Description |
-|------|--------|-------------|
-| `RUN_STARTED` | `run_id` | Emitted once at the start |
-| `TEXT_MESSAGE_START` | `message_id` | Assistant begins generating |
-| `TEXT_MESSAGE_CONTENT` | `message_id`, `delta` | Incremental text chunk |
-| `TEXT_MESSAGE_END` | `message_id` | Generation complete |
-| `RUN_FINISHED` | `run_id` | Run lifecycle complete |
-
----
-
-## CopilotKit Integration
-
-```tsx
-import { useCoAgent } from "@copilotkit/react-core";
-
-const { run } = useCoAgent({
-  url: "http://localhost:8181/ag-ui/stream",
-});
-
-// Trigger a run
-run({ messages: [{ role: "user", content: "Hello" }] });
-```
-
----
-
-## Task Configuration (YAML)
-
-The AG-UI endpoint accepts structured task requests when the request body includes a `task` key:
+`POST /api/v1/ag-ui/stream` projects a turn that the service has already admitted. Send the authorized conversation ID as `threadId` and turn ID as `runId`. Use a valid console session with the matching origin and `X-CSRF-Token` header, or the scoped service bearer for that owner.
 
 ```json
 {
-  "messages": [{ "role": "user", "content": "..." }],
-  "task": {
-    "id": "summarize-pr",
-    "description": "Summarize a pull request",
-    "scope": "project"
-  }
+  "threadId": "97e8e2be-052a-49de-ab2e-c653d4033d56",
+  "runId": "c71afdd3-798c-4c1b-bfa9-33ced6dca388",
+  "protocolVersion": "1.0",
+  "messages": []
 }
 ```
 
-The `scope` field sets the `X-Memory-Scope` header for RAG injection (when memory is enabled). The `id` and `description` are passed through for observability.
+The stream uses camel-case event fields such as `threadId`, `runId`, and `messageId`. The service supplies the history and native permissions from the admitted turn. Terminal failures produce a `RUN_ERROR` event.
 
-> **Note**: Full task YAML configuration (task definitions stored in `.oproxy/tasks/*.yaml`) is planned for a future release.
+The OpenCode console worker can submit A2UI operations through its `render_surface` tool. A validated snapshot appears as `ACTIVITY_SNAPSHOT` with `activityType` set to `a2ui-surface`, `replace` set to `true`, and ordered A2UI operations in `content.a2ui_operations`. Each operation has version `1.0`. The console renders approved Basic catalog components and validates actions against the originating conversation and turn. The schemas ship with the service and browser build. [Vendored schemas and catalog](https://github.com/GQAdonis/openai-proxy/blob/main/frontend/src/schemas/README.md)

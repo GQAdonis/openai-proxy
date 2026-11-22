@@ -8,7 +8,7 @@ compatibility:
   gemini-cli: ">=0.1"
 metadata:
   author: openai-proxy contributors
-  repository: https://github.com/yourusername/openai-proxy
+  repository: https://github.com/GQAdonis/openai-proxy
   tags:
     - openai
     - codex
@@ -39,8 +39,9 @@ Two skills are available. Load the one matching your task:
 
 | Tool | Purpose | Install |
 |---|---|---|
-| Rust 1.80+ | compile the proxy | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
-| Codex CLI | OAuth login flow | `npm i -g @openai/codex` |
+| Rust stable | Compile the proxy | [rustup](https://rustup.rs/) |
+| Node 26.5.0 and npm 11.16.0 | Build the embedded console | [Frontend build guide](frontend/README.md) |
+| Codex CLI 0.169.0 | Managed OAuth login and the native Codex worker | [Install the native drivers](docs/console.md#install-the-native-drivers) |
 | A ChatGPT Plus or Pro subscription | authentication | Required for Codex backend |
 
 ### Step 1: Authenticate
@@ -49,31 +50,26 @@ Two skills are available. Load the one matching your task:
 codex login
 ```
 
-This opens a browser, completes OAuth, and writes credentials to `~/.codex/auth.json`. The proxy reads this file automatically at startup.
+Use the Codex profile assigned to the service. The proxy watches the selected file store for login changes and periodically checks for missed updates. [Codex credential operation](docs/codex-auth.md)
 
 ### Step 2: Build and run
 
 ```bash
-# Option A: use the provided script (builds if needed, then runs)
-./scripts/start.sh
-
-# Option B: direct cargo
-cargo build --release
-./target/release/openai-proxy
+npm ci --prefix frontend --include=dev
+cargo build --release --locked
+./target/release/openai-proxy serve --host 127.0.0.1 --port 8181
 ```
 
-The proxy listens on `http://0.0.0.0:8181/v1` by default.
+The loopback endpoints are `http://127.0.0.1:8181/v1` and `http://127.0.0.1:8181/ui/`.
 
 ### Step 3: Point your client at the proxy
 
 ```bash
-# Any OpenAI-compatible client
-export OPENAI_BASE_URL=http://localhost:8181/v1
-export OPENAI_API_KEY=anything   # not forwarded upstream; auth.json is used
-
-# opencode: provider appears automatically via opencode.json / plugin
-opencode
+# OpenAI-compatible client base URL
+export OPENAI_BASE_URL=http://127.0.0.1:8181/v1
 ```
+
+For the native OpenCode 2.x subscription provider, build the plugin, register it with `plugins`, and configure the OpenCode server with a scoped service credential. Select an available `codex/<model>` ID. [OpenCode setup](docs/opencode-setup.md)
 
 ### Environment Variables
 
@@ -95,12 +91,6 @@ curl http://localhost:8181/health
 # → {"status":"ok"}
 
 curl http://localhost:8181/v1/models
-# → lists available models
-
-curl http://localhost:8181/v1/chat/completions \
-  -H "Authorization: Bearer anything" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"codex-mini","messages":[{"role":"user","content":"Say hi"}]}'
 ```
 
 ---
@@ -176,14 +166,7 @@ curl -X POST http://localhost:8081/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
-### Client Context Customization Hooks
-
-| Hook | How |
-|---|---|
-| Override proxy URL | Set `CODEX_PROXY_URL` — picked up by the opencode plugin shell.env hook |
-| Override default model | Set `CODEX_DEFAULT_MODEL` — forwarded to all spawned shells |
-| Session model switch | Call `set_model` MCP tool — advisory recommendation |
-| Auth path | Set `CODEX_AUTH_PATH` — injected automatically by the plugin |
+For service-host client registration and transport settings, see [Provision local clients](docs/opencode-setup.md#provision-local-clients). The MCP `set_model` response provides an advisory recommendation.
 
 ### Reference Files
 

@@ -26,6 +26,9 @@ memory.db-*
 /workers/node_modules/
 /plugin/dist/
 /plugin/.bun/
+/website/node_modules/
+/website/build/
+/website/.docusaurus/
 
 # Editor / OS
 .DS_Store

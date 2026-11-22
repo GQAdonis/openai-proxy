@@ -5,10 +5,9 @@
 ## Precedence (lowest → highest)
 
 1. Built-in defaults
-2. `$XDG_CONFIG_HOME/oproxy/config.toml` (typically `~/.config/oproxy/config.toml`)
-3. `--config <path>` CLI flag / `OPROXY_CONFIG` env var
-4. Environment variables
-5. CLI flags (highest priority)
+2. The selected `config.toml`. Use `--config <path>` or `OPROXY_CONFIG` to select a different file.
+3. Environment variables
+4. Explicit CLI flags
 
 ---
 
@@ -22,7 +21,7 @@ openai-proxy config path
 openai-proxy setup config
 ```
 
-Default path: `~/.config/oproxy/config.toml`
+The default is the platform configuration directory under `oproxy/config.toml`. On Linux it uses `$XDG_CONFIG_HOME`, falling back to `~/.config`. On macOS it uses `~/Library/Application Support`. `config path` reports the default location. `--config` selects the file for `serve` or `config show`.
 
 ---
 
@@ -40,8 +39,8 @@ port = 8181         # Listen port.  Env: PORT. CLI: --port
 wire_api = "responses"    # Env: CODEX_WIRE_API. CLI: --wire-api
 
 [skills]
-# Colon-separated list of directories to load SKILL.md files from.
-# Env: PROXY_SKILLS_DIRS (merged, not replaced). CLI: --dirs (in subcommands)
+# List of directories to load SKILL.md files from.
+# PROXY_SKILLS_DIRS appends colon-separated entries. Skill CLI subcommands also accept --dirs.
 dirs = []
 
 # Maximum skills to inject per request.
@@ -50,23 +49,23 @@ max_injected = 3
 
 [mcp]
 # Path to mcp.toml containing tool schema definitions.
-# When set, tool schemas are injected into every proxied request.
+# Loads callable schema definitions for OpenAI-compatible chat requests.
 # config_path = "~/.config/oproxy/mcp.toml"
 
 [hooks]
-# Path to hooks.toml for webhook event delivery.
+# File path for webhook event delivery, or a trusted destination alias.
 # Env: PROXY_HOOKS_CONFIG. CLI: --hooks-config
-# config_path = "~/.config/oproxy/hooks.toml"
+# config_path = "/absolute/path/to/hooks.toml"
+# destination = "audit"
 
 [memory]
 # Requires: cargo build --features memory
 enabled = false
 
-# SurrealDB file path. Defaults to $XDG_DATA_HOME/oproxy/memory.db
-# (~/.local/share/oproxy/memory.db)
+# SurrealDB path. Defaults to memory.db under the platform's oproxy data directory.
 db_path = ""
 
-# OpenAI embedding model. Requires OPENAI_API_KEY.
+# Embedding model for a dedicated local service with PROXY_EMBEDDINGS_API_KEY.
 embedding_model = "text-embedding-3-small"
 
 [modes]
@@ -87,11 +86,23 @@ a2a = false    # CLI: --a2a
 | `PROXY_SKILLS_MAX` | `skills.max_injected` | Max skills per request |
 | `PROXY_HOOKS_CONFIG` | `hooks.config_path` | Hooks config path |
 | `OPROXY_CONFIG` | — | Config file path override |
-| `OPENAI_API_KEY` | — | OpenAI API key (auth fallback) |
+| `PROXY_CHAT_AUTH` | — | Set `api_key` to explicitly select an environment API key for chat |
+| `OPENAI_API_KEY` | — | API key used by the explicit environment chat selection |
 | `CODEX_AUTH_PATH` | — | Path to auth.json |
-| `CODEX_BACKEND_URL` | — | Override backend URL |
+| `CODEX_BACKEND_URL` | — | Custom backend URL, subject to credential-class restrictions |
+| `PROXY_BACKEND_CREDENTIAL_CLASS` | — | Required for a custom backend. Use `api_key` or `subscription`. |
 | `CODEX_DEFAULT_MODEL` | — | Default model override |
 | `MCP_HTTP_PORT` | — | MCP HTTP server port |
+| `PROXY_MCP_TOKEN` | — | Optional bearer credential for MCP HTTP |
+| `PROXY_EMBEDDINGS_API_KEY` | — | Separate, optional embeddings API key for a dedicated local service |
+| `PROXY_HOOK_DESTINATIONS` | — | JSON map of approved webhook aliases to URLs |
+| `PROXY_CONSOLE_DATA` | — | Directory for console state and private service data |
+| `PROXY_CONSOLE_WORKSPACE` | — | Assigned workspace in dedicated local mode |
+| `PROXY_CONSOLE_ORIGIN` | — | Allowed browser origin and advertised origin when configured |
+| `PROXY_CONSOLE_PRINCIPALS` | — | Path to the principal registry for shared mode |
+| `PROXY_CONSOLE_LOCAL_AUTO_SESSION` | — | Set to `1` for automatic sessions on a trusted loopback workstation |
+
+See [Codex credential ownership](codex-auth.md) and the [console deployment guide](console.md) for account selection, native SDK runtime variables and shared mode.
 
 ---
 
@@ -102,14 +113,16 @@ a2a = false    # CLI: --a2a
 No config file needed. Run:
 ```bash
 codex login
-openai-proxy serve
+openai-proxy serve --host 127.0.0.1
 ```
 
 ### Minimal — OpenAI API Key
 
 ```bash
-OPENAI_API_KEY=sk-... openai-proxy serve
+PROXY_CHAT_AUTH=api_key openai-proxy serve --host 127.0.0.1
 ```
+
+Supply `OPENAI_API_KEY` through the service environment or your secret manager before starting the proxy.
 
 ### Full ChatGPT Subscription Config
 
@@ -140,7 +153,7 @@ db_path = "~/.local/share/oproxy/memory.db"
 embedding_model = "text-embedding-3-small"
 ```
 
-Build: `cargo build --release --features memory`
+Build with `cargo build --release --locked --features memory`. See [Memory](memory.md) for local retrieval and optional embeddings.
 
 ### MCP Tool Passthrough
 
@@ -156,10 +169,10 @@ name = "read_file"
 description = "Read the contents of a file"
 [tool.input_schema]
 type = "object"
+required = ["path"]
 [tool.input_schema.properties.path]
 type = "string"
 description = "Absolute path to the file"
-required = ["path"]
 ```
 
 ---
@@ -170,4 +183,4 @@ required = ["path"]
 openai-proxy config show
 ```
 
-Prints the resolved configuration with all defaults, env var overrides, and config file values applied.
+Prints supported settings after file values and environment overrides are applied. Use the authenticated console's Settings page to see the running service configuration and the sources of its effective values.

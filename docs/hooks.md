@@ -1,14 +1,12 @@
 # Hooks System
 
-openai-proxy ships a webhook-based hooks system that fires AG-UI-compatible JSON
-payloads to configured HTTP endpoints at key points in the proxy request lifecycle.
-Use it to observe streaming events, feed token deltas into AG-UI-compatible
-frontends, trigger parallel skill execution, audit tool calls, or route events
-to any custom observability pipeline — all without modifying or forking the proxy
-binary.
+openai-proxy can send JSON webhooks at key points in the OpenAI-compatible chat
+request lifecycle. Use them to observe requests, responses and tool calls. For
+AG-UI clients, use the separate [AG-UI SSE endpoint](ag-ui.md).
 
-Hooks are **opt-in**: if no config file is provided the proxy uses a no-op
-`NullHooks` implementation and behaves identically to an unhoooked installation.
+Hooks are opt-in. The service sends webhooks only when configured with a file
+or trusted destination alias. A dedicated local service can send text and tool
+arguments. Choose receivers that are authorized to handle that content.
 
 ---
 
@@ -34,10 +32,19 @@ PROXY_HOOKS_CONFIG=hooks.toml openai-proxy
 
 | Method | Example |
 |--------|---------|
-| CLI flag | `openai-proxy --hooks-config /etc/proxy/hooks.toml` |
-| Environment variable | `PROXY_HOOKS_CONFIG=/etc/proxy/hooks.toml openai-proxy` |
+| CLI flag | `openai-proxy serve --hooks-config /etc/proxy/hooks.toml` |
+| Environment variable | `PROXY_HOOKS_CONFIG=/etc/proxy/hooks.toml openai-proxy serve` |
+| Service configuration | Set `hooks.config_path` to the file, or set `hooks.destination` to an alias |
 
-The file is read once at startup. Changes require a proxy restart.
+The file is read at startup. Changes require a proxy restart. An explicitly
+configured file takes precedence over the alias option. An invalid file or alias
+leaves webhook delivery disabled.
+
+Set `PROXY_HOOK_DESTINATIONS` to a JSON map of approved alias names to receiver URLs
+if operators need to select an alias from Settings. Alias mode emits only
+`on_request_received`. Destinations must use HTTPS or loopback HTTP. URLs may
+include a path and query, and must omit user credentials and fragments. The
+webhook client refuses redirects.
 
 ---
 
@@ -48,7 +55,7 @@ event — no HTTP POST is made for it.
 
 ### `[on_request_received]`
 
-Fired at the entry point of every chat completions request.
+Fired when the OpenAI-compatible chat handler has resolved request credentials.
 
 ```toml
 [on_request_received]
@@ -61,7 +68,7 @@ url = "http://localhost:3000/events"
 
 ### `[on_text_delta]`
 
-Fired for every text delta emitted during a streaming response.
+Fired as the proxy processes text deltas from the Responses backend.
 
 ```toml
 [on_text_delta]
@@ -74,7 +81,7 @@ url = "http://localhost:3000/events"
 
 ### `[on_tool_call_start]`
 
-Fired when the model initiates a new tool call.
+Fired when the Responses backend announces a function call.
 
 ```toml
 [on_tool_call_start]
@@ -87,7 +94,7 @@ url = "http://localhost:3000/events"
 
 ### `[on_tool_call_args]`
 
-Fired for each incremental chunk of tool call arguments (streaming JSON fragments).
+Fired as the proxy processes argument deltas from the Responses backend.
 
 ```toml
 [on_tool_call_args]
@@ -114,7 +121,8 @@ url = "http://localhost:3000/events"
 
 ### `[on_response_complete]`
 
-Fired when the model signals it has finished generating a response.
+Fired when the proxy processes a completion event from the Responses backend,
+or the result of a non-streaming request to the Chat Completions backend.
 
 ```toml
 [on_response_complete]
@@ -127,7 +135,7 @@ url = "http://localhost:3000/events"
 
 ### `[on_error]`
 
-Fired when the proxy encounters an upstream error or model-not-available condition.
+Fired for explicit model-availability errors and rejected upstream requests.
 
 ```toml
 [on_error]
@@ -168,7 +176,7 @@ also route different event types to entirely different services.
 
 ---
 
-## AG-UI Payload Schema
+## Webhook payloads
 
 Every webhook POST delivers a JSON object with these common fields plus
 event-specific fields. The `Content-Type` header is `application/json`.
@@ -178,7 +186,12 @@ event-specific fields. The `Content-Type` header is `application/json`.
 | Field | Type | Description |
 |-------|------|-------------|
 | `type` | string | Event type identifier (matches the TOML section name) |
-| `timestamp` | string | ISO 8601 UTC timestamp of when the event was fired |
+| `timestamp` | string | UTC-formatted event timestamp |
+
+In shared mode, the proxy sends only request, completion and error events. It
+reports `model` as `shared`, `finish_reason` as `complete`, and the error
+`message` as `request failed`. Text, tool payloads and upstream error detail stay
+in the request's owner scope.
 
 ### `on_request_received`
 
@@ -304,15 +317,11 @@ The embedded `reqwest` HTTP client is built with a **5-second timeout** per
 webhook POST. If the endpoint does not respond within 5 seconds the request is
 dropped and a warning is logged.
 
-### No ordering guarantees across concurrent requests
+### Delivery order
 
-Hooks for a single request are fired in order: `on_request_received` →
-`on_text_delta` (repeated) / `on_tool_call_*` → `on_response_complete` or
-`on_error`. However, when multiple requests are being processed concurrently
-their hook events may be interleaved at the webhook endpoint in arbitrary order.
-If your endpoint must demultiplex concurrent conversations, correlate events
-using the `call_id` field on tool events or add your own correlation ID at the
-application layer.
+Each POST runs independently. Receivers may see events out of order even for a
+single request. `call_id` correlates tool events for one call. There is no shared
+request identifier in the payload for demultiplexing concurrent conversations.
 
 ### Retries
 
@@ -322,14 +331,14 @@ behind the webhook URL and implement retries there.
 
 ---
 
-## Example: AG-UI Frontend Integration
+## Example: a local webhook viewer
 
-The following TypeScript example shows a minimal browser subscriber that
+The following TypeScript sketch shows a single-user browser subscriber that
 connects to a server-sent-events (SSE) bridge built on top of the proxy's
 webhook endpoint and renders streaming text deltas in real time.
 
-This pattern assumes you have a small server-side SSE bridge (e.g. a Next.js
-Route Handler or an Express endpoint) that:
+Run this example only on loopback for a dedicated local service. The Express
+bridge receives webhooks and broadcasts them to connected browsers:
 1. Receives POST requests from the proxy webhook
 2. Fans the events out to connected SSE clients
 
@@ -364,7 +373,7 @@ app.get("/stream", (req, res) => {
   });
 });
 
-app.listen(3000);
+app.listen(3000, "127.0.0.1");
 ```
 
 ### Browser subscriber
@@ -437,29 +446,3 @@ const stream = connectToProxyStream((delta) => {
   document.getElementById("output")!.textContent = outputText;
 });
 ```
-
-### AG-UI CopilotKit integration
-
-If you are using [CopilotKit](https://docs.copilotkit.ai/), you can wire the
-proxy's webhook payloads directly into a `useCoAgent` or custom `useCopilotChat`
-integration by mapping the event types above to CopilotKit's AG-UI message
-envelope:
-
-```typescript
-// Map a proxy hook event to an AG-UI-style message
-function toAgUiMessage(event: ProxyEvent) {
-  if (event.type === "on_text_delta" && event.delta) {
-    return { type: "TEXT_MESSAGE_CHUNK", content: event.delta };
-  }
-  if (event.type === "on_tool_call_start") {
-    return { type: "TOOL_CALL_START", toolCallId: event.call_id, toolName: event.name };
-  }
-  if (event.type === "on_response_complete") {
-    return { type: "RUN_FINISHED" };
-  }
-  return null;
-}
-```
-
-The proxy's payloads are intentionally shaped to match AG-UI semantics, so
-adaptation is straightforward.

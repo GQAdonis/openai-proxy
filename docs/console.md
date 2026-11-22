@@ -1,6 +1,6 @@
-# Operating the embedded console
+# Operating the KnowMe console
 
-Open `/ui/` on the proxy's HTTP listener. Chat runs on the selected native driver. Settings shows the signed-in user's connection and the operations their role permits. ACP and MCP stdio processes use their own launch commands. Use the HTTP service for the browser console.
+Open `/ui/` on the proxy's HTTP listener for chat and `/ui/settings` for connection and administration controls. Chat runs on the selected Codex or OpenCode SDK driver. Settings shows the signed-in user's connection and the operations their role permits. ACP and MCP stdio processes use their own launch commands.
 
 ## Start a local console
 
@@ -15,27 +15,51 @@ export PROXY_CONSOLE_ORIGIN=http://localhost:8181
 openai-proxy serve --host 127.0.0.1 --port 8181
 ```
 
-1. Open `http://localhost:8181/ui/`. The startup log identifies the private `pairing-token` file. Read the current value from that file and enter it on the sign-in screen.
-2. Pairing consumes the code. Codes expire after five minutes. Settings → My connection shows the observed credential state, generation, and available driver controls. Use **Check for new login** after completing Codex login for the service owner. **Refresh connection** requests a managed renewal when the service offers it.
-3. Select an available driver and model, then send a message. **Stop reply** requests native cancellation. An interrupted stream retains the transcript and can reconnect to the admitted turn. If its replay window expires, **Read saved turn** retrieves the durable outcome. An uncertain outcome warrants checking the saved turn before submitting another message.
+Open `http://localhost:8181/ui/`. The startup log identifies the private `pairing-token` file for paired mode. Enter its current code on the sign-in screen. Pairing consumes the code, and unused codes expire after five minutes.
 
-The browser receives an eight-hour HttpOnly, SameSite=Strict session cookie and sends a CSRF token on mutations. Sign out ends that session. Local integrations use a separate service token, supplied through `PROXY_CONSOLE_TOKEN` or initialized as the private `service-token` file under the console data directory. Upstream OAuth and API credentials belong in the selected server-side store. [Credential source selection and renewal](codex-auth.md)
+### Automatic sessions on a private workstation
 
-For a private workstation, set `PROXY_CONSOLE_LOCAL_AUTO_SESSION=1` and bind the proxy to `127.0.0.1` or `::1`. Open the console directly on that listener. The browser starts a session automatically and can use chat and settings without an access code. The listener grants console access to local clients, so use this mode only on a trusted machine and keep it off reverse proxies. A configured browser origin must use loopback and the listener's port. Shared deployments always require a principal token.
+Set `PROXY_CONSOLE_LOCAL_AUTO_SESSION=1` before starting the service on `127.0.0.1` or `::1`. Open the console directly on that listener. The browser signs in as the local administrator without an access code. A configured browser origin must use loopback and the listener's port. Use this setting on a trusted workstation without a reverse proxy. Shared deployments always require principal tokens.
+
+The browser receives an eight-hour HttpOnly, SameSite=Strict session cookie and sends a CSRF token on mutations. Local integrations use a separate service token, supplied through `PROXY_CONSOLE_TOKEN` or initialized as the private `service-token` file under the console data directory. Upstream OAuth and API credentials remain in their server-side stores. [Credential source selection and renewal](codex-auth.md)
+
+## Chat and connection settings
+
+Run `codex login` for the service's approved Codex home. The service watches the credential store and reconciles changes while it runs. **Settings → My connection** shows the current credential state, generation, and available drivers. **Check for new login** requests an immediate store reread. **Refresh connection** requests managed renewal when the connection supports it.
+
+Choose a driver and a model from that driver's list. Codex uses the authorized account's native picker, and OpenCode uses its scoped upstream. Changing the driver or model starts a new native conversation on the next send while preserving the visible transcript and draft. If a driver is unavailable, check its runtime and provider status in Settings. For `model_unavailable`, refresh the connection status and choose a model currently listed by the driver.
+
+**Stop reply** requests native cancellation. An interrupted stream retains the transcript and can reconnect to the admitted turn. If its replay window expires, **Read saved turn** retrieves the durable outcome. Check the saved turn before reissuing a prompt whose outcome is uncertain. The console renders validated A2UI 1.0 surfaces and routes an approved surface action back to its conversation. [Structured chat stream](ag-ui.md#console-ag-ui-stream-and-a2ui-10)
+
+## Diagnose Codex startup
 
 To diagnose Codex startup on a private workstation, set `PROXY_CODEX_LOCAL_METRICS=1` with the loopback listener. Look for `Codex local duration` alongside `Console native turn timing` in the service log. The worker adds an owner-only `codex-startup.metrics.jsonl` in the conversation's private directory under the console data directory's `workers/` folder. It records native launch, SQLite initialization, and timings for skill discovery, persistence, instruction refresh, and MCP setup. The worker derives the thread timings in memory from allowlisted native spans received on loopback. It discards raw traces, span events, and attributes. Codex log export is disabled. The service log includes total native thread creation, credential resolution and storage, and model-cache and fetch timings. A cancelled or failed process may exit before its final metrics flush.
 
 The console runs Codex with the conversation's private directory as its OS home and the approved Codex profile as `CODEX_HOME`. This keeps the machine user's separate `~/.agents/skills` directory out of console startup. The approved profile and workspace remain the sources for Codex state and project context.
 
-On macOS, set `ProcessType` to `Interactive` for a user LaunchAgent dedicated to the loopback console. This gives browser-initiated chat and its Codex subprocess the resource policy used by interactive apps. The setting belongs in the LaunchAgent plist and takes effect when the job is reloaded.
+## Update the macOS LaunchAgent
 
-For the native macOS worker bundle, compile `workers/codex-exec.c` as its executable `workers/codex-exec`. The launcher calls `posix_spawn`, passes the same isolation flags as the portable shell launcher, and forwards cancellation. With local metrics enabled, it also records only the elapsed native spawn time.
+These commands operate on an existing versioned user LaunchAgent with label `dev.prometheusags.openai-proxy`. Run them from the checkout as that macOS user. The existing listener, credential wrapper, and console data settings stay in use. A user LaunchAgent dedicated to the loopback console can use `ProcessType` set to `Interactive` for browser-initiated chat. Reload the job to apply that setting.
 
-To deploy worker code from the current Git commit to an existing versioned KnowMe LaunchAgent, run `python3 scripts/deploy-macos-workers.py` from the checkout. The script hard-links the active native launcher into the new release and runs a local `/usr/bin/true` startup probe before stopping the job. It keeps the installed proxy binary, worker dependencies, and OpenCode plugin. It saves the previous plist, restarts the job, and restores that plist if the new service fails its health check. For an intentional launcher upgrade, pass `--launcher /absolute/path/to/codex-exec` with a compiled executable on the same filesystem.
+Run a full update with the pinned Node and npm versions on `PATH`.
 
-Run `python3 scripts/deploy-macos-workers.py --full` with the pinned Node and npm versions on `PATH` to update the proxy binary, embedded console, SDK workers, native Codex CLI, and OpenCode plugin together. It builds from committed source with `Cargo.lock`, the npm lockfile, and the Bun lockfiles using the installed Bun runtime. The full update uses the same launcher check and preserves the LaunchAgent's listener, credential, and console data settings. It points `~/.local/bin/openai-proxy` at the versioned binary without changing the credential-loading wrapper. If startup fails, the updater restores the previous binary and plist before restarting the old release. A successful full deploy writes `release-receipt.json` alongside the backups and prints its path in `receiptPath`.
+```sh
+python3 scripts/deploy-macos-workers.py --full
+```
 
-Run `python3 scripts/deploy-macos-workers.py --rollback "/path/from/receiptPath/release-receipt.json"` as the LaunchAgent owner. The receipt must match the active full release. The command checks the SHA-256 digests of both binaries and plist snapshots and checks and probes the saved Codex launcher before stopping the service. It restores the saved binary and plist, keeping the verified launcher inode. If the restored service fails its health check, it restarts the current release. Older receipts require a matching verified `release-receipt.json` alongside their backups.
+The updater builds the committed Rust service and embedded console, then stages the locked SDK workers, platform-native Codex CLI, and OpenCode plugin using the installed Bun runtime. It points `~/.local/bin/openai-proxy` at the versioned executable. The updater preserves the verified native launcher inode with a hard link and probes that launcher before stopping the job. To upgrade the launcher deliberately, compile `workers/codex-exec.c` and pass `--launcher /absolute/path/to/codex-exec` with the executable on the same filesystem.
+
+The updater saves `release-receipt.json` beside the prior binary and plist in the private rollback directory before cutover. On success it reports HTTP health and the receipt path in `receiptPath`. If startup fails, it restores the previous executable and plist and restarts the old service. With no flags, `python3 scripts/deploy-macos-workers.py` updates only the worker source and keeps the installed proxy binary, worker dependencies, and OpenCode plugin. [Deployment script](https://github.com/GQAdonis/openai-proxy/blob/main/scripts/deploy-macos-workers.py)
+
+### Restore the previous release
+
+Pass the exact `receiptPath` returned by the full deployment.
+
+```sh
+python3 scripts/deploy-macos-workers.py --rollback "/absolute/path/to/release-receipt.json"
+```
+
+The receipt must match the active full release. Before stopping it, rollback checks both binaries and plist snapshots against their digests and verifies the saved Codex launcher inode, digest, and startup. It restores the previous executable and plist. If the previous service fails its health check, rollback restores the release that was active when the command started. Older receipts require a matching verified `release-receipt.json` alongside their backups.
 
 ## Install the native drivers
 
@@ -95,7 +119,7 @@ Client integrations cover the OpenCode V2 native plugin or static provider, ACP 
 
 ## Build and container targets
 
-The native release embeds the Vite output in the Rust binary. After preparing the pinned frontend dependencies, build with `cargo build --release --locked`. Once built, the binary serves the console from any working directory. Keep the operational workspace explicit when launching from a different directory. [Frontend build prerequisites](../frontend/README.md)
+The native release embeds the Vite output in the Rust binary. Use Node 26.5.0 and npm 11.16.0. Run `npm ci --prefix frontend --include=dev`, then build with `cargo build --release --locked`. The binary serves the console from any working directory. Keep the operational workspace explicit when launching from a different directory. [Frontend build prerequisites](https://github.com/GQAdonis/openai-proxy/blob/main/frontend/README.md)
 
 | Docker target | Contents |
 | --- | --- |
@@ -104,4 +128,4 @@ The native release embeds the Vite output in the Rust binary. After preparing th
 
 Compose publishes the HTTP listener on loopback. It mounts the whole Codex home at `/home/oproxy/.codex`, service data at `/home/oproxy/.local/share/oproxy`, and a separate workspace at `/home/oproxy/workspace`. Mounting the directory lets the service observe atomic login replacement and persist managed renewal. `OPROXY_CODEX_HOME` can select a dedicated private host directory accessible to the container's service user. If the external port changes, also set `PROXY_CONSOLE_ORIGIN` to the new public origin.
 
-**Verification status.** This guide describes the implemented configuration and source contracts. Release builds, container launches, real SDK turns, client discovery, and browser acceptance remain pending at the signed verification boundary.
+The retained native and OrbStack receipts record the verified source, runtime, and smoke checks for those releases. Driver and model access on another install depend on that install's credentials and provider. [Native rollout evidence](https://github.com/GQAdonis/openai-proxy/blob/main/.kbd-orchestrator/phases/codex-live-auth-opencode-console/handoffs/native-launch-agent.md) · [OrbStack staging runbook](https://github.com/GQAdonis/openai-proxy/blob/main/.kbd-orchestrator/phases/codex-live-auth-opencode-console/handoffs/staging-runbook.md)

@@ -1,21 +1,21 @@
 import { spawn } from "node:child_process"
 import { isAbsolute } from "node:path"
 import { realpath } from "node:fs/promises"
+import { serviceToken } from "./service-token.ts"
 
 // OpenCode interprets a successful command's stdout as a credential. Reserve it for a
 // public completion marker. Only Codex accesses or persists the upstream login.
 async function login() {
   const origin = new URL(process.env.PROXY_CONSOLE_URL ?? "http://127.0.0.1:8181")
-  const token = process.env.PROXY_CONSOLE_TOKEN
   const home = process.env.OPENAI_PROXY_LOGIN_HOME
   const binary = process.env.OPENAI_PROXY_LOGIN_BINARY
   if (!["127.0.0.1","[::1]","localhost"].includes(origin.hostname) || !["http:","https:"].includes(origin.protocol) ||
       origin.username || origin.password || origin.pathname !== "/" || origin.search || origin.hash ||
-      !token || !isAbsolute(home ?? "") || !isAbsolute(binary ?? "")) throw new Error("unbound_login")
+      !isAbsolute(home ?? "") || !isAbsolute(binary ?? "")) throw new Error("unbound_login")
   async function connection(reload) {
     const response = await fetch(new URL("/api/v1/me/connection" + (reload ? "/reload" : ""),origin), {
       method:reload ? "POST" : "GET", redirect:"error", signal:AbortSignal.timeout(5000),
-      headers:{authorization:"Bearer " + token,"content-type":"application/json"},
+      headers:{authorization:"Bearer " + serviceToken(),"content-type":"application/json"},
       ...(reload ? {body:"{}"} : {}),
     })
     if (!response.ok) throw new Error("service_rejected")

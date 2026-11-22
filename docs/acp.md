@@ -1,97 +1,66 @@
-# ACP stdio Server Reference
+# ACP external agent
 
-The proxy implements [ACP (Agent Client Protocol)](https://agentclientprotocol.org) v0.11 — JSON-RPC 2.0 over stdin/stdout — enabling use as a native AI backend for editors that support ACP.
+The proxy implements [Agent Client Protocol](https://agentclientprotocol.com/) over stdio for editors such as Zed and JetBrains. The editor launches a dedicated process under the credential owner's account. The process uses its configured Codex login or an OpenAI API key with a Responses API route.
 
----
-
-## Starting the ACP Server
-
-```bash
+```sh
 openai-proxy serve --acp-stdio
 ```
 
-The process reads JSON-RPC 2.0 from stdin and writes responses to stdout. All diagnostic logging goes to stderr.
+Standard input and output carry JSON-RPC 2.0. Diagnostic logs go to standard error. Use a dedicated owner and credential store for this process. [Credential operation](codex-auth.md)
 
----
+## Configure Zed
 
-## ACP Event Stream
+Preview the change to the user settings file, then apply it.
 
-The proxy streams `session/notification` messages as the model generates tokens:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "session/notification",
-  "params": {
-    "sessionId": "<uuid>",
-    "update": {
-      "agentMessageChunk": {
-        "content": { "type": "text", "text": "Hello" }
-      }
-    }
-  }
-}
+```sh
+openai-proxy setup acp --zed --global --dry-run
+openai-proxy setup acp --zed --global
 ```
 
-Streaming is incremental — chunks arrive as soon as bytes are available from the upstream backend. The full body is never buffered.
-
----
-
-## Zed IDE Configuration
-
-In Zed's `settings.json`:
+For manual setup, add a custom external agent in Zed and put this entry in `settings.json`. Use the absolute path of the installed executable, then select `openai-proxy` when starting an external agent thread. [Zed external agents](https://zed.dev/docs/ai/external-agents)
 
 ```json
 {
-  "assistant": {
-    "version": "2",
-    "provider": {
-      "name": "custom",
-      "type": "acp",
-      "command": "/path/to/openai-proxy",
+  "agent_servers": {
+    "openai-proxy": {
+      "type": "custom",
+      "command": "/absolute/path/to/openai-proxy",
       "args": ["serve", "--acp-stdio"]
     }
   }
 }
 ```
 
-Or with environment variable for API key:
+## Configure JetBrains AI Assistant
+
+Preview and apply the global registration.
+
+```sh
+openai-proxy setup acp --jetbrains --global --dry-run
+openai-proxy setup acp --jetbrains --global
+```
+
+For manual setup, choose **Add Custom Agent** in AI Chat. Add the executable and arguments to `~/.jetbrains/acp.json`, then select `openai-proxy` in AI Chat. [JetBrains custom agents](https://www.jetbrains.com/help/ai-assistant/acp.html#add-a-custom-agent)
 
 ```json
 {
-  "assistant": {
-    "version": "2",
-    "provider": {
-      "name": "openai-proxy",
-      "type": "acp",
-      "command": "openai-proxy",
-      "args": ["serve", "--acp-stdio"],
-      "env": {
-        "OPENAI_API_KEY": "sk-..."
-      }
+  "agent_servers": {
+    "openai-proxy": {
+      "command": "/absolute/path/to/openai-proxy",
+      "args": ["serve", "--acp-stdio"]
     }
   }
 }
 ```
 
----
+The KnowMe console can preview and apply these entries on the service host or export a descriptor for a different machine. Other ACP editors can use the same executable and arguments through `openai-proxy setup acp --generic`. [Console client setup](console.md#settings-and-client-setup)
 
-## JetBrains Configuration
+## Session behavior
 
-Install the [AI Assistant plugin](https://plugins.jetbrains.com/plugin/22282-ai-assistant). In Settings → AI Assistant → Custom Providers → Add:
+| Method | Behavior |
+| --- | --- |
+| `initialize` | Negotiates the protocol and returns the agent capabilities. |
+| `session/new` | Creates a session bound to the credential owner and an existing workspace. |
+| `session/prompt` | Sends text to the configured Responses backend and emits incremental `session/notification` chunks. |
 
-- **Type**: ACP
-- **Command**: `/path/to/openai-proxy serve --acp-stdio`
-- **Environment**: `OPENAI_API_KEY=sk-...`
-
----
-
-## Protocol Details
-
-| Method | Description |
-|--------|-------------|
-| `initialize` | Capability negotiation |
-| `session/new` | Create a session with a working directory |
-| `session/prompt` | Send a prompt, receive streamed notifications |
-
-The proxy maps each `session/prompt` request to a single `POST /v1/chat/completions` call and streams text deltas back as `session/notification` chunks.
+A credential owner change invalidates the prior session. Start a new editor session after changing accounts. The dedicated ACP process streams assistant text and returns the prompt stop reason.

@@ -1,4 +1,5 @@
 import { Model, Provider } from "@opencode/plugin"
+import { serviceToken } from "./service-token"
 
 export const providerID = Provider.ID.make("codex")
 
@@ -13,9 +14,7 @@ export function serviceOrigin(): URL {
 }
 
 export function authorization(): string {
-  const token = process.env.PROXY_CONSOLE_TOKEN
-  if (!token) throw new Error("A scoped service connection is required")
-  return `Bearer ${token}`
+  return `Bearer ${serviceToken()}`
 }
 
 export function request(path: string, init: RequestInit = {}): Promise<Response> {

@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target bun --external @opencode/plugin && cp src/login.mjs dist/login.mjs"
+    "build": "bun build ./src/index.ts --outfile ./dist/index.js --format esm --target bun --external @opencode/plugin && bun build ./src/login.mjs --outfile ./dist/login.mjs --format esm --target node"
   },
   "dependencies": {
     "@opencode/plugin": "2.3.0"

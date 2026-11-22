@@ -1,9 +1,22 @@
-# Embedded console
+# Embedded KnowMe console
 
-The console uses KnowMe's desktop monogram, app icon, color ramps and typography from `know-me-system`. Its light and dark palettes follow the browser's color preference, with fonts and icons bundled locally.
+The console uses the KnowMe desktop monogram, app icon, colors, and typefaces. Fonts and icons ship locally, and the light and dark palettes follow the browser's preference.
 
-Prepare the build host with Node 26.5.0 and npm 11.16.0. Run `npm ci --include=dev` in this directory before a Cargo build, test, or release. The compiler runs TypeScript, generates offline A2UI validators, and builds Vite into Cargo's OUT_DIR. Cargo embeds the resulting index, styles, JavaScript and fonts. Run `cargo build --release --locked` at the repository root. The released HTTP service serves the console at `/ui/` without a JavaScript runtime or a source checkout. Native chat drivers have independent runtime prerequisites.
+## Build
 
-For development, run the service on port 8181 and `npm run dev` here. Open the Vite URL under `/ui/`. Production packaging and acceptance use the service origin. Local pairing and shared session tokens are entered only into the session sign-in form. The browser uses the issued HttpOnly cookie for subsequent requests.
+Use Node 26.5.0 and npm 11.16.0. From the repository root, install the locked dependencies and build the service.
 
-Use the Docker `runtime` target for the embedded web/API service alone. The default `sdk-runtime` target also ships Bun, the version-locked SDK workers, the sibling delegation plugin, and the platform-specific Codex CLI 0.169.0. Compose binds the listener to loopback and mounts a private Codex home directory, persistent service data, and a separate workspace. When overriding the external port, set PROXY_CONSOLE_ORIGIN to the browser's exact origin. Provision the dedicated Codex volume or directory with the authorized account's login at runtime. With the default named volumes the console pairing code is in the private file identified in the service log.
+```sh
+npm ci --prefix frontend --include=dev
+cargo build --release --locked
+```
+
+Cargo runs the TypeScript check, generates offline A2UI validators, and builds Vite into Cargo's output directory. The Rust binary embeds the resulting HTML, CSS, JavaScript, and fonts. The frontend uses React 19 and Vite 8. AG-UI client packages are pinned at 1.0.5. The renderer validates A2UI 1.0 snapshots against the [vendored wire schemas](src/schemas/README.md).
+
+## Run
+
+Open the service's `/ui/` for chat or `/ui/settings` for connections and client setup. A local loopback installation can use a pairing code or opt into an automatic local browser session. Shared deployments use individual principal tokens. The browser uses the service's HttpOnly session cookie for subsequent requests. Native chat requires the matching Codex or OpenCode SDK runtime and its account or upstream configuration. [Console operation](../docs/console.md)
+
+For frontend development, run the service on port 8181 and then run `npm run dev` from this directory. Use the Vite URL under `/ui/`. Use the service origin to verify a production build and its browser session behavior.
+
+The Docker `runtime` target carries the embedded UI and API. The default `sdk-runtime` target adds Bun, the locked workers, the sibling OpenCode plugin, and the platform-specific Codex CLI. On macOS, the updater builds both layers for the existing versioned user LaunchAgent and saves a verified rollback receipt. [LaunchAgent deployment](../docs/console.md#update-the-macos-launchagent)

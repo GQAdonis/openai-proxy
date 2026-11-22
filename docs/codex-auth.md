@@ -37,4 +37,6 @@ Default destinations are fixed to the matching OpenAI credential class. A custom
 
 Authenticated REST requests use their server-assigned credential provider and memory scope. Each shared principal needs a separate Codex home and workspace. Standalone ACP and MCP processes require a dedicated owner. MCP HTTP listens on loopback. On a multi-user host, set `PROXY_MCP_TOKEN` to a private token of 32–512 bytes and supply it as the local client’s bearer. Operator settings return the connection mode, source, observed state, generation, timestamps, refresh capability and retry delay. A private binding record under the console data directory keeps sessions associated with an owner across restarts. An observed logout or account switch invalidates the prior binding.
 
+The OpenCode server plugin uses a scoped service credential for its protected Codex route. The browser console uses its own authenticated session, including automatic sessions on a trusted loopback workstation when enabled. See [OpenCode setup](opencode-setup.md) and the [console deployment guide](console.md).
+
 The native writer and storage layouts follow [Codex App Server 0.169.0](https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/app-server/README.md) and the [tagged credential store](https://github.com/openai/codex/blob/rust-v0.169.0/codex-rs/login/src/auth/storage.rs).

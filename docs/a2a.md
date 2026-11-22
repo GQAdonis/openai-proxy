@@ -1,96 +1,58 @@
 # A2A Agent Card Reference
 
-The proxy implements the [A2A (Agent-to-Agent)](https://google.github.io/A2A/) specification's Agent Card endpoint, enabling AI orchestrators to discover and call this proxy as a task-capable agent.
+The proxy exposes an optional Agent Card at `GET /.well-known/agent.json`. The card advertises OpenAI-compatible chat and model discovery. Clients invoke those capabilities through the proxy HTTP API. See the [integration guide](a2a-integration.md) for examples.
 
----
-
-## Enabling A2A
+## Enabling discovery
 
 ```bash
-openai-proxy serve --a2a --port 8181
+openai-proxy serve --a2a --host 127.0.0.1 --port 8181
+curl --fail http://127.0.0.1:8181/.well-known/agent.json
 ```
 
-Or in `~/.config/oproxy/config.toml`:
+To enable discovery in the service's [configuration file](config.md), set:
+
 ```toml
 [modes]
 a2a = true
 ```
 
----
+The card is public when discovery is enabled, including in shared mode. Chat and model discovery follow the authentication rules of their own routes.
 
-## Agent Card Endpoint
-
-```
-GET /.well-known/agent.json
-```
-
-### Example Response
+## Agent Card response
 
 ```json
 {
   "name": "openai-proxy",
-  "description": "OpenAI-compatible proxy routing to ChatGPT Subscription or OpenAI Responses API",
+  "description": "OpenAI Chat Completions proxy backed by Codex/Responses API",
   "url": "http://127.0.0.1:8181",
   "version": "0.1.0",
   "capabilities": {
     "streaming": true,
-    "pushNotifications": false,
-    "stateTransitionHistory": false
+    "tools": true,
+    "multi_turn": true
   },
-  "defaultInputModes": ["text/plain"],
-  "defaultOutputModes": ["text/plain"],
   "skills": [
     {
-      "id": "chat",
+      "id": "chat_completion",
       "name": "Chat Completion",
-      "description": "Process chat completion requests and stream responses",
-      "inputModes": ["text/plain"],
-      "outputModes": ["text/plain"]
+      "description": "Complete a conversation using the configured model backend"
+    },
+    {
+      "id": "list_models",
+      "name": "List Models",
+      "description": "List available models for the configured backend profile"
     }
-  ]
-}
-```
-
----
-
-## A2A Task Request
-
-A2A orchestrators send tasks to `POST /v1/chat/completions` in standard OpenAI format. The proxy translates and forwards the request.
-
-### Request
-
-```json
-{
-  "model": "gpt-5.5",
-  "messages": [
-    { "role": "user", "content": "Summarize this code file: ..." }
   ],
-  "stream": true
+  "input_modes": ["text"],
+  "output_modes": ["text", "stream"]
 }
 ```
 
-### Response (streaming)
+`url` uses the origin of a valid `PROXY_CONSOLE_ORIGIN` when configured. Otherwise it is derived from the server's listening address. An unspecified bind address advertises `127.0.0.1` with the effective port. Set an HTTPS origin for deployments reached through a reverse proxy.
 
-Standard OpenAI SSE `text/event-stream`.
+| Advertised skill | Client endpoint |
+| --- | --- |
+| `chat_completion` | `POST /v1/chat/completions` |
+| `list_models` | `GET /v1/models` |
 
----
-
-## Orchestrator Discovery
-
-An A2A orchestrator discovers this proxy by fetching `GET /.well-known/agent.json`. The `url` field tells it where to send tasks. Orchestrators that follow the A2A spec will use `POST /` with A2A task format — the proxy maps these to the OpenAI chat completions endpoint.
-
----
-
-## Integration with opencode
-
-opencode supports A2A for multi-agent coordination. When `--a2a` is enabled, opencode (or any A2A-aware tool) can treat this proxy as a named agent in a pipeline:
-
-```json
-{
-  "agents": {
-    "openai-proxy": {
-      "url": "http://127.0.0.1:8181"
-    }
-  }
-}
-```
+`multi_turn` describes sending conversation history as `messages` in the OpenAI-compatible request. Agent Card support is limited to discovery. Task lifecycle, push notifications and artifact exchange are outside this interface.

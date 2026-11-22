@@ -1,6 +1,6 @@
-# openai-proxy
+# KnowMe OpenAI Proxy
 
-A fast, extensible OpenAI-compatible proxy written in Rust that bridges any OpenAI Chat Completions client to **ChatGPT Plus/Pro subscriptions** and **OpenAI API keys** — with full agent support built in.
+A Rust service that connects OpenAI-compatible clients to **ChatGPT Plus and Pro subscriptions** or **OpenAI API keys**. The embedded KnowMe console provides chat and settings for the Codex and OpenCode SDK drivers.
 
 The service provides these interfaces.
 
@@ -10,21 +10,33 @@ The service provides these interfaces.
 | **OpenCode 2.x provider** | Native V2 plugin with a dedicated Codex SDK subscription route |
 | **Embedded console** | Chat, settings, client provisioning and A2UI 1.0 at `/ui/` |
 | **MCP server** | stdio + Streamable HTTP — for Claude Code, Codex CLI, Gemini CLI |
-| **ACP server** | stdio — for Zed and JetBrains via Agent Client Protocol v0.11 |
-| **AG-UI endpoint** | `POST /ag-ui/stream` — structured SSE for CopilotKit and AG-UI frontends |
+| **ACP server** | stdio for external agents in Zed and JetBrains |
+| **AG-UI endpoint** | `POST /ag-ui/stream` streams assistant text in lifecycle events |
 | **A2A agent** | `GET /.well-known/agent.json` — A2A-discoverable for multi-agent orchestration |
 
 ---
 
 ## Chat and settings
 
-Start the proxy, open `http://localhost:8181/ui/`, and enter the short-lived pairing token from the private file named in the startup log. Pairing consumes the token and creates an HTTP-only session. Owners can inspect credential status, reload the native store, request managed refresh, choose a chat driver and configure local clients. See the [frontend build guide](frontend/README.md) and [console deployment guide](docs/console.md).
+Open `http://127.0.0.1:8181/ui/` after starting the proxy on a loopback listener. Paired mode uses the short-lived access code from the private `pairing-token` file identified in the startup log. A private workstation can opt into automatic local browser sessions with `PROXY_CONSOLE_LOCAL_AUTO_SESSION=1`. Shared deployments use individual principal tokens. Owners can inspect credentials, request renewal, choose a chat driver and configure local clients. [Console deployment guide](docs/console.md)
 
 The Codex and OpenCode SDK drivers run in scoped server-side workers. The browser receives ordered text and validated A2UI 1.0 activity snapshots. A tool approval, cancellation or surface action belongs to the authenticated conversation that created it.
 
+On macOS, an existing KnowMe LaunchAgent can be updated with `python3 scripts/deploy-macos-workers.py --full`. The command builds the committed proxy and console, installs the locked runtime, and prints the path to a verified rollback receipt after the service passes its health check. [LaunchAgent deployment and rollback](docs/console.md#update-the-macos-launchagent)
+
 ## OpenCode 2.x plugin
 
-The repository configuration loads the package in `plugin/` with the V2 `plugins` setting. Set `PROXY_CONSOLE_URL` to the service origin and provide a scoped service token through `PROXY_CONSOLE_TOKEN`. The plugin gets its model inventory from the service and sends subscription requests to `/api/v1/drivers/codex/v1`. OpenCode host, plugin and native SDK 2.3.0 are the initial compatibility target. See [OpenCode setup](docs/opencode-setup.md).
+The repository configuration loads the package in `plugin/` with the V2 `plugins` setting. Set `PROXY_CONSOLE_URL` to the service origin and provide a scoped service token through `PROXY_CONSOLE_TOKEN` or an owner-only `PROXY_CONSOLE_TOKEN_FILE`. The plugin gets its model inventory from the service and sends subscription requests to `/api/v1/drivers/codex/v1`. OpenCode host, plugin and native SDK 2.3.0 are the release baseline. [OpenCode setup](docs/opencode-setup.md)
+
+## Documentation
+
+Read the [documentation index](docs/index.md) or build the Docusaurus site from the same Markdown guides.
+
+```sh
+npm ci --prefix website
+npm run build --prefix website
+npm run start --prefix website
+```
 
 ## How the proxy works
 
@@ -74,18 +86,9 @@ The three backends have different parameter allowlists. The proxy shapes each re
 
 ## Model catalog
 
-`GET /v1/models` reads the active managed Codex account's visible model picker. New model IDs appear as Codex offers them. The proxy uses the built-in catalogue for API-key routes and when it cannot read the Codex picker.
+`GET /v1/models` lists the visible models from the active managed Codex account's native picker when the service can read it. The list follows that account's available models and can change after login. API-key routes and unavailable native discovery use the [built-in catalogue](src/model_catalog.rs). Context and output limits are returned when the proxy has metadata for the model.
 
-| Model ID | Context | Output | Notes |
-|----------|--------:|-------:|-------|
-| `gpt-5.5` | 1,000,000 | 32,768 | Default model |
-| `gpt-5.5-pro` | 1,000,000 | 32,768 | API key only |
-| `gpt-5.4` | 400,000 | 32,768 | |
-| `gpt-5.4-mini` | 200,000 | 16,384 | `codex-mini` aliases here |
-| `gpt-5.4-nano` | 128,000 | 8,192 | |
-| `gpt-5.3-codex` | 400,000 | 32,768 | |
-| `gpt-5.3-chat` | 128,000 | 16,384 | |
-| `gpt-5.2-chat` | 128,000 | 16,384 | |
+The console lists models for the selected driver. Codex uses the authorized account's picker, and OpenCode uses its configured provider. The OpenCode V2 subscription plugin gets its list from the service's authenticated Codex driver endpoint. Use the returned model IDs for the account and path you intend to use. [OpenCode model discovery](docs/opencode-setup.md#credentials-and-models)
 
 ---
 
@@ -93,10 +96,11 @@ The three backends have different parameter allowlists. The proxy shapes each re
 
 | Tool | Purpose | Install |
 |------|---------|---------|
-| Rust 1.87+ | compile the proxy | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
-| Codex CLI | ChatGPT OAuth login | `npm i -g @openai/codex` |
-| opencode (optional) | AI coding agent | `npm i -g opencode` |
-| Bun (optional) | plugin local build | `curl -fsSL https://bun.sh/install \| bash` |
+| Rust stable | Compile the proxy | [rustup](https://rustup.rs/) |
+| Node 26.5.0 and npm 11.16.0 | Build the embedded console | [Frontend build guide](frontend/README.md) |
+| Native Codex CLI 0.169.0 | Managed ChatGPT login and Codex SDK worker | [Console runtime setup](docs/console.md#install-the-native-drivers) |
+| Bun 1.4.4 | Run the native workers and build the OpenCode plugin | [Console runtime setup](docs/console.md#install-the-native-drivers) |
+| OpenCode 2.3.0 | Host the optional external OpenCode V2 plugin | [OpenCode setup](docs/opencode-setup.md) |
 | Docker (optional) | containerised deployment | [docker.com](https://docker.com) |
 
 A ChatGPT **Plus** or **Pro** subscription is required for the subscription path. An explicitly configured OpenAI API-key connection uses separate per-token billing.
@@ -116,10 +120,11 @@ export OPENAI_API_KEY=sk-...
 
 # Install the locked web dependencies, then build and run
 npm ci --prefix frontend --include=dev
-cargo build --release
-./target/release/openai-proxy serve
-# Proxy is now at http://localhost:8181
+cargo build --release --locked
+./target/release/openai-proxy serve --host 127.0.0.1 --port 8181
 ```
+
+This starts the HTTP proxy and embedded settings. For SDK chat, configure the [native worker runtime](docs/console.md#install-the-native-drivers) and an approved workspace before starting the service.
 
 ### Docker
 
@@ -134,11 +139,11 @@ RUST_LOG=openai_proxy=debug cargo run
 # Full tower/axum HTTP traces
 RUST_LOG=openai_proxy=debug,tower_http=debug cargo run
 
-# Build release binary (~8MB stripped)
-cargo build --release
+# Build the release binary
+cargo build --release --locked
 
 # Build with SurrealDB memory
-cargo build --release --features memory
+cargo build --release --locked --features memory
 
 # Run all integration tests (requires live credentials)
 cargo test --test integration -- --nocapture
@@ -158,10 +163,9 @@ curl http://localhost:8181/v1/models
 
 ```bash
 cd plugin
-bun install
+bun install --frozen-lockfile
 bun run typecheck      # TypeScript type check (no emit)
 bun run build          # compile to dist/
-bun run dev            # run src/index.ts directly via bun
 ```
 
 ---
@@ -173,7 +177,7 @@ bun run dev            # run src/index.ts directly via bun
 | `POST` | `/v1/chat/completions` | OpenAI Chat Completions (streaming + non-streaming) |
 | `GET` | `/v1/models` | Available models for the active backend profile |
 | `GET` | `/health` | `{"status":"ok"}` |
-| `POST` | `/ag-ui/stream` | AG-UI 5-event SSE stream |
+| `POST` | `/ag-ui/stream` | Five lifecycle event types for a Responses-backed text stream |
 | `GET` | `/.well-known/agent.json` | A2A Agent Card (opt-in with `--a2a`) |
 | `POST` | `/v1/memory/documents` | Store a document (`--features memory`) |
 | `GET` | `/v1/memory/documents` | List documents by scope |
@@ -205,7 +209,7 @@ openai-proxy/
 │   ├── skills.rs          # SKILL.md parser, SkillIndex (IDF-weighted), selector
 │   ├── mcp.rs             # MCP JSON-RPC 2.0 server (stdio + HTTP)
 │   ├── mcp_client.rs      # MCP tool schema loader for passthrough injection
-│   ├── acp.rs             # ACP v0.11 stdio server
+│   ├── acp.rs             # ACP stdio server
 │   ├── agui.rs            # AG-UI 5-event SSE endpoint
 │   ├── memory.rs          # SurrealDB RAG (feature-gated: --features memory)
 │   ├── hooks.rs           # Webhook lifecycle hooks
@@ -225,7 +229,7 @@ openai-proxy/
 ├── Dockerfile             # Multi-stage build (builder + debian-slim runtime)
 ├── docker-compose.yaml    # Compose with auth mount + data volume
 ├── SKILL.md               # agentskills.io skill (setup + MCP sub-skills)
-├── opencode.json          # Static opencode provider config (Level 2 integration)
+├── opencode.json          # OpenCode V2 plugin configuration
 ├── hooks.example.toml     # Webhook hooks config template
 ├── CLAUDE.md              # Guidance for Claude Code agents working in this repo
 └── Cargo.toml
